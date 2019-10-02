@@ -1,32 +1,74 @@
+<!-- Ce composant est le composant principal du site. Il est importé depuis App.vue -->
 <template>
-  <div class="hello">
-    <h1>Bienvenue sur le site Bell'Italia !</h1>
+  <div class="container">
+
+    <!-- Ligne 1 : titre -->
+    <div class="row">
+      <div class="col-12">
+        <h1 class="text-center text-info">Bell'Italia via Vue.js</h1>
+      </div>
+    </div>
+
+    <!-- Ligne 2 : contenu -->
+    <div class="row">
+
+      <!-- Colonne de gauche : tableau -->
+      <div class="col-6 interest-list">
+        <div class="card" style="width: 18rem;">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Colonne de droite : carte -->
+      <div class="col-6 interest-map">
+        <h2 class="text-center">Carte</h2>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
+
+import axios from 'axios';
+
 export default {
   name: 'Map',
-  props: {
-    msg: String
-  }
+  data: function() {
+    return {
+      // Tableau vide qui contiendra tous les points d'intérêt
+      interests: []
+    }
+  },
+  // Quand le composant est opérationnel
+  mounted: function() {
+    // Appel Axios (bien faire le import plus haut)
+    axios
+    // promesse
+    .get('http://127.0.0.1:8000/api/interest')
+    // concrétisation de la promesse
+    .then((r) => { // r représente la donnée que l'on veut envoyer
+    // les données sont dans r.data
+    console.log(r);
+  })
+}
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+<style lang="scss" scoped>
+
+.interest-list {
+  overflow-y: scroll;
+  height: 95vh;
+  li{
+    &:hover{
+      background-color: darkgrey;
+    }
+  }
 }
 </style>

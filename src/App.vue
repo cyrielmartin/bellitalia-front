@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid">
 
-    <Map/>    
+    <Map/>
 
   </div>
 </template>

@@ -13,14 +13,9 @@
     <div class="row">
 
       <!-- Colonne de gauche : tableau -->
-      <div class="col-6 interest-list">
-        <div class="card" style="width: 18rem;">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-          </ul>
-        </div>
+
+      <div class="col-6">
+        <InterestList :interests="interests"/>
       </div>
 
       <!-- Colonne de droite : carte -->
@@ -34,10 +29,12 @@
 
 <script>
 
-import axios from 'axios';
+import axios from 'axios'
+import InterestList from './InterestList.vue'
 
 export default {
   name: 'Map',
+  components: {InterestList},
   data: function() {
     return {
       // Tableau vide qui contiendra tous les points d'intérêt
@@ -53,7 +50,7 @@ export default {
     // concrétisation de la promesse
     .then((r) => { // r représente la donnée que l'on veut envoyer
     // les données sont dans r.data
-    console.log(r);
+    this.interests = r.data;
   })
 }
 }
@@ -62,13 +59,4 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 
-.interest-list {
-  overflow-y: scroll;
-  height: 95vh;
-  li{
-    &:hover{
-      background-color: darkgrey;
-    }
-  }
-}
 </style>

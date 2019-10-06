@@ -13,14 +13,13 @@
     <div class="row">
 
       <!-- Colonne de gauche : tableau -->
-
-      <div class="col-6">
+      <div class="col-4">
         <InterestList :interests="interests"/>
       </div>
 
       <!-- Colonne de droite : carte -->
-      <div class="col-6 interest-map">
-        <h2 class="text-center">Carte</h2>
+      <div class="col-8 interest-map">
+        <InterestMap/>
       </div>
     </div>
 
@@ -31,10 +30,11 @@
 
 import axios from 'axios'
 import InterestList from './InterestList.vue'
+import InterestMap from './InterestMap.vue'
 
 export default {
-  name: 'Map',
-  components: {InterestList},
+  name: 'Bellitalia',
+  components: {InterestList, InterestMap},
   data: function() {
     return {
       // Tableau vide qui contiendra tous les points d'intérêt

@@ -19,7 +19,7 @@
 
       <!-- Colonne de droite : carte -->
       <div class="col-8 interest-map">
-        <InterestMap/>
+        <InterestMap :interests="interests"/>
       </div>
     </div>
 
@@ -49,8 +49,10 @@ export default {
     .get('http://127.0.0.1:8000/api/interest')
     // concrétisation de la promesse
     .then((r) => { // r représente la donnée que l'on veut envoyer
-    // les données sont dans r.data
+    // les données sont dans r.data :
     this.interests = r.data;
+    // On peut filtrer les données reçues en utilisant .filter() :
+    // this.interests = r.data.filter(r => r.name == 'Santuario di Oropa');
   })
 }
 }

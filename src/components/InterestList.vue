@@ -1,5 +1,4 @@
 <template>
-
   <div class="card interest-list">
     <ul class="list-group list-group-flush">
       <li

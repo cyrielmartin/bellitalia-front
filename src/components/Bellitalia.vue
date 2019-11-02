@@ -6,7 +6,7 @@
     <!-- Ligne 1 : titre -->
     <div class="row">
       <div class="col-12">
-        <h1 class="text-center text-info">Bell'Italia via Vue.js</h1>
+        <h1 class="text-center text-info">Bell'Italia</h1>
       </div>
     </div>
 
@@ -25,9 +25,6 @@
       <div class="col-8 interest-map">
         <InterestMap :interests="interests" />
       </div>
-    </div>
-    <div class="row">
-      <InterestForm />
     </div>
 
   </div>

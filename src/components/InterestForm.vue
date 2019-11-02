@@ -1,5 +1,7 @@
 <template>
+
   <div class="container">
+    <a href="/"><button type="button" class="btn btn-outline-dark"><i class="fas fa-arrow-circle-left"></i> Retour</button></a>
     <div class="row justify-content-center">
       <div class="col-md-10">
         <div class="card">
@@ -69,7 +71,7 @@
             </div>
 
             <div class="d-flex justify-content-center">
-              <button type="submit" class="btn btn-fill btn-blue">Sauvegarder</button>
+              <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
             </div>
 
           </form>

@@ -1,5 +1,6 @@
 <template>
   <div class="card interest-list">
+    <a href="add"><button type="button" class="btn btn-outline-success col-12"><i class="fas fa-plus-circle"></i> Ajouter un point d'intérêt</button></a>
     <ul class="list-group list-group-flush">
       <li
       @mouseover="mouseOver(index)"

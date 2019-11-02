@@ -2,7 +2,8 @@
 
   <div class="container-fluid">
 
-    <Map/>
+    <!-- L'affichage des composants est géré par le router -->
+    <router-view/></router-view>
 
   </div>
 
@@ -10,14 +11,8 @@
 
 <script>
 
-  import Map from './components/Bellitalia.vue'
-
-  export default {
-    name: 'app',
-    components: {
-      Map
-    }
-  }
+// Plus besoin des infos du export default, en revanche il faut le garder, meme vide
+export default {}
 
 </script>
 

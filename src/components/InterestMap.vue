@@ -1,26 +1,31 @@
 <template>
+  <div class="">
 
-  <div class="row map">
-    <!-- Affichage de la position réelle -->
-    <small>{{currentCenter}}</small>
-    <!-- Affichage de la carte -->
-    <l-map @update:center="centerUpdate"
-    :zoom="zoom"
-    :max-zoom="maxZoom"
-    :center="center">
-    <!-- Surcouche OSM -->
-    <l-tile-layer :url="url" :attribution="attribution">
-    </l-tile-layer>
-    <!-- Marqueurs -->
-    <l-marker :key="index"
-    v-for="(interest,index) in interests"
-    :lat-lng="latLng(interest.latitude, interest.longitude)">
-    <!-- Icône pour marqueurs -->
-    <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-    </l-icon>
-    <l-popup>Coucou</l-popup>
-  </l-marker>
-</l-map>
+    <div class="row map">
+      <!-- Affichage de la position réelle -->
+      <!-- <small>{{currentCenter}}</small> -->
+      <!-- Affichage de la carte -->
+      <l-map
+      @update:center="centerUpdate"
+      :zoom="zoom"
+      :max-zoom="maxZoom"
+      :center="center">
+      <!-- Surcouche OSM -->
+      <l-tile-layer :url="url" :attribution="attribution">
+      </l-tile-layer>
+      <!-- Marqueurs -->
+      <l-marker
+      :key="index"
+      v-for="(interest,index) in interests"
+      :lat-lng="latLng(interest.latitude, interest.longitude)">
+      <!-- Icône pour marqueurs -->
+      <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+      </l-icon>
+      <l-popup><h1>{{interest.name}}</h1><p>{{interest.description}}</p></l-popup>
+    </l-marker>
+  </l-map>
+</div>
+
 </div>
 
 </template>

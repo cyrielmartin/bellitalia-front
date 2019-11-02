@@ -3,14 +3,6 @@
 
   <div class="container">
 
-    <!-- Ligne 1 : titre -->
-    <div class="row">
-      <div class="col-12">
-        <h1 class="text-center text-info">Bell'Italia</h1>
-      </div>
-    </div>
-
-    <!-- Ligne 2 : contenu -->
     <div class="row">
 
       <!-- Colonne de gauche : tableau -->
@@ -36,12 +28,11 @@
 import axios from 'axios'
 import InterestList from './InterestList.vue'
 import InterestMap from './InterestMap.vue'
-import InterestForm from './InterestForm.vue'
 
 
 export default {
   name: 'Bellitalia',
-  components: { InterestList, InterestMap, InterestForm },
+  components: { InterestList, InterestMap },
   data: function() {
     return {
       // Tableau vide qui contiendra tous les points d'intérêt

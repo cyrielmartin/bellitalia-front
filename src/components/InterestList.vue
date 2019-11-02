@@ -1,15 +1,18 @@
 <template>
-  <div class="card interest-list">
+
+  <div>
     <a href="add"><button type="button" class="btn btn-outline-success col-12"><i class="fas fa-plus-circle"></i> Ajouter un point d'intérêt</button></a>
-    <ul class="list-group list-group-flush">
-      <li
-      @mouseover="mouseOver(index)"
-      @mouseleave="mouseLeave(index)"
-      :key="index"
-      v-for="(interest, index) in interests"
-      class="list-group-item">{{index}}, {{interest.name}}
-    </li>
-  </ul>
+    <div class="card interest-list">
+      <ul class="list-group list-group-flush">
+        <li
+        @mouseover="mouseOver(index)"
+        @mouseleave="mouseLeave(index)"
+        :key="index"
+        v-for="(interest, index) in interests"
+        class="list-group-item">{{index}}, {{interest.name}}
+      </li>
+    </ul>
+  </div>
 </div>
 
 </template>

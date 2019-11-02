@@ -131,6 +131,12 @@ export default {
         this.interestDate = ""
         this.interestCategory = ""
         this.errors = {}
+        this.$router.push('/')
+        this.flashMessage.show({
+          status: 'success',
+          title: 'Confirmation',
+          message: 'Le point d\'intérêt a bien été enregistré'
+        });
       })
       .catch(error => {
         this.errors = error.response.data
@@ -139,3 +145,13 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+
+.text-error {
+  color: red;
+}
+.border-red {
+  border-color: red;
+}
+</style>

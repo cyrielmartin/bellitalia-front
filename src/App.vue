@@ -8,7 +8,7 @@
       </div>
     </div>
     <!-- L'affichage des composants est géré par le router -->
-    <router-view/></router-view>
+    <router-view></router-view>
   <FlashMessage position="left bottom"/>
   </div>
 

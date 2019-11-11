@@ -48,8 +48,14 @@
 
             <div class="form-group">
               <label>Nom de la région *</label>
-              <input class="form-control" v-model="interestRegion" :class="{'border-red': errors.region_id}">
-              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+              <select class="form-control" v-model="interestRegion" :class="{'border-red': errors.region_id}">
+                <option disabled value="">Sélectionner</option>
+                <option></option>
+
+              </select>
+              <!-- <span>Sélectionné : {{ interestRegion }}</span> -->
+              <!-- <input class="form-control" v-model="interestRegion" :class="{'border-red': errors.region_id}">
+              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p> -->
             </div>
 
             <div class="form-group">
@@ -100,7 +106,6 @@ export default {
       interestNumber:'',
       interestDate:'',
       interestCategory:'',
-      interestDate:'',
       errors: {},
     }
   },

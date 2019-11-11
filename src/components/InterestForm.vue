@@ -41,21 +41,18 @@
             </div>
 
             <div class="form-group">
-              <label>Nom de la ville *</label>
+              <label>Ville *</label>
               <input class="form-control" v-model="interestCity" :class="{'border-red': errors.city_id}">
               <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
             </div>
 
             <div class="form-group">
-              <label>Nom de la région *</label>
+              <label>Région *</label>
               <select class="form-control" v-model="interestRegion" :class="{'border-red': errors.region_id}">
                 <option disabled value="">Sélectionner</option>
-                <option></option>
-
+                <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
               </select>
-              <!-- <span>Sélectionné : {{ interestRegion }}</span> -->
-              <!-- <input class="form-control" v-model="interestRegion" :class="{'border-red': errors.region_id}">
-              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p> -->
+                <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
             </div>
 
             <div class="form-group">
@@ -107,9 +104,14 @@ export default {
       interestDate:'',
       interestCategory:'',
       errors: {},
+      regions: [],
     }
   },
   methods: {
+    getRegions() {
+      axios.get('http://127.0.0.1:8000/api/region')
+      .then(response => (this.regions = response))
+    },
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
@@ -148,6 +150,9 @@ export default {
       })
     },
   },
+  mounted: function(){
+    this.getRegions();
+  }
 }
 </script>
 

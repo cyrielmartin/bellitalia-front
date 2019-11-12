@@ -52,7 +52,7 @@
                 <option disabled value="">Sélectionner</option>
                 <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
               </select>
-                <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
             </div>
 
             <div class="form-group">
@@ -66,6 +66,14 @@
               <input type="date" class="form-control" v-model="interestDate" :class="{'border-red': errors.publication}">
               <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
             </div>
+
+            <div class="form-group">
+              <div>
+                <label>Catégorie</label>
+                <multiselect v-model="value" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="code" :options="options" :multiple="true" :limit="3" selectLabel="Cliquer ou 'entrée' pour sélectionner" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
+              </div>
+            </div>
+{{tags}}
 
             <div class="form-group">
               <label>Catégorie</label>
@@ -88,11 +96,21 @@
 <script>
 
 import axios from 'axios'
+import Multiselect from 'vue-multiselect'
 
 export default {
+  components: {
+    Multiselect
+  },
   name: 'InterestForm',
   data() {
     return {
+      value:'',
+      options: [
+        {name: 'Vue.js', code: 'vu'},
+        {name: 'Javascript', code: 'js'},
+        {name: 'Open Source', code: 'os'},
+      ],
       interestName: '',
       interestDescription:'',
       interestLink:'',
@@ -105,9 +123,24 @@ export default {
       interestCategory:'',
       errors: {},
       regions: [],
+      tags: [],
     }
   },
+
   methods: {
+    addTag(newTag) {
+      const tag = {
+        name: newTag,
+        code: newTag.substring(0, 2) + Math.floor((Math.random() * 10000000))
+      }
+      this.options.push(tag)
+      this.value.push(tag)
+    },
+    getTags() {
+      axios.get('http://127.0.0.1:8000/api/tag')
+      .then(response => (this.tags = response))
+
+    },
     getRegions() {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.regions = response))
@@ -152,11 +185,12 @@ export default {
   },
   mounted: function(){
     this.getRegions();
+    this.getTags();
   }
 }
 </script>
-
-<style lang="scss" scoped>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style lang="scss" scoped >
 
 .text-error {
   color: red;

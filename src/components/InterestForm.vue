@@ -70,10 +70,9 @@
             <div class="form-group">
               <div>
                 <label>Catégorie</label>
-                <multiselect v-model="value" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="code" :options="options" :multiple="true" :limit="3" selectLabel="Cliquer ou 'entrée' pour sélectionner" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
+                <multiselect v-model="value" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="tags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
               </div>
             </div>
-{{tags}}
 
             <div class="form-group">
               <label>Catégorie</label>
@@ -105,12 +104,7 @@ export default {
   name: 'InterestForm',
   data() {
     return {
-      value:'',
-      options: [
-        {name: 'Vue.js', code: 'vu'},
-        {name: 'Javascript', code: 'js'},
-        {name: 'Open Source', code: 'os'},
-      ],
+      value:[],
       interestName: '',
       interestDescription:'',
       interestLink:'',
@@ -131,14 +125,14 @@ export default {
     addTag(newTag) {
       const tag = {
         name: newTag,
-        code: newTag.substring(0, 2) + Math.floor((Math.random() * 10000000))
       }
-      this.options.push(tag)
-      this.value.push(tag)
+      this.tags.push(tag);
+      this.value.push(tag);
+      // <TODO>Axios Post tags pour ajouter en base le tag nouvellement créé</TODO>
     },
     getTags() {
       axios.get('http://127.0.0.1:8000/api/tag')
-      .then(response => (this.tags = response))
+      .then(response => (this.tags = response.data))
 
     },
     getRegions() {

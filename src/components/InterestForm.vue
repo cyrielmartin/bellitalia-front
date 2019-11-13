@@ -73,6 +73,7 @@
                 <multiselect v-model="value" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="code" :options="options" :multiple="true" :limit="3" selectLabel="Cliquer ou 'entrée' pour sélectionner" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
               </div>
             </div>
+            Affichage Tags :
 {{tags}}
 
             <div class="form-group">

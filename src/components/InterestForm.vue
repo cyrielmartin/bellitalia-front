@@ -74,11 +74,11 @@
               </div>
             </div>
 
-            <div class="form-group">
+            <!-- <div class="form-group">
               <label>Catégorie</label>
               <input class="form-control" v-model="interestCategory">
               <p class="text-error" v-if="errors.category_id" v-text="errors.category_id[0]"></p>
-            </div>
+            </div> -->
 
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>

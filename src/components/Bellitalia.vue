@@ -1,7 +1,7 @@
 <!-- Ce composant est le composant principal du site. Il est importé depuis App.vue -->
 <template>
 
-  <div class="container">
+  <div class="container-fluid">
 
     <div class="row">
 

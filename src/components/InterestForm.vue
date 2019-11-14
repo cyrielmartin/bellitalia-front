@@ -73,22 +73,23 @@
                 <multiselect v-model="value" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="tags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
               </div>
             </div>
+            <pre class="language-json"><code>{{ value }}</code></pre>
 
             <!-- <div class="form-group">
-              <label>Catégorie</label>
-              <input class="form-control" v-model="interestCategory">
-              <p class="text-error" v-if="errors.category_id" v-text="errors.category_id[0]"></p>
-            </div> -->
+            <label>Catégorie</label>
+            <input class="form-control" v-model="interestCategory">
+            <p class="text-error" v-if="errors.category_id" v-text="errors.category_id[0]"></p>
+          </div> -->
 
-            <div class="d-flex justify-content-center">
-              <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
-            </div>
+          <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
+          </div>
 
-          </form>
-        </div>
+        </form>
       </div>
     </div>
   </div>
+</div>
 </div>
 </template>
 
@@ -104,7 +105,7 @@ export default {
   name: 'InterestForm',
   data() {
     return {
-      value:[],
+      value: [],
       interestName: '',
       interestDescription:'',
       interestLink:'',
@@ -114,7 +115,6 @@ export default {
       interestRegion:'',
       interestNumber:'',
       interestDate:'',
-      interestCategory:'',
       errors: {},
       regions: [],
       tags: [],
@@ -128,7 +128,9 @@ export default {
       }
       this.tags.push(tag);
       this.value.push(tag);
-      // <TODO>Axios Post tags pour ajouter en base le tag nouvellement créé</TODO>
+      // axios.post('http://127.0.0.1:8000/api/tag', {
+      //   category_id: this.value,
+      // })
     },
     getTags() {
       axios.get('http://127.0.0.1:8000/api/tag')
@@ -150,8 +152,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         publication: this.interestDate,
-        category_id: this.interestCategory,
-
+        category_id: this.value,
       })
       .then(() => {
         this.interestName = ""

@@ -128,9 +128,9 @@ export default {
       }
       this.tags.push(tag);
       this.value.push(tag);
-      // axios.post('http://127.0.0.1:8000/api/tag', {
-      //   category_id: this.value,
-      // })
+      axios.post('http://127.0.0.1:8000/api/tag', {
+        category_id: this.value,
+      })
     },
     getTags() {
       axios.get('http://127.0.0.1:8000/api/tag')

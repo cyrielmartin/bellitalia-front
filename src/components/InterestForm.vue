@@ -70,26 +70,19 @@
             <div class="form-group">
               <div>
                 <label>Catégorie</label>
-                <multiselect v-model="value" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="tags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
+                <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
               </div>
             </div>
-            <pre class="language-json"><code>{{ value }}</code></pre>
 
-            <!-- <div class="form-group">
-            <label>Catégorie</label>
-            <input class="form-control" v-model="interestCategory">
-            <p class="text-error" v-if="errors.category_id" v-text="errors.category_id[0]"></p>
-          </div> -->
+            <div class="d-flex justify-content-center">
+              <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
+            </div>
 
-          <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
-          </div>
-
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </div>
 </template>
 
@@ -105,7 +98,8 @@ export default {
   name: 'InterestForm',
   data() {
     return {
-      value: [],
+      interestTag: [],
+      storedTags: [],
       interestName: '',
       interestDescription:'',
       interestLink:'',
@@ -117,26 +111,28 @@ export default {
       interestDate:'',
       errors: {},
       regions: [],
-      tags: [],
     }
   },
 
   methods: {
+    // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
-      const tag = {
+      const createdTag = {
         name: newTag,
       }
-      this.tags.push(tag);
-      this.value.push(tag);
+      this.storedTags.push(createdTag);
+      this.interestTag.push(createdTag);
       axios.post('http://127.0.0.1:8000/api/tag', {
-        category_id: this.value,
+        tag_id: this.interestTag,
       })
     },
-    getTags() {
+    // Récupération des tags en BDD
+    getStoredTags() {
       axios.get('http://127.0.0.1:8000/api/tag')
-      .then(response => (this.tags = response.data))
+      .then(response => (this.storedTags = response.data))
 
     },
+    // Récupération des régions en BDD
     getRegions() {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.regions = response))
@@ -152,7 +148,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         publication: this.interestDate,
-        category_id: this.value,
+        tag_id: this.interestTag,
       })
       .then(() => {
         this.interestName = ""
@@ -180,7 +176,7 @@ export default {
   },
   mounted: function(){
     this.getRegions();
-    this.getTags();
+    this.getStoredTags();
   }
 }
 </script>

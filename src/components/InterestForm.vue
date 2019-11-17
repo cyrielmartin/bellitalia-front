@@ -63,7 +63,7 @@
 
             <div class="form-group">
               <label>Date de publication du Bell'Italia *</label>
-              <!-- TODO: MonthPicker -->
+              <!-- TODO: MonthPicker IMPORTANT -->
               <input type="date" class="form-control" v-model="interestDate" :class="{'border-red': errors.publication}">
               <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
             </div>

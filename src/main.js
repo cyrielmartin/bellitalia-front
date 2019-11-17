@@ -16,6 +16,7 @@ Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 Vue.use('axios');
+Vue.use(require('vue-moment'));
 Vue.config.productionTip = false
 
 // Chargement du router dans VueJS

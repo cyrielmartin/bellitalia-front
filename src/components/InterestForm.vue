@@ -63,28 +63,40 @@
 
             <div class="form-group">
               <label>Date de publication du Bell'Italia *</label>
-              <!-- TODO: MonthPicker IMPORTANT -->
-              <input type="date" class="form-control" v-model="interestDate" :class="{'border-red': errors.publication}">
-              <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
-            </div>
+              <vue-monthly-picker
+              v-model="interestDate"
+              :class="{'border-red': errors.publication}"
+              placeHolder="sélectionner une date de publication"
+              :monthLabels="monthLabels"
+              dateFormat="MM/YYYY"
+              >
+            </vue-monthly-picker>
+            <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
+          </div>
 
-            <div class="form-group">
-              <div>
-                <label>Catégorie(s)</label>
-                <!-- Catégories/Tags gérés grâce à Vue Multiselect -->
-                <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
-              </div>
-            </div>
+          <!-- <div class="form-group">
+            <label>Date de publication du Bell'Italia *</label>
+            <input type="date" class="form-control" v-model="interestDate" :class="{'border-red': errors.publication}">
+            <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
+          </div> -->
 
-            <div class="d-flex justify-content-center">
-              <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
+          <div class="form-group">
+            <div>
+              <label>Catégorie(s)</label>
+              <!-- Catégories/Tags gérés grâce à Vue Multiselect -->
+              <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
             </div>
+          </div>
 
-          </form>
-        </div>
+          <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
+          </div>
+
+        </form>
       </div>
     </div>
   </div>
+</div>
 </div>
 </template>
 
@@ -92,10 +104,12 @@
 
 import axios from 'axios'
 import Multiselect from 'vue-multiselect'
+import VueMonthlyPicker from 'vue-monthly-picker'
 
 export default {
   components: {
-    Multiselect
+    Multiselect,
+    VueMonthlyPicker
   },
   name: 'InterestForm',
   data() {
@@ -110,9 +124,10 @@ export default {
       interestCity:'',
       interestRegion:'',
       interestNumber:'',
-      interestDate:'',
+      interestDate: '',
       errors: {},
       regions: [],
+      monthLabels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
     }
   },
 

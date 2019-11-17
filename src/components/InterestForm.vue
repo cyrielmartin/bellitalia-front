@@ -69,7 +69,8 @@
 
             <div class="form-group">
               <div>
-                <label>Catégorie</label>
+                <label>Catégorie(s)</label>
+                <!-- Catégories/Tags gérés grâce à Vue Multiselect -->
                 <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
               </div>
             </div>

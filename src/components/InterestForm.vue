@@ -56,6 +56,14 @@
             </div>
 
             <div class="form-group">
+              <div>
+                <label>Publication</label>
+                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true"  :class="{'border-red': errors.bellitalia_id}"></multiselect>
+                <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+              </div>
+            </div>
+
+            <div class="form-group">
               <label>Numéro du Bell'Italia *</label>
               <input type="number" class="form-control" v-model="interestNumber" :class="{'border-red': errors.bellitalia_id}">
               <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
@@ -73,12 +81,6 @@
             </vue-monthly-picker>
             <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
           </div>
-
-          <!-- <div class="form-group">
-            <label>Date de publication du Bell'Italia *</label>
-            <input type="date" class="form-control" v-model="interestDate" :class="{'border-red': errors.publication}">
-            <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
-          </div> -->
 
           <div class="form-group">
             <div>
@@ -123,7 +125,8 @@ export default {
       interestLongitude:'',
       interestCity:'',
       interestRegion:'',
-      interestNumber:'',
+      interestNumber:[],
+      storedPublications: [],
       interestDate: '',
       errors: {},
       regions: [],
@@ -147,7 +150,11 @@ export default {
     getStoredTags() {
       axios.get('http://127.0.0.1:8000/api/tag')
       .then(response => (this.storedTags = response.data))
-
+    },
+    // Récupération des publications BI en BDD
+    getStoredPublications() {
+      axios.get('http://127.0.0.1:8000/api/bellitalia')
+      .then(response => (this.storedPublications = response.data))
     },
     // Récupération des régions en BDD
     getRegions() {
@@ -194,6 +201,8 @@ export default {
   mounted: function(){
     this.getRegions();
     this.getStoredTags();
+    this.getStoredPublications();
+
   }
 }
 </script>

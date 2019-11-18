@@ -4,7 +4,8 @@ import './scss/main.scss';
 import Vue from 'vue'
 import App from './App.vue'
 import VueRouter from 'vue-router'
-import FlashMessage from '@smartweb/vue-flash-message';
+import FlashMessage from '@smartweb/vue-flash-message'
+import VModal from 'vue-js-modal'
 
 Vue.use(FlashMessage);
 
@@ -15,8 +16,9 @@ Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
-Vue.use('axios');
-Vue.use(require('vue-moment'));
+Vue.use('axios')
+Vue.use(require('vue-moment'))
+Vue.use(VModal, {dialog: true})
 Vue.config.productionTip = false
 
 // Chargement du router dans VueJS

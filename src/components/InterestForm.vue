@@ -30,13 +30,13 @@
 
             <div class="form-group">
               <label>Latitude *</label>
-              <input type="number" min="0" max="100" step="1.0E-7" class="form-control" v-model="interestLatitude" :class="{'border-red': errors.latitude}">
+              <input type="number" @keyup="checkIfNumber" min="0" max="100" step="1.0E-7" class="form-control" v-model.number="interestLatitude" :class="{'border-red': errors.latitude}">
               <p class="text-error" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
             </div>
 
             <div class="form-group">
               <label>Longitude *</label>
-              <input type="number" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
+              <input type="number" @keyup="checkIfNumber" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
               <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
             </div>
 
@@ -121,6 +121,9 @@ export default {
   },
 
   methods: {
+    checkIfNumber() {
+      console.log('checkIfNumber')
+    },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
       const createdTag = {

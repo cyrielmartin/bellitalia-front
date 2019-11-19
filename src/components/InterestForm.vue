@@ -30,13 +30,13 @@
 
             <div class="form-group">
               <label>Latitude *</label>
-              <input type="number" @keyup="checkIfNumber" min="0" max="100" step="1.0E-7" class="form-control" v-model.number="interestLatitude" :class="{'border-red': errors.latitude}">
+              <input type="number" min="0" max="100" step="1.0E-7" class="form-control" v-model.number="interestLatitude" :class="{'border-red': errors.latitude}">
               <p class="text-error" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
             </div>
 
             <div class="form-group">
               <label>Longitude *</label>
-              <input type="number" @keyup="checkIfNumber" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
+              <input type="number" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
               <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
             </div>
 
@@ -57,9 +57,11 @@
 
             <div class="form-group">
               <div>
+                <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
                 <label>Numéro du Bell'Italia *</label>
-                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication (seuls les chiffres sont autorisés)" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
                 <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+                <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
               </div>
             </div>
 
@@ -92,12 +94,10 @@
 
 import axios from 'axios'
 import Multiselect from 'vue-multiselect'
-import VueMonthlyPicker from 'vue-monthly-picker'
 
 export default {
   components: {
     Multiselect,
-    VueMonthlyPicker
   },
   name: 'InterestForm',
   data() {
@@ -112,18 +112,16 @@ export default {
       interestCity:'',
       interestRegion:'',
       interestNumber:[],
-      storedPublications: [],
+      storedPublications:[],
       interestDate: '',
       errors: {},
       regions: [],
+      NotANumber: false,
       monthLabels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
     }
   },
 
   methods: {
-    checkIfNumber() {
-      console.log('checkIfNumber')
-    },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
       const createdTag = {
@@ -140,27 +138,47 @@ export default {
       axios.get('http://127.0.0.1:8000/api/tag')
       .then(response => (this.storedTags = response.data))
     },
+    // Ajout d'une nouvelle publication à la volée
     addPublication(newPublication) {
-      // console.log(typeof(Number(document.querySelector('input#number').value)))
-      this.$modal.show('dialog', {
-        title: 'Création d\'une publication',
-        text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate">',
-        buttons: [
-          {
-            title: 'Enregistrer',
-            handler: () => {
-              axios.post('http://127.0.0.1:8000/api/bellitalia', {
-                number: newPublication,
-                date: document.querySelector('input#date').value,
-              }).then(() => this.hideModal())
+      const createdPublication = {
+        number: newPublication,
+      }
+      // Le JS empêche la saisie de lettres, mais la 1ère est quand même pris en compte par Multiselect.
+      // Donc on bloque l'ajout de moins de 2 charactères
+      if(newPublication.length<2) {
+        // Si moins de 2 charactères, on affiche le message d'erreur
+        this.NotANumber = true
+      } else {
+        //Sinon, on ajoute bien au menu déroulant la publication que l'on crée
+        this.storedPublications.push(createdPublication)
+        //Et on l'affiche dans l'input
+        this.interestNumber.push(createdPublication)
+        //On enlève le message d'erreur s'il était présent
+        this.NotANumber = false
+        //Et à la validation de la nouvelle publication, on ouvre la modale pour ajouter la date
+        this.$modal.show('dialog', {
+          title: 'Création d\'une publication',
+          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate">',
+          buttons: [
+            {
+              title: 'Enregistrer',
+              //On envoie tout ça à l'API pour enregistrement
+              handler: () => {
+                axios.post('http://127.0.0.1:8000/api/bellitalia', {
+                  number: newPublication,
+                  date: document.querySelector('input#date').value,
+                  //On referme la modale
+                }).then(() => this.hideModal())
+              }
+            },
+            {
+              title: 'Annuler',
             }
-          },
-          {
-            title: 'Annuler',
-          }
-        ]
-      })
+          ]
+        })
+      }
     },
+    //Petite méthode gérant la fermeture de la modale
     hideModal () {
       this.$modal.hide('dialog')
     },
@@ -208,6 +226,7 @@ export default {
       })
       .catch(error => {
         this.errors = error.response.data
+        this.NotANumber = false
       })
     },
   },
@@ -216,16 +235,34 @@ export default {
     this.getStoredTags();
     this.getStoredPublications();
 
+    // Méthode JS empêchant de saisir autre chose que des chiffres
+    function setInputFilter(textbox, inputFilter) {
+      ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+        textbox.addEventListener(event, function() {
+          if (inputFilter(this.value)) {
+            this.oldValue = this.value;
+            this.oldSelectionStart = this.selectionStart;
+            this.oldSelectionEnd = this.selectionEnd;
+          } else if (this.hasOwnProperty("oldValue")) {
+            this.value = this.oldValue;
+            this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+          }
+        });
+      });
+    }
+    // On applique cette méthode sur notre input numéro de Bell'Italia
+    setInputFilter(document.getElementById("number"), function(value) {
+      return /^\d*$/.test(value); });
+    }
   }
-}
-</script>
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
-<style lang="scss" scoped >
+  </script>
+  <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+  <style lang="scss" scoped >
 
-.text-error {
-  color: red;
-}
-.border-red {
-  border-color: red;
-}
-</style>
+  .text-error {
+    color: red;
+  }
+  .border-red {
+    border-color: red;
+  }
+  </style>

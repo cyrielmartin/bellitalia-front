@@ -57,53 +57,34 @@
 
             <div class="form-group">
               <div>
-                <label>Publication</label>
-                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+                <label>Numéro du Bell'Italia *</label>
+                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
                 <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
               </div>
             </div>
 
-            <modal name="hello-world">
-
+            <!-- Plugin vue-js-modal gérant l'ajout dynamique de nouveaux numéros BI + date publication -->
+            <modal name="publication">
             </modal>
             <v-dialog/>
 
-            <!-- <div class="form-group">
-            <label>Numéro du Bell'Italia *</label>
-            <input type="number" class="form-control" v-model="interestNumber" :class="{'border-red': errors.bellitalia_id}">
-            <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
-          </div> -->
+            <div class="form-group">
+              <div>
+                <label>Catégorie(s)</label>
+                <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
+                <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
+              </div>
+            </div>
 
-          <div class="form-group">
-            <label>Date de publication du Bell'Italia *</label>
-            <vue-monthly-picker
-            v-model="interestDate"
-            :class="{'border-red': errors.publication}"
-            placeHolder="sélectionner une date de publication"
-            :monthLabels="monthLabels"
-            dateFormat="MM/YYYY"
-            >
-          </vue-monthly-picker>
-          <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
+            <div class="d-flex justify-content-center">
+              <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
+            </div>
+
+          </form>
         </div>
-
-        <div class="form-group">
-          <div>
-            <label>Catégorie(s)</label>
-            <!-- Catégories/Tags gérés grâce à Vue Multiselect -->
-            <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
-          </div>
-        </div>
-
-        <div class="d-flex justify-content-center">
-          <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
-        </div>
-
-      </form>
+      </div>
     </div>
   </div>
-</div>
-</div>
 </div>
 </template>
 
@@ -157,9 +138,10 @@ export default {
       .then(response => (this.storedTags = response.data))
     },
     addPublication(newPublication) {
+      // console.log(typeof(Number(document.querySelector('input#number').value)))
       this.$modal.show('dialog', {
         title: 'Création d\'une publication',
-        text: 'Merci de préciser la date de parution du n°'+newPublication+ ' de Bell\'Italia               <input id="date" type="date" class="form-control" v-model="interestDate">',
+        text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate">',
         buttons: [
           {
             title: 'Enregistrer',
@@ -167,7 +149,7 @@ export default {
               axios.post('http://127.0.0.1:8000/api/bellitalia', {
                 number: newPublication,
                 date: document.querySelector('input#date').value,
-              })
+              }).then(() => this.hideModal())
             }
           },
           {
@@ -175,6 +157,9 @@ export default {
           }
         ]
       })
+    },
+    hideModal () {
+      this.$modal.hide('dialog')
     },
     // Récupération des publications BI en BDD
     getStoredPublications() {

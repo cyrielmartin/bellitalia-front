@@ -59,7 +59,7 @@
               <div>
                 <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
                 <label>Numéro du Bell'Italia *</label>
-                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication (seuls les chiffres sont autorisés)" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication (seuls les chiffres sont autorisés)" label="number" track-by="number" :options="storedPublications" :multiple="false" :options-limit="1" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
                 <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
                 <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
               </div>
@@ -202,7 +202,6 @@ export default {
         city_id: this.interestCity,
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
-        publication: this.interestDate,
         tag_id: this.interestTag,
       })
       .then(() => {

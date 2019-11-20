@@ -6,14 +6,12 @@
       <div class="col-md-10">
         <div class="card">
           <div class="card-header">Ajouter un nouveau point d'intérêt</div>
-
           <div class="card-body">
-
             <form
             @submit.prevent="submitForm"
             novalidate="true">
             <div class="form-group">
-              <label>Nom du point d'intérêt *</label>
+              <label>Nom du point d'intérêt <span class="redStar">*</span></label>
               <input class="form-control" v-model="interestName" :class="{'border-red': errors.name}">
               <p class="text-error" v-if="errors.name" v-text="errors.name[0]"></p>
             </div>
@@ -29,26 +27,28 @@
             </div>
 
             <div class="form-group">
-              <label>Latitude *</label>
-              <input type="number" min="0" max="100" step="1.0E-7" class="form-control" v-model.number="interestLatitude" :class="{'border-red': errors.latitude}">
+              <label>Latitude <span class="redStar">*</span></label>
+              <input id="latitude" min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="{'border-red': errors.latitude}">
+              <small class="helpText">La saisie des lettres est désactivée</small>
               <p class="text-error" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
             </div>
 
             <div class="form-group">
-              <label>Longitude *</label>
-              <input type="number" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
+              <label>Longitude <span class="redStar">*</span></label>
+              <input id="longitude" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
+              <small class="helpText">La saisie des lettres est désactivée</small>
               <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
             </div>
 
             <div class="form-group">
-              <label>Ville *</label>
+              <label>Ville <span class="redStar">*</span></label>
               <input class="form-control" v-model="interestCity" :class="{'border-red': errors.city_id}">
               <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
             </div>
 
             <div class="form-group">
-              <label>Région *</label>
-              <select class="form-control" v-model="interestRegion" :class="{'border-red': errors.region_id}">
+              <label>Région <span class="redStar">*</span></label>
+              <select class="form-control helpText" v-model="interestRegion" :class="{'border-red': errors.region_id}">
                 <option disabled value="">Sélectionner</option>
                 <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
               </select>
@@ -58,8 +58,8 @@
             <div class="form-group">
               <div>
                 <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-                <label>Numéro du Bell'Italia *</label>
-                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication (seuls les chiffres sont autorisés)" label="number" track-by="number" :options="storedPublications" :multiple="false" :options-limit="1" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+                <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
+                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" :options-limit="1" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
                 <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
                 <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
               </div>
@@ -77,11 +77,10 @@
                 <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
               </div>
             </div>
-
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
             </div>
-
+            <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </form>
         </div>
       </div>
@@ -149,8 +148,6 @@ export default {
         // Si moins de 2 charactères, on affiche le message d'erreur
         this.NotANumber = true
       } else {
-        //Sinon, on ajoute bien au menu déroulant la publication que l'on crée
-        this.storedPublications.push(createdPublication)
         //Et on l'affiche dans l'input
         this.interestNumber.push(createdPublication)
         //On enlève le message d'erreur s'il était présent
@@ -158,7 +155,7 @@ export default {
         //Et à la validation de la nouvelle publication, on ouvre la modale pour ajouter la date
         this.$modal.show('dialog', {
           title: 'Création d\'une publication',
-          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate">',
+          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
           buttons: [
             {
               title: 'Enregistrer',
@@ -168,10 +165,15 @@ export default {
                   number: newPublication,
                   date: document.querySelector('input#date').value,
                   //On referme la modale
-                }).then(() => this.hideModal())
+                }).then(() =>
+                this.hideModal())
+                //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
+                this.storedPublications.push(createdPublication)
               }
             },
             {
+              // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
+              handler:()=> {this.interestNumber.pop(), this.hideModal()},
               title: 'Annuler',
             }
           ]
@@ -251,17 +253,30 @@ export default {
     }
     // On applique cette méthode sur notre input numéro de Bell'Italia
     setInputFilter(document.getElementById("number"), function(value) {
-      return /^\d*$/.test(value); });
-    }
-  }
-  </script>
-  <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
-  <style lang="scss" scoped >
+      return /^\d*$/.test(value); }),
 
-  .text-error {
-    color: red;
-  }
-  .border-red {
-    border-color: red;
-  }
-  </style>
+      //On applique une méthode légèrement différente pour la latitude et la longitude (que des chiffres + points et virgules)
+      setInputFilter(document.getElementById("latitude"), function(value) {
+        return /^-?\d*[.,]?\d*$/.test(value); })
+
+        setInputFilter(document.getElementById("longitude"), function(value) {
+          return /^-?\d*[.,]?\d*$/.test(value); })
+        }
+      }
+      </script>
+      <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+      <style lang="scss" scoped >
+
+      .text-error {
+        color: red;
+      }
+      .border-red {
+        border-color: red;
+      }
+      .helpText {
+        color: #ADADAD;
+      }
+      .redStar {
+        color:red;
+      }
+      </style>

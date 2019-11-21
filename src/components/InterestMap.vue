@@ -35,7 +35,7 @@
 import axios from 'axios'
 import { LMap, LTileLayer, LMarker, LIcon, LPopup } from 'vue2-leaflet'
 
-import ruin from '../assets/ruin.png'
+import marker from '../assets/marker.png'
 
 export default {
   name: 'InterestMap',
@@ -48,8 +48,8 @@ export default {
       url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       marker: L.latLng(41.89591, 12.508798),
-      icon: ruin,
-      // iconSize: [30, 30]
+      icon: marker,
+      iconSize: [30, 30]
     }
   },
   components: {

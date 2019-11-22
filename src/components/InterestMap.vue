@@ -21,9 +21,14 @@
       <!-- Icône pour marqueurs -->
       <l-icon :icon-size="interest.iconSize" :icon-url="icon">
       </l-icon>
-      <l-popup><h1>{{interest.name}}</h1><p>{{interest.description}}</p></l-popup>
+      <l-popup><h1>{{interest.name}}</h1><p>{{interest.description}}</p><small>{{ interest.city_id.name }}</small></l-popup>
     </l-marker>
   </l-map>
+  <div v-for="interest in interests" :key="interest.interests">
+    <div v-for="city in interest.city">
+      {{city.name}}
+    </div>
+  </div>
 </div>
 
 </div>
@@ -49,7 +54,7 @@ export default {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       marker: L.latLng(41.89591, 12.508798),
       icon: marker,
-      iconSize: [30, 30]
+      iconSize: [30, 30],
     }
   },
   components: {

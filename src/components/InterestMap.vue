@@ -24,11 +24,6 @@
       <l-popup><h1>{{interest.name}}</h1><p>{{interest.description}}</p><small>{{ interest.city_id.name }}</small></l-popup>
     </l-marker>
   </l-map>
-  <div v-for="interest in interests" :key="interest.interests">
-    <div v-for="city in interest.city">
-      {{city.name}}
-    </div>
-  </div>
 </div>
 
 </div>
@@ -37,8 +32,8 @@
 
 <script>
 
-import axios from 'axios'
 import { LMap, LTileLayer, LMarker, LIcon, LPopup } from 'vue2-leaflet'
+import L from 'leaflet'
 
 import marker from '../assets/marker.png'
 

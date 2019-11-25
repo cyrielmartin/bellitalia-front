@@ -1,6 +1,5 @@
 <template>
   <div class="">
-
     <div class="row map">
       <!-- Affichage de la position réelle -->
       <!-- <small>{{currentCenter}}</small> -->
@@ -21,7 +20,7 @@
       <!-- Icône pour marqueurs -->
       <l-icon :icon-size="interest.iconSize" :icon-url="icon">
       </l-icon>
-      <l-popup><h1>{{interest.name}}</h1><p>{{interest.description}}</p><small>{{ interest.city_id.name }}</small></l-popup>
+      <l-popup><span v-for="tag in interest.tags" class="badge badge-warning mr-1">{{tag.name}}</span><h1>{{interest.name}}</h1><p>{{interest.description}}</p><span>{{interest.city.name}}</span> (<span v-for="region in interest.city">{{region.name}}</span>)</l-popup>
     </l-marker>
   </l-map>
 </div>
@@ -57,7 +56,7 @@ export default {
     LTileLayer,
     LMarker,
     LIcon,
-    LPopup
+    LPopup,
 
   },
   methods: {

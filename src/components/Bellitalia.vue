@@ -46,7 +46,7 @@ export default {
   mounted: function() {
     axios
     .get('http://127.0.0.1:8000/api/interest')
-    .then(r => {this.interests = r.data
+    .then(r => {this.interests = r.data.data
       // On peut filtrer les données reçues en utilisant .filter() :
       // this.interests = r.data.filter(r => r.name == 'Santuario di Oropa');
       // map() permet de greffer une information à la data récupérée par Axios

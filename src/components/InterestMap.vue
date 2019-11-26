@@ -20,7 +20,8 @@
       <!-- Icône pour marqueurs -->
       <l-icon :icon-size="interest.iconSize" :icon-url="icon">
       </l-icon>
-      <l-popup><span v-for="tag in interest.tags" class="badge badge-warning mr-1">{{tag.name}}</span><h1>{{interest.name}}</h1><p>{{interest.description}}</p><div class="badge badge-info"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span> (<span v-for="region in interest.city">{{region.name}}</span>)</div></l-popup>
+
+      <l-popup><div><span v-for="tag in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-for="region in interest.city">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link">Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div></l-popup>
     </l-marker>
   </l-map>
 </div>
@@ -49,6 +50,8 @@ export default {
       marker: L.latLng(41.89591, 12.508798),
       icon: marker,
       iconSize: [30, 30],
+      href:'',
+      linkUrl: 'https://'
     }
   },
   components: {
@@ -91,6 +94,10 @@ export default {
 
 .map {
   height: 95vh;
+}
+
+.popupText {
+  font-size: 0.8rem;
 }
 
 </style>

@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="row">
       <div class="col-12">
-        <h1 class="text-center text-info">Bell'Italia</h1>
+        <div class="text-center text-info title">Bell'Italia</div>
       </div>
     </div>
     <!-- L'affichage des composants est géré par le router -->
@@ -22,5 +22,8 @@ export default {}
 </script>
 
 <style>
+.title {
+  font-size: 3rem;
+}
 
 </style>

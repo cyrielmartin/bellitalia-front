@@ -20,7 +20,7 @@
       <!-- Icône pour marqueurs -->
       <l-icon :icon-size="interest.iconSize" :icon-url="icon">
       </l-icon>
-      <l-popup><span v-for="tag in interest.tags" class="badge badge-warning mr-1">{{tag.name}}</span><h1>{{interest.name}}</h1><p>{{interest.description}}</p><span>{{interest.city.name}}</span> (<span v-for="region in interest.city">{{region.name}}</span>)</l-popup>
+      <l-popup><span v-for="tag in interest.tags" class="badge badge-warning mr-1">{{tag.name}}</span><h1>{{interest.name}}</h1><p>{{interest.description}}</p><div class="badge badge-info"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span> (<span v-for="region in interest.city">{{region.name}}</span>)</div></l-popup>
     </l-marker>
   </l-map>
 </div>

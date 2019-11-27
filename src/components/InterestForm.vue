@@ -1,6 +1,8 @@
 <template>
 
   <div class="container">
+    {{interest}}
+
     <a href="/"><button type="button" class="btn btn-outline-dark"><i class="fas fa-arrow-circle-left"></i> Retour</button></a>
     <div class="row justify-content-center">
       <div class="col-md-10">
@@ -230,6 +232,22 @@ export default {
         this.NotANumber = false
       })
     },
+    getInterest() {
+      axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
+      .then(r => {
+        this.interest = r.data.data
+        this.interestName = r.data.data.name
+        this.interestDescription = r.data.data.description
+        this.interestLink = r.data.data.link
+        this.interestLatitude = r.data.data.latitude
+        this.interestLongitude = r.data.data.longitude
+        this.interestCity = r.data.data.city.name
+        this.interestRegion = r.data.data.city.region_id.name
+      })
+    },
+  },
+  created: function(){
+    this.getInterest();
   },
   mounted: function(){
     this.getRegions();

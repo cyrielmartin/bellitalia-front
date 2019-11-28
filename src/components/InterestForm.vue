@@ -1,7 +1,6 @@
 <template>
 
   <div class="container">
-    {{interest}}
 
     <a href="/"><button type="button" class="btn btn-outline-dark"><i class="fas fa-arrow-circle-left"></i> Retour</button></a>
     <div class="row justify-content-center">
@@ -61,7 +60,7 @@
               <div>
                 <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
                 <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" :options-limit="1" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
                 <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
                 <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
               </div>
@@ -218,7 +217,7 @@ export default {
         this.interestRegion = ""
         this.interestNumber = ""
         this.interestDate = ""
-        this.interestCategory = ""
+        this.interestTag = ""
         this.errors = {}
         this.$router.push('/')
         this.flashMessage.show({
@@ -243,6 +242,8 @@ export default {
         this.interestLongitude = r.data.data.longitude
         this.interestCity = r.data.data.city.name
         this.interestRegion = r.data.data.city.region_id.name
+        this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
+        this.interestTag = this.interestTag.concat(r.data.data.tags)
       })
     },
   },

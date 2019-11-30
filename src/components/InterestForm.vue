@@ -6,88 +6,91 @@
     <div class="row justify-content-center">
       <div class="col-md-10">
         <div class="card">
-          <div class="card-header">Ajouter un nouveau point d'intérêt</div>
-          <div class="card-body">
-            <form
-            @submit.prevent="submitForm"
-            novalidate="true">
-            <div class="form-group">
-              <label>Nom du point d'intérêt <span class="redStar">*</span></label>
-              <input class="form-control" v-model="interestName" :class="{'border-red': errors.name}">
-              <p class="text-error" v-if="errors.name" v-text="errors.name[0]"></p>
-            </div>
+          <div class="card-header" v-if="!edit">Ajouter un nouveau point d'intérêt</div>
+          <div class="card-header" v-if="edit">Modifier un point d'intérêt</div>
 
-            <div class="form-group">
-              <label>Description</label>
-              <textarea cols="50" rows="5" class="form-control" v-model="interestDescription"></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Lien</label>
-              <input class="form-control" v-model="interestLink">
-            </div>
-
-            <div class="form-group">
-              <label>Latitude <span class="redStar">*</span></label>
-              <input id="latitude" min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="{'border-red': errors.latitude}">
-              <small class="helpText">La saisie des lettres est désactivée</small>
-              <p class="text-error" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
-            </div>
-
-            <div class="form-group">
-              <label>Longitude <span class="redStar">*</span></label>
-              <input id="longitude" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
-              <small class="helpText">La saisie des lettres est désactivée</small>
-              <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
-            </div>
-
-            <div class="form-group">
-              <label>Ville <span class="redStar">*</span></label>
-              <input class="form-control" v-model="interestCity" :class="{'border-red': errors.city_id}">
-              <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
-            </div>
-
-            <div class="form-group">
-              <label>Région <span class="redStar">*</span></label>
-              <select class="form-control helpText" v-model="interestRegion" :class="{'border-red': errors.region_id}">
-                <option disabled value="">Sélectionner</option>
-                <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
-              </select>
-              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
-            </div>
-
-            <div class="form-group">
-              <div>
-                <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-                <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-                <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
-                <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
-                <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
-              </div>
-            </div>
-
-            <!-- Plugin vue-js-modal gérant l'ajout dynamique de nouveaux numéros BI + date publication -->
-            <modal name="publication">
-            </modal>
-            <v-dialog/>
-
-            <div class="form-group">
-              <div>
-                <label>Catégorie(s)</label>
-                <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
-                <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
-              </div>
-            </div>
-            <div class="d-flex justify-content-center">
-              <button type="submit" class="btn btn-fill btn-blue">Enregistrer</button>
-            </div>
-            <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
-          </form>
         </div>
+        <div class="card-body">
+          <form
+          novalidate="true">
+          <div class="form-group">
+            <label>Nom du point d'intérêt <span class="redStar">*</span></label>
+            <input class="form-control" v-model="interestName" :class="{'border-red': errors.name}">
+            <p class="text-error" v-if="errors.name" v-text="errors.name[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea cols="50" rows="5" class="form-control" v-model="interestDescription"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Lien</label>
+            <input class="form-control" v-model="interestLink">
+          </div>
+
+          <div class="form-group">
+            <label>Latitude <span class="redStar">*</span></label>
+            <input id="latitude" min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="{'border-red': errors.latitude}">
+            <small class="helpText">La saisie des lettres est désactivée</small>
+            <p class="text-error" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <label>Longitude <span class="redStar">*</span></label>
+            <input id="longitude" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
+            <small class="helpText">La saisie des lettres est désactivée</small>
+            <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <label>Ville <span class="redStar">*</span></label>
+            <input class="form-control" v-model="interestCity" :class="{'border-red': errors.city_id}">
+            <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <label>Région <span class="redStar">*</span></label>
+            <select class="form-control helpText" v-model="interestRegion" :class="{'border-red': errors.region_id}">
+              <option disabled value="">Sélectionner</option>
+              <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
+            </select>
+            <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <div>
+              <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
+              <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
+              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+              <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+              <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
+            </div>
+          </div>
+
+          <!-- Plugin vue-js-modal gérant l'ajout dynamique de nouveaux numéros BI + date publication -->
+          <modal name="publication">
+          </modal>
+          <v-dialog/>
+
+          <div class="form-group">
+            <div>
+              <label>Catégorie(s)</label>
+              <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
+              <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
+            </div>
+          </div>
+          <div class="d-flex justify-content-center">
+            <button type="submit" v-if="!edit" @click.prevent="submitForm" class="btn btn-fill btn-blue">Enregistrer</button>
+            <button type="submit" v-if="edit" @click.prevent="editForm" class="btn btn-fill btn-blue">Enregistrer les modifications</button>
+          </div>
+          <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
+        </form>
       </div>
     </div>
   </div>
 </div>
+<!-- </div> -->
 </template>
 
 <script>
@@ -102,6 +105,7 @@ export default {
   name: 'InterestForm',
   data() {
     return {
+      edit: false,
       interestTag: [],
       storedTags: [],
       interestName: '',
@@ -196,6 +200,7 @@ export default {
       .then(response => (this.regions = response))
     },
     submitForm() {
+      // console.log("submitForm")
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
         description: this.interestDescription,
@@ -231,9 +236,47 @@ export default {
         this.NotANumber = false
       })
     },
+    editForm() {
+      // console.log("editForm")
+      axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
+        name: this.interestName,
+        description: this.interestDescription,
+        link: this.interestLink,
+        latitude: this.interestLatitude,
+        longitude: this.interestLongitude,
+        city_id: this.interestCity,
+        region_id: this.interestRegion,
+        bellitalia_id: this.interestNumber,
+        tag_id: this.interestTag,
+      })
+      .then(() => {
+        this.interestName = ""
+        this.interestDescription = ""
+        this.interestLink = ""
+        this.interestLatitude = ""
+        this.interestLongitude = ""
+        this.interestCity = ""
+        this.interestRegion = ""
+        this.interestNumber = ""
+        this.interestDate = ""
+        this.interestTag = ""
+        this.errors = {}
+        this.$router.push('/')
+        this.flashMessage.show({
+          status: 'success',
+          title: 'Confirmation',
+          message: 'Le point d\'intérêt a bien été modifié'
+        });
+      })
+      // .catch(error => {
+      //   this.errors = error.response.data
+      //   this.NotANumber = false
+      // })
+    },
     getInterest() {
       axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
       .then(r => {
+        this.edit = true
         this.interest = r.data.data
         this.interestName = r.data.data.name
         this.interestDescription = r.data.data.description
@@ -247,13 +290,11 @@ export default {
       })
     },
   },
-  created: function(){
-    this.getInterest();
-  },
   mounted: function(){
     this.getRegions();
     this.getStoredTags();
     this.getStoredPublications();
+    this.getInterest();
 
     // Méthode JS empêchant de saisir autre chose que des chiffres
     function setInputFilter(textbox, inputFilter) {

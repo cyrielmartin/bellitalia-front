@@ -37,6 +37,9 @@ const router = new VueRouter({
     path: '/interest/:id',
     component: require('./components/InterestForm.vue').default
   }, {
+    path: '/interest/:id/edit',
+    component: require('./components/InterestForm.vue').default
+  }, {
     path: '*',
     redirect: '/'
   }]

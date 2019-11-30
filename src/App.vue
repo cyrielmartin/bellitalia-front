@@ -4,12 +4,12 @@
     <!-- Header -->
     <div class="row">
       <div class="col-12">
-        <div class="text-center text-info title">Bell'Italia</div>
+        <a href="/" class="text-center text-info title"><div >Bell'Italia</div></a>
       </div>
     </div>
     <!-- L'affichage des composants est géré par le router -->
     <router-view></router-view>
-  <FlashMessage position="left bottom"/>
+    <FlashMessage position="left bottom"/>
   </div>
 
 </template>
@@ -24,6 +24,9 @@ export default {}
 <style>
 .title {
   font-size: 3rem;
+}
+a:hover {
+  text-decoration: none;
 }
 
 </style>

@@ -144,6 +144,7 @@ export default {
     },
     // Ajout d'une nouvelle publication à la volée
     addPublication(newPublication) {
+      this.NotANumber = false
       const createdPublication = {
         number: newPublication,
       }
@@ -153,7 +154,9 @@ export default {
         // Si moins de 2 charactères, on affiche le message d'erreur
         this.NotANumber = true
       } else {
-        //Et on l'affiche dans l'input
+        //Pour une raison que j'ignore, je dois redire que interestNumber est un tableau, sinon bug à l'update.
+        this.interestNumber = new Array()
+        //On affiche ensuite la nouvelle publication dans l'input
         this.interestNumber.push(createdPublication)
         //On enlève le message d'erreur s'il était présent
         this.NotANumber = false
@@ -200,7 +203,6 @@ export default {
       .then(response => (this.regions = response))
     },
     submitForm() {
-      // console.log("submitForm")
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
         description: this.interestDescription,
@@ -237,7 +239,6 @@ export default {
       })
     },
     editForm() {
-      // console.log("editForm")
       axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
         name: this.interestName,
         description: this.interestDescription,
@@ -268,10 +269,10 @@ export default {
           message: 'Le point d\'intérêt a bien été modifié'
         });
       })
-      // .catch(error => {
-      //   this.errors = error.response.data
-      //   this.NotANumber = false
-      // })
+      .catch(error => {
+        this.errors = error.response.data
+        this.NotANumber = false
+      })
     },
     getInterest() {
       axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)

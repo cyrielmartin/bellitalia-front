@@ -40,6 +40,9 @@ const router = new VueRouter({
     path: '/interest/:id/edit',
     component: require('./components/InterestForm.vue').default
   }, {
+    path: '/interest/:id/delete',
+    component: require('./components/InterestMap.vue').default
+  }, {
     path: '*',
     redirect: '/'
   }]

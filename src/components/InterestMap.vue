@@ -5,6 +5,7 @@
       <!-- <small>{{currentCenter}}</small> -->
       <!-- Affichage de la carte -->
       <l-map
+      ref="myMap"
       @update:center="centerUpdate"
       :zoom="zoom"
       :max-zoom="maxZoom"
@@ -54,7 +55,8 @@ export default {
       icon: marker,
       iconSize: [30, 30],
       href:'',
-      linkUrl: 'https://'
+      linkUrl: 'https://',
+      noMarker: L.latLng()
     }
   },
   components: {
@@ -66,9 +68,6 @@ export default {
 
   },
   methods: {
-    hideModal () {
-      this.$modal.hide('dialog')
-    },
     deleteButton(event, id){
       this.$modal.show('dialog', {
         title: 'Suppression d\'un point d\'intérêt',
@@ -78,41 +77,47 @@ export default {
             title: 'Supprimer',
             handler: () => {
               axios.delete('http://127.0.0.1:8000/api/interest/'+id, {
-                //On referme la modale
               }).then(() =>
-              this.hideModal())
-            }
-          },
-          {
-            // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
-            // handler:()=> {this.interestNumber.pop(), this.hideModal()},
-            title: 'Annuler',
+              document.location.reload(true),
+              //On referme la modale
+              this.$modal.hide('dialog'),
+              //On referme la popup
+              this.$nextTick(() => {
+                this.$refs.myMap.mapObject.closePopup()
+              }),
+            )
           }
-        ]
-      })
-    },
-    latLng: function(lat, lng) {
-      return L.latLng(lat, lng)
-    },
-    centerUpdate: function(center) {
-      this.currentCenter = center
-    }
+        },
+        {
+          // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
+          // handler:()=> {this.interestNumber.pop(), this.hideModal()},
+          title: 'Annuler',
+        }
+      ]
+    })
   },
-  props: {
-    interests: Array,
-    text: {
-      type: String,
-      default: ""
-    },
-    position: {
-      type: Object,
-      default: () => {}
-    },
-    title: {
-      type: String,
-      default: ""
-    },
+  latLng: function(lat, lng) {
+    return L.latLng(lat, lng)
+  },
+  centerUpdate: function(center) {
+    this.currentCenter = center
   }
+},
+props: {
+  interests: Array,
+  text: {
+    type: String,
+    default: ""
+  },
+  position: {
+    type: Object,
+    default: () => {}
+  },
+  title: {
+    type: String,
+    default: ""
+  },
+}
 }
 
 </script>
@@ -131,6 +136,10 @@ export default {
 .deleteLink {
   color: red;
   cursor: pointer;
+}
+
+.hideMarker {
+  opacity: 100%;
 }
 
 </style>

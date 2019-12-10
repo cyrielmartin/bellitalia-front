@@ -56,7 +56,6 @@ export default {
       iconSize: [30, 30],
       href:'',
       linkUrl: 'https://',
-      noMarker: L.latLng()
     }
   },
   components: {

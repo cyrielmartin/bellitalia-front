@@ -77,6 +77,7 @@ export default {
             handler: () => {
               axios.delete('http://127.0.0.1:8000/api/interest/'+id, {
               }).then(() =>
+              // On recharge la page pour que le marker et la ligne dans le tableau disparaissent bien
               document.location.reload(true),
               //On referme la modale
               this.$modal.hide('dialog'),

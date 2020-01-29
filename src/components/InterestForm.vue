@@ -25,6 +25,17 @@
           </div>
 
           <div class="form-group">
+            <label>Image</label>
+            <div v-if="!image">
+              <input type="file" @change="onFileChange">
+            </div>
+            <div v-else>
+              <img :src="image" />
+              <button class="btn btn-outline-danger" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
+            </div>
+          </div>
+
+          <div class="form-group">
             <label>Lien</label>
             <input class="form-control" v-model="interestLink">
           </div>
@@ -105,6 +116,7 @@ export default {
   name: 'InterestForm',
   data() {
     return {
+      image: '',
       edit: false,
       interestTag: [],
       storedTags: [],
@@ -126,6 +138,26 @@ export default {
   },
 
   methods: {
+    // Méthodes gérant l'ajout et la suppression d'une image
+    onFileChange(e) {
+      var files = e.target.files || e.dataTransfer.files;
+      if (!files.length)
+      return;
+      this.createImage(files[0]);
+    },
+    createImage(file) {
+      var image = new Image();
+      var reader = new FileReader();
+      var vm = this;
+      reader.onload = (e) => {
+        vm.image = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      this.interestImage = file.name;
+    },
+    removeImage: function (e) {
+      this.image = '';
+    },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
       const createdTag = {
@@ -213,6 +245,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
+        image: this.interestImage,
       })
       .then(() => {
         this.interestName = ""
@@ -328,6 +361,11 @@ export default {
       <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
       <style lang="scss" scoped >
 
+      img {
+        width: 30%;
+        display: block;
+        margin-bottom: 10px;
+      }
       .text-error {
         color: red;
       }
@@ -339,5 +377,12 @@ export default {
       }
       .redStar {
         color:red;
+      }
+      .imageTrash {
+        // color:red;
+      }
+      .imageTrash:hover{
+        // color:white;
+        cursor: pointer;
       }
       </style>

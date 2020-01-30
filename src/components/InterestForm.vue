@@ -153,10 +153,12 @@ export default {
         vm.image = e.target.result;
       };
       reader.readAsDataURL(file);
-      this.interestImage = file.name;
+      // console.log(file);
+      // this.interestImage = file;
     },
     removeImage: function (e) {
       this.image = '';
+
     },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
@@ -245,7 +247,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
-        image: this.interestImage,
+        image: this.image,
       })
       .then(() => {
         this.interestName = ""

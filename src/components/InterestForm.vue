@@ -146,17 +146,17 @@ export default {
       this.createImage(files[0]);
     },
     createImage(file) {
-      var image = new Image();
+      // var image = new Image();
       var reader = new FileReader();
-      var vm = this;
+      // var vm = this;
       reader.onload = (e) => {
-        vm.image = e.target.result;
+        this.image = e.target.result;
       };
       reader.readAsDataURL(file);
       // console.log(file);
       // this.interestImage = file;
     },
-    removeImage: function (e) {
+    removeImage: function () {
       this.image = '';
 
     },

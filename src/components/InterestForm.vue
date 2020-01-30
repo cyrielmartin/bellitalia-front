@@ -236,6 +236,7 @@ export default {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.regions = response))
     },
+    // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
@@ -260,6 +261,7 @@ export default {
         this.interestNumber = ""
         this.interestDate = ""
         this.interestTag = ""
+        this.image = ""
         this.errors = {}
         this.$router.push('/')
         this.flashMessage.show({
@@ -273,6 +275,7 @@ export default {
         this.NotANumber = false
       })
     },
+    // Modification d'un point d'intérêt
     editForm() {
       axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
         name: this.interestName,
@@ -284,6 +287,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
+        image: this.image,
       })
       .then(() => {
         this.interestName = ""
@@ -296,6 +300,7 @@ export default {
         this.interestNumber = ""
         this.interestDate = ""
         this.interestTag = ""
+        this.image = ""
         this.errors = {}
         this.$router.push('/')
         this.flashMessage.show({
@@ -309,6 +314,7 @@ export default {
         this.NotANumber = false
       })
     },
+    // Récupération d'un point d'intérêt existant pour édit
     getInterest() {
       axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
       .then(r => {
@@ -321,6 +327,7 @@ export default {
         this.interestLongitude = r.data.data.longitude
         this.interestCity = r.data.data.city.name
         this.interestRegion = r.data.data.city.region_id.name
+        this.image = r.data.data.image
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
       })

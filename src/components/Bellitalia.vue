@@ -15,7 +15,7 @@
 
       <!-- Colonne de droite : carte -->
       <div class="col-8 interest-map">
-        <InterestMap :interests="interests" />
+        <InterestMap :interests="interests"/>
       </div>
     </div>
 
@@ -39,7 +39,7 @@ export default {
       interests: [],
       // 2 tailles d'icônes pour les markers
       normalIcon: [30, 30],
-      largeIcon: [45, 45]
+      largeIcon: [45, 45],
     }
   },
   // Quand le composant est opérationnel

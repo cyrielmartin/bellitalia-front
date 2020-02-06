@@ -24,6 +24,7 @@ Vue.config.productionTip = false
 // Chargement du router dans VueJS
 Vue.use(VueRouter)
 
+
 // Instanciation du router
 const router = new VueRouter({
   mode: 'history',

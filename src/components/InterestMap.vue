@@ -14,23 +14,48 @@
       <!-- Bouton pour recentrer la carte -->
       <l-control
       :position="'topleft'"
-      class="center-button" @click="recenterMap">
+      class="center-button">
       <div @click="recenterMap">
         <i class="far fa-dot-circle"></i>
       </div>
     </l-control>
-    <!-- Marqueurs -->
-    <l-marker
-    :key="interestIndex"
-    @popupclose="popupclose"
-    v-for="(interest,interestIndex) in interests"
-    :lat-lng="latLng(interest.latitude, interest.longitude)">
-    <!-- Icône pour marqueurs -->
-    <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-    </l-icon>
-    <!-- <l-popup :options="{ autoClose: false, closeOnClick: false }" -->
-    <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
-  </l-marker>
+    <!-- Module filtres régions -->
+    <l-control
+    :position="'topright'">
+    <div class="select-regions">
+      <p>Filtrer par région :</p>
+      <button type="button" name="button" @click="allRegions">Toutes</button>
+      <button type="button" name="button" @click="noRegion">Aucune</button>
+
+      <div>
+        <input type="checkbox" id="sardegna" value="Sardegna" v-model="checkedRegions">
+        <label for="sardegna">Sardegna</label>
+      </div>
+
+      <div>
+        <input type="checkbox" id="lombardia" value="Lombardia" v-model="checkedRegions">
+        <label for="lombardia">Lombardia</label>
+      </div>
+    </div>
+
+  </l-control>
+  <!-- Marqueurs -->
+  <!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
+  <div class=""   v-for="(interest,interestIndex) in interests">
+    <div class="" v-for="(region, interestRegion) in interest.city">
+      <l-marker
+      :key="interestIndex"
+      @popupclose="popupclose"
+      v-if="checkedRegions.includes(region.name)"
+      :lat-lng="latLng(interest.latitude, interest.longitude)">
+      <!-- Icône pour marqueurs -->
+      <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+      </l-icon>
+      <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+    </l-marker>
+  </div>
+</div>
+
 </l-map>
 <modal name="delete">
 </modal>
@@ -63,6 +88,7 @@ export default {
       iconSize: [30, 30],
       href:'',
       linkUrl: 'https://',
+      checkedRegions: ['Lombardia', 'Sardegna'],
     }
   },
   components: {
@@ -75,6 +101,12 @@ export default {
 
   },
   methods: {
+    allRegions: function(){
+      this.checkedRegions = ['Lombardia', 'Sardegna'];
+    },
+    noRegion: function(){
+      this.checkedRegions = [];
+    },
     recenterMap: function(){
       this.$nextTick(() => {
         this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
@@ -174,4 +206,10 @@ props: {
 .center-button:hover{
   background-color: #F4F4F4;
 }
+
+.select-regions {
+  background-color: white;
+  padding:1em;
+}
+
 </style>

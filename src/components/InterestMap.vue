@@ -1,7 +1,6 @@
 <template>
   <div class="">
     <div class="row map">
-      <button type="button" name="button" class="btn btn-light mb-1" @click="recenterMap"><i class="fas fa-sync-alt"></i> Recentrer la carte</button>
       <!-- Affichage de la carte -->
       <l-map
       ref="myMap"
@@ -12,22 +11,30 @@
       <!-- Surcouche OSM -->
       <l-tile-layer :url="url" :attribution="attribution">
       </l-tile-layer>
-      <!-- Marqueurs -->
-      <l-marker
-      :key="interestIndex"
-      @popupclose="popupclose"
-      v-for="(interest,interestIndex) in interests"
-      :lat-lng="latLng(interest.latitude, interest.longitude)">
-      <!-- Icône pour marqueurs -->
-      <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-      </l-icon>
-      <!-- <l-popup :options="{ autoClose: false, closeOnClick: false }" -->
-      <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
-    </l-marker>
-  </l-map>
-  <modal name="delete">
-  </modal>
-  <v-dialog/>
+      <!-- Bouton pour recentrer la carte -->
+      <l-control
+      :position="'topleft'"
+      class="center-button" @click="recenterMap">
+      <div @click="recenterMap">
+        <i class="far fa-dot-circle"></i>
+      </div>
+    </l-control>
+    <!-- Marqueurs -->
+    <l-marker
+    :key="interestIndex"
+    @popupclose="popupclose"
+    v-for="(interest,interestIndex) in interests"
+    :lat-lng="latLng(interest.latitude, interest.longitude)">
+    <!-- Icône pour marqueurs -->
+    <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+    </l-icon>
+    <!-- <l-popup :options="{ autoClose: false, closeOnClick: false }" -->
+    <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+  </l-marker>
+</l-map>
+<modal name="delete">
+</modal>
+<v-dialog/>
 </div>
 </div>
 
@@ -35,7 +42,7 @@
 
 <script>
 
-import { LMap, LTileLayer, LMarker, LIcon, LPopup } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl } from 'vue2-leaflet'
 import L from 'leaflet'
 import axios from 'axios'
 
@@ -64,6 +71,7 @@ export default {
     LMarker,
     LIcon,
     LPopup,
+    LControl,
 
   },
   methods: {
@@ -153,4 +161,17 @@ props: {
   opacity: 100%;
 }
 
+.center-button {
+  font-size: 1.6em;
+  background-color: white;
+  border: 0.1em solid #9ca3ad;
+  padding: 0% 10%;
+  margin-left: 26%;
+  border-radius: 8%;
+  cursor: pointer;
+}
+
+.center-button:hover{
+  background-color: #F4F4F4;
+}
 </style>

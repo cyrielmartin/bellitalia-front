@@ -2,7 +2,6 @@
 <template>
 
   <div class="container-fluid">
-
     <div class="row">
 
       <!-- Colonne de gauche : tableau -->

@@ -3,9 +3,9 @@
   <div class="container-fluid">
     <!-- Header -->
     <div class="row">
-      <div class="col-12">
-        <a href="/" class="text-center text-info title"><div >Bell'Italia</div></a>
-      </div>
+      <a href="/" class="col-12" id="banner"></a>
+        <!-- <a href="/" class="text-center text-info title"><div >Bell'Italia</div></a> -->
+
     </div>
     <!-- L'affichage des composants est géré par le router -->
     <router-view></router-view>
@@ -22,6 +22,12 @@ export default {}
 </script>
 
 <style>
+
+#banner{
+  background: url('./assets/bellitalia.png') no-repeat center;
+  background-size: 47%;
+  padding-bottom: 10em;
+}
 .title {
   font-size: 3rem;
 }

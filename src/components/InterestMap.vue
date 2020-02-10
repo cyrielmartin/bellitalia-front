@@ -23,37 +23,44 @@
     <l-control
     :position="'topright'">
     <div class="select-regions">
+
+      <!-- Module de filtres -->
       <p>Filtrer par région :</p>
       <button type="button" name="button" @click="allRegions">Toutes</button>
-      <button type="button" name="button" @click="noRegion">Aucune</button>
 
-      <div>
-        <input type="checkbox" id="sardegna" value="Sardegna" v-model="checkedRegions">
-        <label for="sardegna">Sardegna</label>
+      <!-- Récupération de toutes les régions -->
+      <div class="" v-for="(storedRegion,storedRegionIndex) in storedRegions">
+        <!-- Select -->
+        <div>
+          <input type="checkbox" id="storedRegion.name" :value="storedRegion.name" v-model="checkedRegions">
+          <label for="storedRegion.name">{{storedRegion.name}}</label>
+        </div>
       </div>
+      <!-- Checked
+      {{checkedRegions}}
+      <div class="">Stored
+      {{storedRegions}}
+    </div> -->
 
-      <div>
-        <input type="checkbox" id="lombardia" value="Lombardia" v-model="checkedRegions">
-        <label for="lombardia">Lombardia</label>
-      </div>
-    </div>
 
-  </l-control>
-  <!-- Marqueurs -->
-  <!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
-  <div class=""   v-for="(interest,interestIndex) in interests">
-    <div class="" v-for="(region, interestRegion) in interest.city">
-      <l-marker
-      :key="interestIndex"
-      @popupclose="popupclose"
-      v-if="checkedRegions.includes(region.name)"
-      :lat-lng="latLng(interest.latitude, interest.longitude)">
-      <!-- Icône pour marqueurs -->
-      <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-      </l-icon>
-      <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
-    </l-marker>
   </div>
+
+</l-control>
+<!-- Marqueurs -->
+<!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
+<div class="" v-for="(interest,interestIndex) in interests">
+  <div class="" v-for="(region, interestRegion) in interest.city">
+    <l-marker
+    :key="interestIndex"
+    @popupclose="popupclose"
+    v-if="checkedRegions.includes(region.name)"
+    :lat-lng="latLng(interest.latitude, interest.longitude)">
+    <!-- Icône pour marqueurs -->
+    <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+    </l-icon>
+    <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+  </l-marker>
+</div>
 </div>
 
 </l-map>
@@ -88,7 +95,8 @@ export default {
       iconSize: [30, 30],
       href:'',
       linkUrl: 'https://',
-      checkedRegions: ['Lombardia', 'Sardegna'],
+      checkedRegions: [],
+      storedRegions: [],
     }
   },
   components: {
@@ -101,12 +109,22 @@ export default {
 
   },
   methods: {
+    // Récupération des régions en BDD
+    getRegions() {
+      axios.get('http://127.0.0.1:8000/api/region')
+      .then(response => (this.storedRegions = response.data))
+    },
+    // Cocher toutes les régions dans le filtre
     allRegions: function(){
-      this.checkedRegions = ['Lombardia', 'Sardegna'];
+      if(this.checkedRegions.length==0) {
+        this.storedRegions.forEach((storedRegion, index) => {
+          this.checkedRegions.push(storedRegion.name)
+        })
+      } else {
+        this.checkedRegions = []
+      }
     },
-    noRegion: function(){
-      this.checkedRegions = [];
-    },
+    // Méthode pour recentrer la carte via bouton dédié
     recenterMap: function(){
       this.$nextTick(() => {
         this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
@@ -153,6 +171,9 @@ export default {
   latLng: function(lat, lng) {
     return L.latLng(lat, lng)
   },
+},
+created: function(){
+  this.getRegions()
 },
 props: {
   interests: Array,

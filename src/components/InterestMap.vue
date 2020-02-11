@@ -2,9 +2,11 @@
   <div class="">
     <div class="row map">
       <!-- Affichage de la carte -->
+
       <l-map
       ref="myMap"
       @update:center="centerUpdate"
+      :options="{ scrollWheelZoom: false}"
       :zoom="zoom"
       :max-zoom="maxZoom"
       :center="center">
@@ -25,28 +27,17 @@
     <div class="select-regions">
 
       <!-- Module de filtres -->
-      {{initialCheckedRegions}}
       <p>Filtrer par région :</p>
-      <button type="button" name="button" @click="allRegions">Toutes</button>
-
-      <!-- Récupération de toutes les régions -->
+      <button type="button" name="button" @click="allRegions">Toutes/Aucune</button>
       <div class="" v-for="(storedRegion,storedRegionIndex) in storedRegions">
-        <!-- Select -->
         <div>
           <input type="checkbox" id="storedRegion.name" :value="storedRegion.name" v-model="checkedRegions">
           <label for="storedRegion.name">{{storedRegion.name}}</label>
         </div>
       </div>
-      <!-- Checked
-      {{checkedRegions}}
-      <div class="">Stored
-      {{storedRegions}}
-    </div> -->
+    </div>
 
-
-  </div>
-
-</l-control>
+  </l-control>
 <!-- Marqueurs -->
 <!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
 <div class="" v-for="(interest,interestIndex) in interests">
@@ -83,95 +74,100 @@ import marker from '../assets/marker.png'
 
 export default {
   name: 'InterestMap',
-data: function() {
-  return {
-    zoom: 5.5,
-    maxZoom: 15,
-    center: [41.89591, 12.508798],
-    currentCenter: [41.89591, 12.508798],
-    url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-    marker: L.latLng(41.89591, 12.508798),
-    icon: marker,
-    iconSize: [30, 30],
-    href:'',
-    linkUrl: 'https://',
-    checkedRegions: this.initialCheckedRegions,
-    storedRegions: [],
-  }
-},
-components: {
-  LMap,
-  LTileLayer,
-  LMarker,
-  LIcon,
-  LPopup,
-  LControl,
-
-},
-methods: {
-  // Récupération des régions en BDD
-  getRegions() {
-    axios.get('http://127.0.0.1:8000/api/region')
-    .then(response => (this.storedRegions = response.data))
-  },
-  // Cocher toutes les régions dans le filtre
-  allRegions: function(){
-    if(this.checkedRegions.length==0) {
-      this.storedRegions.forEach((storedRegion, index) => {
-        this.checkedRegions.push(storedRegion.name)
-      })
-    } else {
-      this.checkedRegions = []
+  data: function() {
+    return {
+      zoom: 5.5,
+      maxZoom: 15,
+      center: [41.89591, 12.508798],
+      currentCenter: [41.89591, 12.508798],
+      url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      marker: L.latLng(41.89591, 12.508798),
+      icon: marker,
+      iconSize: [30, 30],
+      href:'',
+      linkUrl: 'https://',
+      checkedRegions: [],
+      storedRegions: [],
     }
   },
-  // Méthode pour recentrer la carte via bouton dédié
-  recenterMap: function(){
-    this.$nextTick(() => {
-      this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
-    })
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker,
+    LIcon,
+    LPopup,
+    LControl,
+
   },
-  // A chaque fermeture de popup, on recentre la carte
-  popupclose: function(){
-    this.$nextTick(() => {
-      this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
-    })
-  },
-  centerUpdate: function(center) {
-    this.currentCenter = center
-  },
-  deleteButton(event, id){
-    this.$modal.show('dialog', {
-      title: 'Suppression d\'un point d\'intérêt',
-      text: 'Êtes-vous sûr de vouloir supprimer ce point d\'intérêt ?',
-      buttons: [
-        {
-          title: 'Supprimer',
-          handler: () => {
-            axios.delete('http://127.0.0.1:8000/api/interest/'+id, {
-            }).then(() =>
-            // On recharge la page pour que le marker et la ligne dans le tableau disparaissent bien
-            document.location.reload(true),
-            //On referme la modale
-            this.$modal.hide('dialog'),
-            //On referme la popup
-            this.$nextTick(() => {
-              this.$refs.myMap.mapObject.closePopup()
-            }),
-          )
-        }
-      },
-      {
-        // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
-        // handler:()=> {this.interestNumber.pop(), this.hideModal()},
-        title: 'Annuler',
+  methods: {
+    // Récupération des régions en BDD et check de toutes les régions sur le filtre
+    getRegions() {
+      axios.get('http://127.0.0.1:8000/api/region')
+      .then(response => (
+        this.storedRegions = response.data,
+        this.storedRegions.forEach((storedRegion, index) => {
+          this.checkedRegions.push(storedRegion.name)
+        })
+      ))
+    },
+    // Cocher toutes les régions dans le filtre
+    allRegions: function(){
+      if(this.checkedRegions.length==0) {
+        this.storedRegions.forEach((storedRegion, index) => {
+          this.checkedRegions.push(storedRegion.name)
+        })
+      } else {
+        this.checkedRegions = []
       }
-    ]
-  })
-},
-latLng: function(lat, lng) {
-  return L.latLng(lat, lng)
-},
+    },
+    // Méthode pour recentrer la carte via bouton dédié
+    recenterMap: function(){
+      this.$nextTick(() => {
+        this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
+      })
+    },
+    // A chaque fermeture de popup, on recentre la carte
+    popupclose: function(){
+      this.$nextTick(() => {
+        this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
+      })
+    },
+    centerUpdate: function(center) {
+      this.currentCenter = center
+    },
+    deleteButton(event, id){
+      this.$modal.show('dialog', {
+        title: 'Suppression d\'un point d\'intérêt',
+        text: 'Êtes-vous sûr de vouloir supprimer ce point d\'intérêt ?',
+        buttons: [
+          {
+            title: 'Supprimer',
+            handler: () => {
+              axios.delete('http://127.0.0.1:8000/api/interest/'+id, {
+              }).then(() =>
+              // On recharge la page pour que le marker et la ligne dans le tableau disparaissent bien
+              document.location.reload(true),
+              //On referme la modale
+              this.$modal.hide('dialog'),
+              //On referme la popup
+              this.$nextTick(() => {
+                this.$refs.myMap.mapObject.closePopup()
+              }),
+            )
+          }
+        },
+        {
+          // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
+          // handler:()=> {this.interestNumber.pop(), this.hideModal()},
+          title: 'Annuler',
+        }
+      ]
+    })
+  },
+  latLng: function(lat, lng) {
+    return L.latLng(lat, lng)
+  },
 },
 created: function(){
   this.getRegions()
@@ -190,10 +186,6 @@ props: {
     type: String,
     default: ""
   },
-  initialCheckedRegions : {
-  type: Array,
-  default: () => ['Calabria'],
-},
 }
 }
 
@@ -236,6 +228,12 @@ props: {
 .select-regions {
   background-color: white;
   padding:1em;
+  scroll-behavior: auto;
+}
+
+.leaflet-control {
+  max-height: 90vh;
+  overflow: auto;
 }
 
 </style>

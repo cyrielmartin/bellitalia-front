@@ -6,6 +6,10 @@ import App from './App.vue'
 import VueRouter from 'vue-router'
 import FlashMessage from '@smartweb/vue-flash-message'
 import VModal from 'vue-js-modal'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
 
 Vue.use(FlashMessage);
 
@@ -20,6 +24,8 @@ Vue.use('axios')
 Vue.use(require('vue-moment'))
 Vue.use(VModal, {dialog: true})
 Vue.config.productionTip = false
+Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 
 // Chargement du router dans VueJS
 Vue.use(VueRouter)

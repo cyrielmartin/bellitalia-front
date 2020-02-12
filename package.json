@@ -9,9 +9,11 @@
   },
   "dependencies": {
     "@smartweb/vue-flash-message": "^0.5.0",
+    "@syncfusion/ej2-vue-buttons": "^17.4.49",
     "@types/leaflet": "^1.5.3",
     "axios": "^0.19.0",
     "bootstrap": "^4.4.1",
+    "bootstrap-vue": "^2.4.0",
     "core-js": "^2.6.10",
     "jquery": "^3.4.1",
     "laravel-vue-datatable": "^0.4.2",

@@ -2,6 +2,28 @@
   <div class="">
     <div class="row map">
       <!-- Affichage de la carte -->
+      <div class="container-fluid drop">
+        <b-dropdown class="mb-1 mr-1 dropdown-regions" text="Filtrer par catégorie" size="sm">
+          <b-dropdown-form>
+            <b-form-checkbox class="mb-1" size="sm">Remember me</b-form-checkbox>
+            <b-form-checkbox class="mb-1" size="sm">Remember me</b-form-checkbox>
+            <b-form-checkbox class="mb-1" size="sm">Remember me</b-form-checkbox>
+            <b-form-checkbox class="mb-1" size="sm">Remember me</b-form-checkbox>
+            <b-form-checkbox class="mb-1" size="sm">Remember me</b-form-checkbox>
+            <b-form-checkbox class="mb-1" size="sm">Remember me</b-form-checkbox>
+          </b-dropdown-form>
+        </b-dropdown>
+        <b-dropdown class="mb-1 dropdown-tags" text="Filtrer par région" size="sm">
+          <b-dropdown-form>
+            <b-button pill variant="outline-secondary" size="sm" @click="allRegions">Toutes/Aucune</b-button>
+            <div class="" v-bind:key="storedRegion" v-for="(storedRegion) in storedRegions">
+              <b-form-checkbox noflip class="mb-1" size="sm" style="width:20vh;" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
+              <!-- <input type="checkbox" id="storedRegion.name" :value="storedRegion.name" v-model="checkedRegions">
+              <label for="storedRegion.name">{{storedRegion.name}}</label> -->
+            </div>
+          </b-dropdown-form>
+        </b-dropdown>
+      </div>
       <l-map
       ref="myMap"
       @update:center="centerUpdate"
@@ -18,45 +40,44 @@
       class="center-button">
       <!-- <v-select v-model="selected" :options="['Vue.js','React']"></v-select> -->
       <!-- <div class="filterSelect">
-        <h1>Vue Select</h1>
-        <v-select :options="['Vue.js','React']"></v-select>
-      </div> -->
-      <div @click="recenterMap">
-        <i class="far fa-dot-circle"></i>
-      </div>
-    </l-control>
-    <!-- Module filtres régions -->
-    <l-control
-    :position="'topright'">
-    <div class="select-regions">
-
-      <!-- Module de filtres -->
-      <p>Filtrer par région :</p>
-      <button type="button" name="button" @click="allRegions">Toutes/Aucune</button>
-      <div class="" v-bind:key="storedRegion" v-for="(storedRegion) in storedRegions">
-        <div>
-          <input type="checkbox" id="storedRegion.name" :value="storedRegion.name" v-model="checkedRegions">
-          <label for="storedRegion.name">{{storedRegion.name}}</label>
-        </div>
+      <h1>Vue Select</h1>
+      <v-select :options="['Vue.js','React']"></v-select>
+    </div> -->
+    <div @click="recenterMap">
+      <i class="far fa-dot-circle"></i>
+    </div>
+  </l-control>
+  <!-- Module filtres régions -->
+  <l-control
+  :position="'topright'">
+  <!-- Module de filtres -->
+  <!-- <div>
+    <p>Filtrer par région :</p>
+    <button type="button" name="button" @click="allRegions">Toutes/Aucune</button>
+    <div class="" v-bind:key="storedRegion" v-for="(storedRegion) in storedRegions">
+      <div>
+        <input type="checkbox" id="storedRegion.name" :value="storedRegion.name" v-model="checkedRegions">
+        <label for="storedRegion.name">{{storedRegion.name}}</label>
       </div>
     </div>
+  </div> -->
 
-  </l-control>
-  <!-- Marqueurs -->
-  <!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
-  <div class="" v-bind:key="interest" v-for="(interest,interestIndex) in interests">
-    <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
-      <l-marker
-      :key="interestIndex"
-      @popupclose="popupclose"
-      v-if="checkedRegions.includes(region.name)"
-      :lat-lng="latLng(interest.latitude, interest.longitude)">
-      <!-- Icône pour marqueurs -->
-      <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-      </l-icon>
-      <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
-    </l-marker>
-  </div>
+</l-control>
+<!-- Marqueurs -->
+<!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
+<div class="" v-bind:key="interest" v-for="(interest,interestIndex) in interests">
+  <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
+    <l-marker
+    :key="interestIndex"
+    @popupclose="popupclose"
+    v-if="checkedRegions.includes(region.name)"
+    :lat-lng="latLng(interest.latitude, interest.longitude)">
+    <!-- Icône pour marqueurs -->
+    <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+    </l-icon>
+    <l-popup :options="{ keepInView: true}"><div><span  :key="interestTag" v-for="(tag, interestTag) in interest.tags" class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+  </l-marker>
+</div>
 </div>
 
 </l-map>
@@ -73,7 +94,6 @@
 import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl } from 'vue2-leaflet'
 import L from 'leaflet'
 import axios from 'axios'
-import vSelect from 'vue-select'
 
 import marker from '../assets/marker.png'
 
@@ -103,7 +123,6 @@ export default {
     LIcon,
     LPopup,
     LControl,
-    vSelect
 
   },
   methods: {
@@ -233,8 +252,8 @@ props: {
 
 .select-regions {
   background-color: white;
-  padding:1em;
-  scroll-behavior: auto;
+  // padding:1em;
+  // scroll-behavior: auto;
 }
 
 .leaflet-control {
@@ -254,6 +273,20 @@ h1 {
 .filterSelect {
   max-width: 30em;
   margin: 1em auto;
+}
+
+.dropdown-regions {
+  margin-left: 65vh;
+}
+
+.coucou {
+  display: flex;
+  justify-content: right;
+}
+
+.drop{
+  display: flex;
+  justify-content: right;
 }
 
 </style>

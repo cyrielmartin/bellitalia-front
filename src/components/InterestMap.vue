@@ -29,7 +29,7 @@
       <!-- Module de filtres -->
       <p>Filtrer par région :</p>
       <button type="button" name="button" @click="allRegions">Toutes/Aucune</button>
-      <div class="" v-for="(storedRegion,storedRegionIndex) in storedRegions">
+      <div class="" v-bind:key="storedRegion" v-for="(storedRegion) in storedRegions">
         <div>
           <input type="checkbox" id="storedRegion.name" :value="storedRegion.name" v-model="checkedRegions">
           <label for="storedRegion.name">{{storedRegion.name}}</label>
@@ -40,8 +40,8 @@
   </l-control>
 <!-- Marqueurs -->
 <!-- On récupère d'abord les régions pour les filtres (marqueur affiché que si région cochée)  -->
-<div class="" v-for="(interest,interestIndex) in interests">
-  <div class="" v-for="(region, interestRegion) in interest.city">
+<div class="" v-bind:key="interest" v-for="(interest,interestIndex) in interests">
+  <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
     <l-marker
     :key="interestIndex"
     @popupclose="popupclose"
@@ -106,7 +106,7 @@ export default {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (
         this.storedRegions = response.data,
-        this.storedRegions.forEach((storedRegion, index) => {
+        this.storedRegions.forEach((storedRegion) => {
           this.checkedRegions.push(storedRegion.name)
         })
       ))
@@ -114,7 +114,7 @@ export default {
     // Cocher toutes les régions dans le filtre
     allRegions: function(){
       if(this.checkedRegions.length==0) {
-        this.storedRegions.forEach((storedRegion, index) => {
+        this.storedRegions.forEach((storedRegion) => {
           this.checkedRegions.push(storedRegion.name)
         })
       } else {

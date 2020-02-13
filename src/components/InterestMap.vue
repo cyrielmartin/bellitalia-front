@@ -30,7 +30,7 @@
       <l-map
       ref="myMap"
       @update:center="centerUpdate"
-      :options="{ scrollWheelZoom: false}"
+      :options="{ scrollWheelZoom: false, gestureHandling: true}"
       :zoom="zoom"
       :max-zoom="maxZoom"
       :center="center">
@@ -85,6 +85,10 @@
 import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl } from 'vue2-leaflet'
 import L from 'leaflet'
 import axios from 'axios'
+import { GestureHandling } from "leaflet-gesture-handling"
+import "leaflet/dist/leaflet.css"
+import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
+
 
 import marker from '../assets/marker.png'
 

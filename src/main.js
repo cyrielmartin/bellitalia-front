@@ -27,6 +27,7 @@ Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 
+
 // Chargement du router dans VueJS
 Vue.use(VueRouter)
 

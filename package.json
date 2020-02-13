@@ -18,6 +18,7 @@
     "jquery": "^3.4.1",
     "laravel-vue-datatable": "^0.4.2",
     "leaflet": "^1.5.1",
+    "leaflet-gesture-handling": "^1.1.8",
     "mdbootstrap": "^4.12.0",
     "node-sass": "^4.12.0",
     "popper.js": "^1.15.0",
@@ -31,6 +32,7 @@
     "vue-select": "^3.4.0",
     "vue-upload-image": "^1.1.5",
     "vue2-leaflet": "^2.2.1",
+    "vue2-leaflet-markercluster": "^3.1.0",
     "vuejs-datatable": "^2.0.0-alpha.5"
   },
   "devDependencies": {

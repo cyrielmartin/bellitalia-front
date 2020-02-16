@@ -62,6 +62,10 @@
           @popupclose="popupclose"
           v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
           :lat-lng="latLng(interest.latitude, interest.longitude)">
+
+          <!-- Tool tip au passage de la souris sur un marker -->
+          <l-tooltip>{{interest.name}}</l-tooltip>
+
           <!-- Icône pour marqueurs -->
           <l-icon :icon-size="interest.iconSize" :icon-url="icon">
           </l-icon>
@@ -86,7 +90,7 @@
 
 <script>
 
-import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl, LTooltip } from 'vue2-leaflet'
 import L from 'leaflet'
 import axios from 'axios'
 import { GestureHandling } from "leaflet-gesture-handling"
@@ -128,6 +132,7 @@ export default {
     LIcon,
     LPopup,
     LControl,
+    LTooltip,
 
   },
   methods: {

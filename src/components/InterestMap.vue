@@ -1,5 +1,9 @@
 <template>
   <div class="">
+    Width: {{ window.width }},
+    Height: {{ window.height }}
+    Zoom : {{zoom}}
+    Center : {{center}}
     <div class="row map">
       <div class="container-fluid drop">
 
@@ -96,9 +100,9 @@ export default {
   name: 'InterestMap',
   data: function() {
     return {
-      zoom: 5.5,
+      zoom: 0,
       maxZoom: 15,
-      center: [41.89591, 12.508798],
+      center: [],
       currentCenter: [41.89591, 12.508798],
       url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -111,6 +115,10 @@ export default {
       storedRegions: [],
       storedCategories: [],
       checkedCategories: [],
+      window: {
+        width: 0,
+        height: 0
+      },
     }
   },
   components: {
@@ -165,7 +173,7 @@ export default {
     // Méthode pour recentrer la carte via bouton dédié
     recenterMap: function(){
       this.$nextTick(() => {
-        this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], 6)
+        this.$refs.myMap.mapObject.flyTo([41.89591, 12.508798], this.zoom)
       })
     },
     // A chaque fermeture de popup, on recentre la carte
@@ -209,11 +217,53 @@ export default {
   latLng: function(lat, lng) {
     return L.latLng(lat, lng)
   },
+  handleResize() {
+    this.window.width = window.innerWidth;
+    this.window.height = window.innerHeight;
+  },
+  // Ecran 34 pouces : 3440 x 1440 (21/9)
+  // Ecran 30 pouces : 2560 x 1600 (16/10e)
+  // Ecran 27 pouces : 2560 x 1440 (16/9e)
+  // Ecran 24 pouces : 1920 * 1200 (16/10e)
+  // Ecran 21 pouces : 1680 x 1050
+  // Ecran 19 pouces : 1366 x 768 (16/9e)
+  // Ecran 17 pouces : 1280 x 1024 (4/3)
+  // Ecran 15.4 pouces : 1280 x 800 (16/10e)
+  // Ecran 15 pouces : 1024 x 768 (4/3)
+  // Ecran 13 pouces : 800 * 600 (4/3)
+
+  // Changement de zoom en fonction de la taille de l'écran
+  setMapZoom() {
+    if(this.window.width <= 1280) {
+      this.zoom = 6;
+      this.center = [41.89591, 12.508798];
+    } else if (this.window.width <=1366) {
+      this.zoom = 6;
+      this.center = [41.89591, 12.508798];
+    } else if (this.window.width <= 1680) {
+      this.zoom = 6;
+      this.center = [41.89591, 12.508798];
+    } else if (this.window.width <= 1920) {
+      this.zoom = 6;
+      this.center = [41.89591, 12.508798];
+    } else if (this.window.width <= 2560) {
+      this.zoom = 6;
+      this.center = [41.89591, 12.508798];
+    } else if (this.window.width <= 3440) {
+      this.zoom = 6;
+      this.center = [41.89591, 12.508798];
+    }
+  },
 },
 created: function(){
   this.getRegions(),
-  this.getCategories()
-
+  this.getCategories(),
+  window.addEventListener('resize', this.handleResize)
+  this.handleResize();
+  this.setMapZoom();
+},
+destroyed() {
+  window.removeEventListener('resize', this.handleResize)
 },
 props: {
   interests: Array,

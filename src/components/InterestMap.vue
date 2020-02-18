@@ -56,23 +56,37 @@
       <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
         <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
 
+          <!-- <v-marker-cluster>
+            <l-marker
+              :lat-lng="[59.94729558555478, 30.411314964294437]"
+              :icon="defaultIcon"
+            />
+            <l-marker
+              :lat-lng="[59.9337277687683, 30.357758563477553]"
+              :icon="defaultIcon"
+            />
+          </v-marker-cluster> -->
 
-          <l-marker
-          :key="interestIndex"
-          @popupclose="popupclose"
-          v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
-          :lat-lng="latLng(interest.latitude, interest.longitude)">
+          <v-marker-cluster>
 
-          <!-- Tool tip au passage de la souris sur un marker -->
-          <l-tooltip>{{interest.name}}</l-tooltip>
+            <l-marker
+            :key="interestIndex"
+            @popupclose="popupclose"
+            v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
+            :lat-lng="[interest.latitude, interest.longitude]">
 
-          <!-- Icône pour marqueurs -->
-          <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-          </l-icon>
+            <!-- Tool tip au passage de la souris sur un marker -->
+            <l-tooltip>{{interest.name}}[{{interest.latitude}}, {{interest.longitude}}]</l-tooltip>
 
-          <!-- Popup -->
-          <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
-        </l-marker>
+            <!-- Icône pour marqueurs -->
+            <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+            </l-icon>
+
+            <!-- Popup -->
+            <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+          </l-marker>
+
+        </v-marker-cluster>
       </div>
     </div>
   </div>
@@ -94,9 +108,11 @@ import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl, LTooltip } from 'vu
 import L from 'leaflet'
 import axios from 'axios'
 import { GestureHandling } from "leaflet-gesture-handling"
+import Vue2LeafletMarkerCluster from 'vue2-leaflet-markercluster'
 import "leaflet/dist/leaflet.css"
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
-
+import "leaflet.markercluster/dist/MarkerCluster.css"
+import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 
 import marker from '../assets/marker.png'
 
@@ -107,10 +123,8 @@ export default {
       zoom: 0,
       maxZoom: 15,
       center: [],
-      currentCenter: [41.89591, 12.508798],
       url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      marker: L.latLng(41.89591, 12.508798),
       icon: marker,
       iconSize: [30, 30],
       href:'',
@@ -133,6 +147,7 @@ export default {
     LPopup,
     LControl,
     LTooltip,
+    'v-marker-cluster': Vue2LeafletMarkerCluster,
 
   },
   methods: {

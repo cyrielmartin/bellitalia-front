@@ -52,9 +52,8 @@
     </l-control>
 
     <!-- Clusters -->
+
     <v-marker-cluster :options="clusterOptions">
-      <l-icon :icon="clusterIcon">
-      </l-icon>
       <div class="" v-bind:key="interest" v-for="(interest,interestIndex) in interests">
         <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
           <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
@@ -67,7 +66,7 @@
             :lat-lng="[interest.latitude, interest.longitude]">
 
             <!-- Tool tip au passage de la souris sur un marker -->
-            <l-tooltip>{{interest.name}}[{{interest.latitude}}, {{interest.longitude}}]</l-tooltip>
+            <l-tooltip>{{interest.name}}</l-tooltip>
 
             <!-- Icône pour marqueurs -->
             <l-icon :icon-size="interest.iconSize" :icon-url="icon">
@@ -300,9 +299,6 @@ props: {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 
-.marker-cluster {
-  color: red;
-}
 .map {
   height: 100vh;
 }

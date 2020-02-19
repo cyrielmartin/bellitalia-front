@@ -53,7 +53,8 @@
 
     <!-- Clusters -->
     <v-marker-cluster :options="clusterOptions">
-
+      <l-icon :icon="clusterIcon">
+      </l-icon>
       <div class="" v-bind:key="interest" v-for="(interest,interestIndex) in interests">
         <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
           <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
@@ -125,7 +126,9 @@ export default {
       storedRegions: [],
       storedCategories: [],
       checkedCategories: [],
-      clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: false},
+      clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: false, maxClusterRadius:30, iconCreateFunction: function(cluster) {
+        return L.divIcon({ html: '<div style="font-size: 2.3em; color:#c0392b;"<i class="fas fa-search-plus"></i></div>', className: ""});
+      }},
       window: {
         width: 0,
         height: 0
@@ -297,6 +300,9 @@ props: {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 
+.marker-cluster {
+  color: red;
+}
 .map {
   height: 100vh;
 }

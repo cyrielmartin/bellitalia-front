@@ -73,7 +73,7 @@
             <div>
               <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
               <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'border-red': errors.bellitalia_id}"></multiselect>
+              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'multiselect__tags': errors.bellitalia_id}"></multiselect>
               <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
               <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
             </div>
@@ -84,11 +84,12 @@
           </modal>
           <v-dialog/>
 
+          <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
           <div class="form-group">
             <div>
               <label>Catégorie(s)</label>
-              <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
-              <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag"></multiselect>
+              <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="{'      multiselect__tags': errors.tag_id}"></multiselect>
+              <p class="text-error" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
             </div>
           </div>
           <div class="d-flex justify-content-center">
@@ -379,6 +380,9 @@ export default {
         color: red;
       }
       .border-red {
+        border-color: red;
+      }
+      .multiselect__tags {
         border-color: red;
       }
       .helpText {

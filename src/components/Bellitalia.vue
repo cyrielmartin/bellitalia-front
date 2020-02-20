@@ -6,10 +6,7 @@
 
       <!-- Colonne de gauche : tableau -->
       <div class="col-4">
-        <!-- Ces événements @mouse... sont récupérés depuis le child component InterestList, où ils sont émis -->
-        <InterestList @mouse-over-interest="mouseOverInterest"
-        @mouse-leave-interest="mouseLeaveInterest"
-        :interests="interests" />
+        <InterestList :interests="interests" />
       </div>
 
       <!-- Colonne de droite : carte -->
@@ -36,9 +33,7 @@ export default {
     return {
       // Tableau vide qui contiendra tous les points d'intérêt
       interests: [],
-      // 2 tailles d'icônes pour les markers
       normalIcon: [30, 30],
-      largeIcon: [45, 45],
     }
   },
   // Quand le composant est opérationnel
@@ -46,8 +41,6 @@ export default {
     axios
     .get('http://127.0.0.1:8000/api/interest')
     .then(r => {this.interests = r.data.data
-      // On peut filtrer les données reçues en utilisant .filter() :
-      // this.interests = r.data.filter(r => r.name == 'Santuario di Oropa');
       // map() permet de greffer une information à la data récupérée par Axios
       .map(r => {
         r.iconSize = this.normalIcon
@@ -55,14 +48,6 @@ export default {
       })
     })
   },
-  methods: {
-    mouseOverInterest: function(index) {
-      this.interests[index].iconSize = this.largeIcon
-    },
-    mouseLeaveInterest: function(index) {
-      this.interests[index].iconSize = this.normalIcon
-    }
-  }
 }
 
 </script>

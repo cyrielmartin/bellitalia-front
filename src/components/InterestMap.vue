@@ -12,7 +12,7 @@
           <b-dropdown-form>
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
-              <div class="" v-bind:key="storedCategory" v-for="(storedCategory) in storedCategories">
+              <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
                 <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
               </div>
             </b-dropdown-form>
@@ -23,7 +23,7 @@
         <b-dropdown class="mb-1 dropdown-tags" text="Filtrer par région" size="sm">
           <b-dropdown-form>
             <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
-            <div class="" v-bind:key="storedRegion" v-for="(storedRegion) in storedRegions">
+            <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
               <b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
             </div>
           </b-dropdown-form>
@@ -54,13 +54,12 @@
     <!-- Clusters -->
 
     <v-marker-cluster :options="clusterOptions">
-      <div class="" v-bind:key="interest" v-for="(interest,interestIndex) in interests">
-        <div class="" v-bind:key="region" v-for="(region, interestRegion) in interest.city">
+      <div class="" v-bind:key="interestIndex" v-for="(interest,interestIndex) in interests">
+        <div class="" v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">
           <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
 
             <!-- Marqueurs -->
             <l-marker
-            :key="interestIndex"
             @popupclose="popupclose"
             v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
             :lat-lng="[interest.latitude, interest.longitude]">
@@ -73,7 +72,7 @@
             </l-icon>
 
             <!-- Popup -->
-            <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span :key="interestRegion">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+            <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span>{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
 
           </l-marker>
 
@@ -117,15 +116,17 @@ export default {
       center: [],
       url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      icon: marker,
-      iconSize: [30, 30],
       href:'',
       linkUrl: 'https://',
+      icon: marker,
+      iconSize: [30, 30],
+      markerNormalIcon: [30, 30],
+      markerLargeIcon: [45, 45],
       checkedRegions: [],
       storedRegions: [],
       storedCategories: [],
       checkedCategories: [],
-      clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: false, maxClusterRadius:30, iconCreateFunction: function(cluster) {
+      clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: false, maxClusterRadius:30, iconCreateFunction: function() {
         return L.divIcon({ html: '<div style="font-size: 2.3em; color:#c0392b;"<i class="fas fa-search-plus"></i></div>', className: ""});
       }},
       window: {
@@ -266,6 +267,16 @@ export default {
       this.center = [41.89591, 12.508798];
     }
   },
+},
+// Evénements récupérés depuis le composant List pour que l'icône grossisse au passage de la souris
+mounted: function(){
+  this.$root.$on('mouse-over-interest', (index) => {
+    this.interests[index].iconSize = this.markerLargeIcon
+
+  });
+  this.$root.$on('mouse-leave-interest', (index) => {
+    this.interests[index].iconSize = this.markerNormalIcon
+  });
 },
 created: function(){
   this.getRegions(),

@@ -26,10 +26,10 @@ export default {
   },
   methods: {
     mouseOver: function(index) {
-      this.$emit('mouse-over-interest', index)
+      this.$root.$emit('mouse-over-interest', index)
     },
     mouseLeave: function(index) {
-      this.$emit('mouse-leave-interest', index)
+      this.$root.$emit('mouse-leave-interest', index)
     }
   }
 }

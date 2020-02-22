@@ -37,6 +37,7 @@
       :options="{ scrollWheelZoom: false, gestureHandling: true}"
       :zoom="zoom"
       :max-zoom="maxZoom"
+      :min-zoom="minZoom"
       :center="center">
       <!-- Surcouche OSM -->
       <l-tile-layer :url="url" :attribution="attribution">
@@ -113,6 +114,7 @@ export default {
     return {
       zoom: 0,
       maxZoom: 15,
+      minZoom:2,
       center: [],
       url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',

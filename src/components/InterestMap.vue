@@ -353,8 +353,8 @@ h1,.muted {
 }
 
 h1 {
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight:600;
 }
 
 .b-dropdown-form {

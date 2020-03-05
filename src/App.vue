@@ -27,6 +27,10 @@ export default {}
   padding-bottom: 10em;
   margin: auto;
 }
+
+* {
+  font-family: "NewCaledoniaLTStd";
+}
 .title {
   font-size: 3rem;
 }
@@ -142,6 +146,11 @@ a:hover {
     display: inline-block;
     width: 25%
   }
+}
+
+@font-face {
+  font-family: "NewCaledoniaLTStd";
+  src: url("/font/NewCaledoniaLTStd.otf");
 }
 
 /* @media screen and (min-width: 1400px) {

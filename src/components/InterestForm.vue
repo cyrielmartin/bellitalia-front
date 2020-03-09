@@ -54,53 +54,62 @@
             <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
           </div>
 
-          <div class="form-group">
-            <label>Ville <span class="redStar">*</span></label>
-            <input class="form-control" v-model="interestCity" :class="{'border-red': errors.city_id}">
+          <!-- <div class="form-group">
+          <label>VilleOld <span class="redStar">*</span></label>
+          <input class="form-control" v-model="interestCity" :class="{'border-red': errors.city_id}">
+          <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
+        </div> -->
+
+        <!-- Villes gérées grâce à plugin Vue Multiselect -->
+        <div class="form-group">
+          <div>
+            <label>VilleNew</label>
+            <multiselect v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" :class="{'multiselect__tags': errors.city_id}"></multiselect>
             <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label>Région <span class="redStar">*</span></label>
-            <select class="form-control helpText" v-model="interestRegion" :class="{'border-red': errors.region_id}">
-              <option disabled value="">Sélectionner</option>
-              <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
-            </select>
-            <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
-          </div>
+        <div class="form-group">
+          <label>Région <span class="redStar">*</span></label>
+          <select class="form-control helpText" v-model="interestRegion" :class="{'border-red': errors.region_id}">
+            <option disabled value="">Sélectionner</option>
+            <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
+          </select>
+          <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+        </div>
 
-          <div class="form-group">
-            <div>
-              <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-              <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'multiselect__tags': errors.bellitalia_id}"></multiselect>
-              <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
-              <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
-            </div>
+        <div class="form-group">
+          <div>
+            <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
+            <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
+            <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'multiselect__tags': errors.bellitalia_id}"></multiselect>
+            <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+            <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
           </div>
+        </div>
 
-          <!-- Plugin vue-js-modal gérant l'ajout dynamique de nouveaux numéros BI + date publication -->
-          <modal name="publication">
-          </modal>
-          <v-dialog/>
+        <!-- Plugin vue-js-modal gérant l'ajout dynamique de nouveaux numéros BI + date publication -->
+        <modal name="publication">
+        </modal>
+        <v-dialog/>
 
-          <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
-          <div class="form-group">
-            <div>
-              <label>Catégorie(s)</label>
-              <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="{'      multiselect__tags': errors.tag_id}"></multiselect>
-              <p class="text-error" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
-            </div>
+        <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
+        <div class="form-group">
+          <div>
+            <label>Catégorie(s)</label>
+            <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="{'multiselect__tags': errors.tag_id}"></multiselect>
+            <p class="text-error" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
           </div>
-          <div class="d-flex justify-content-center">
-            <button type="submit" v-if="!edit" @click.prevent="submitForm" class="btn btn-fill btn-blue">Enregistrer</button>
-            <button type="submit" v-if="edit" @click.prevent="editForm" class="btn btn-fill btn-blue">Enregistrer les modifications</button>
-          </div>
-          <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
-        </form>
-      </div>
+        </div>
+        <div class="d-flex justify-content-center">
+          <button type="submit" v-if="!edit" @click.prevent="submitForm" class="btn btn-fill btn-blue">Enregistrer</button>
+          <button type="submit" v-if="edit" @click.prevent="editForm" class="btn btn-fill btn-blue">Enregistrer les modifications</button>
+        </div>
+        <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
+      </form>
     </div>
   </div>
+</div>
 </div>
 <!-- </div> -->
 </template>
@@ -121,6 +130,7 @@ export default {
       edit: false,
       interestTag: [],
       storedTags: [],
+      storedCities: '',
       interestName: '',
       interestDescription:'',
       interestLink:'',
@@ -237,6 +247,19 @@ export default {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.regions = response))
     },
+    // Récupération des villes en BDD
+    getStoredCities() {
+      axios.get('http://127.0.0.1:8000/api/city')
+      .then(response => (this.storedCities = response.data))
+    },
+    // Ajout d'une ville
+    addCity(newCity) {
+      const createdCity = {
+        name: newCity,
+      }
+      this.interestCity = createdCity;
+      console.log(newCity);
+    },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
@@ -339,6 +362,7 @@ export default {
     this.getStoredTags();
     this.getStoredPublications();
     this.getInterest();
+    this.getStoredCities();
 
     // Méthode JS empêchant de saisir autre chose que des chiffres
     function setInputFilter(textbox, inputFilter) {

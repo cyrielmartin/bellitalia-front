@@ -54,7 +54,7 @@
 
     <!-- Clusters -->
 
-    <v-marker-cluster :options="clusterOptions">
+    <!-- <v-marker-cluster :options="clusterOptions"> -->
       <div class="" v-bind:key="interestIndex" v-for="(interest,interestIndex) in interests">
         <div class="" v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">
           <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
@@ -81,7 +81,7 @@
       </div>
     </div>
 
-  </v-marker-cluster>
+  <!-- </v-marker-cluster> -->
 
 </l-map>
 

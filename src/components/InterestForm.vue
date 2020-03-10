@@ -65,13 +65,15 @@
             </div>
           </div>
 
+          <!-- Régions gérées grâce à plugin Vue Multiselect -->
           <div class="form-group">
-            <label>Région <span class="redStar">*</span></label>
-            <select class="form-control helpText" v-model="interestRegion" :class="{'border-red': errors.region_id}">
-              <option disabled value="">Sélectionner</option>
-              <option v-for='region in regions.data' :key="region.index"> {{ region.name }} </option>
-            </select>
-            <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+            <div>
+              <label>Région <span class="redStar">*</span></label>
+              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="{'multiselect__tags': errors.region_id}">
+                <span slot="noResult">Aucune région correspondante</span>
+              </multiselect>
+              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+            </div>
           </div>
 
           <div class="form-group">
@@ -127,6 +129,7 @@ export default {
       interestTag: [],
       storedTags: [],
       storedCities: [],
+      storedRegions: [],
       interestName: '',
       interestDescription:'',
       interestLink:'',
@@ -138,9 +141,7 @@ export default {
       storedPublications:[],
       interestDate: '',
       errors: {},
-      regions: [],
       NotANumber: false,
-      monthLabels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
     }
   },
 
@@ -239,9 +240,9 @@ export default {
       .then(response => (this.storedPublications = response.data))
     },
     // Récupération des régions en BDD
-    getRegions() {
+    getStoredRegions() {
       axios.get('http://127.0.0.1:8000/api/region')
-      .then(response => (this.regions = response))
+      .then(response => (this.storedRegions = response.data))
     },
     // Récupération des villes en BDD
     getStoredCities() {
@@ -346,7 +347,7 @@ export default {
         this.interestLatitude = r.data.data.latitude
         this.interestLongitude = r.data.data.longitude
         this.interestCity = {"name": r.data.data.city.name}
-        this.interestRegion = r.data.data.city.region_id.name
+        this.interestRegion = {"name": r.data.data.city.region_id.name}
         this.image = r.data.data.image
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
@@ -354,7 +355,7 @@ export default {
     },
   },
   mounted: function(){
-    this.getRegions();
+    this.getStoredRegions();
     this.getStoredTags();
     this.getStoredPublications();
     this.getInterest();

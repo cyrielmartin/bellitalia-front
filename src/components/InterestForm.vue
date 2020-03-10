@@ -161,8 +161,6 @@ export default {
         this.image = e.target.result;
       };
       reader.readAsDataURL(file);
-      // console.log(file);
-      // this.interestImage = file;
     },
     removeImage: function () {
       this.image = '';
@@ -255,7 +253,6 @@ export default {
         name: newCity,
       }
       this.interestCity = createdCity;
-      console.log(newCity);
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {

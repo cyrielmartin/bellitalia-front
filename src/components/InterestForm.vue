@@ -33,6 +33,8 @@
               <img :src="image" />
               <button class="btn btn-outline-danger" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
+            <small class="helpText">L'image ne doit pas peser plus de 30Mo</small><br/>
+            <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
           </div>
 
           <div class="form-group">
@@ -81,6 +83,7 @@
               <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
               <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
               <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'multiselect__tags': errors.bellitalia_id}"></multiselect>
+              <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
               <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
               <p class="text-error" v-show="NotANumber">Veuillez saisir un numéro de publication</p>
             </div>

@@ -215,8 +215,8 @@ export default {
                 axios.post('http://127.0.0.1:8000/api/bellitalia', {
                   number: newPublication,
                   date: document.querySelector('input#date').value,
-                  //On referme la modale
                 }).then(() =>
+                //On referme la modale
                 this.hideModal())
                 //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
                 this.storedPublications.push(createdPublication)

@@ -151,6 +151,7 @@ export default {
   methods: {
     // Méthodes gérant l'ajout et la suppression d'une image
     onFileChange(e) {
+      console.log('coucou');
       var files = e.target.files || e.dataTransfer.files;
       if (!files.length)
       return;
@@ -185,6 +186,21 @@ export default {
       axios.get('http://127.0.0.1:8000/api/tag')
       .then(response => (this.storedTags = response.data))
     },
+    getImage(){
+      var file = document.getElementById("pubImage").files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = function (evt) {
+          document.getElementById("fileContents").innerHTML = evt.target.result;
+        }
+        reader.onerror = function (evt) {
+          document.getElementById("fileContents").innerHTML = "error reading file";
+        }
+        console.log(file);
+        console.log('ici');
+      }
+    },
     // Ajout d'une nouvelle publication à la volée
     addPublication(newPublication) {
       this.NotANumber = false
@@ -206,12 +222,13 @@ export default {
         //Et à la validation de la nouvelle publication, on ouvre la modale pour ajouter la date
         this.$modal.show('dialog', {
           title: 'Création d\'une publication',
-          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
+          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small><br><br><input type="file" id="pubImage">',
           buttons: [
             {
               title: 'Enregistrer',
               //On envoie tout ça à l'API pour enregistrement
               handler: () => {
+                this.getImage(),
                 axios.post('http://127.0.0.1:8000/api/bellitalia', {
                   number: newPublication,
                   date: document.querySelector('input#date').value,

@@ -215,7 +215,8 @@ export default {
                   number: newPublication,
                   date: document.querySelector('input#date').value,
                 }).then(() =>
-                //On referme la modale
+                //On referme la modale, mais avant on vérifie que le numéro de publication est bien valide
+                //(vérif nécessaire car multiselect laisse passer 1 lettre malgré contrôle JS)
                 this.hideModal()).catch(function (error) {
                   alert(error.response.data.number[0])
                 });

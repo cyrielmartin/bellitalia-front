@@ -158,9 +158,7 @@ export default {
       this.createImage(files[0]);
     },
     createImage(file) {
-      // var image = new Image();
       var reader = new FileReader();
-      // var vm = this;
       reader.onload = (e) => {
         this.image = e.target.result;
       };
@@ -186,21 +184,6 @@ export default {
       axios.get('http://127.0.0.1:8000/api/tag')
       .then(response => (this.storedTags = response.data))
     },
-    getImage(){
-      var file = document.getElementById("pubImage").files[0];
-      if (file) {
-        var reader = new FileReader();
-        reader.readAsText(file, "UTF-8");
-        reader.onload = function (evt) {
-          document.getElementById("fileContents").innerHTML = evt.target.result;
-        }
-        reader.onerror = function (evt) {
-          document.getElementById("fileContents").innerHTML = "error reading file";
-        }
-        console.log(file);
-        console.log('ici');
-      }
-    },
     // Ajout d'une nouvelle publication à la volée
     addPublication(newPublication) {
       this.NotANumber = false
@@ -222,19 +205,20 @@ export default {
         //Et à la validation de la nouvelle publication, on ouvre la modale pour ajouter la date
         this.$modal.show('dialog', {
           title: 'Création d\'une publication',
-          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small><br><br><input type="file" id="pubImage">',
+          text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
           buttons: [
             {
               title: 'Enregistrer',
               //On envoie tout ça à l'API pour enregistrement
               handler: () => {
-                this.getImage(),
                 axios.post('http://127.0.0.1:8000/api/bellitalia', {
                   number: newPublication,
                   date: document.querySelector('input#date').value,
                 }).then(() =>
                 //On referme la modale
-                this.hideModal())
+                this.hideModal()).catch(function (error) {
+                  alert(error.response.data.number[0])
+                });
                 //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
                 this.storedPublications.push(createdPublication)
               }
@@ -397,7 +381,7 @@ export default {
     setInputFilter(document.getElementById("number"), function(value) {
       return /^\d*$/.test(value); }),
 
-      //On applique une méthode légèrement différente pour la latitude et la longitude (que des chiffres + points et virgules)
+      //On applique une méthode légèrement différente pour la latitude et la longitude (que des chiffres + points)
       setInputFilter(document.getElementById("latitude"), function(value) {
         return /^-?\d*[.]?\d*$/.test(value); })
 

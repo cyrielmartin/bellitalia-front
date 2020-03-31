@@ -7,6 +7,7 @@
         <li
         @mouseover="mouseOver(index)"
         @mouseleave="mouseLeave(index)"
+        @click="click(index)"
         :key="index"
         v-for="(interest, index) in interests"
         class="list-group-item">{{index}}, {{interest.name}}
@@ -30,6 +31,9 @@ export default {
     },
     mouseLeave: function(index) {
       this.$root.$emit('mouse-leave-interest', index)
+    },
+    click: function(index) {
+      this.$root.$emit('click-interest', index)
     }
   }
 }

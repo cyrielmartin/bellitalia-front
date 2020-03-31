@@ -55,31 +55,32 @@
     <!-- Clusters -->
 
     <!-- <v-marker-cluster :options="clusterOptions"> -->
-      <div class="" v-bind:key="interestIndex" v-for="(interest,interestIndex) in interests">
-        <div class="" v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">
-          <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
+    <div class="" v-bind:key="interestIndex" v-for="(interest,interestIndex) in interests">
+      <div class="" v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">
+        <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
 
-            <!-- Marqueurs -->
-            <l-marker
-            @popupclose="popupclose"
-            v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
-            :lat-lng="[interest.latitude, interest.longitude]">
+          <!-- Marqueurs -->
+          <l-marker
+          @popupclose="popupclose"
+          ref="myMarker"
+          v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
+          :lat-lng="[interest.latitude, interest.longitude]">
 
-            <!-- Tool tip au passage de la souris sur un marker -->
-            <l-tooltip>{{interest.name}}</l-tooltip>
+          <!-- Tool tip au passage de la souris sur un marker -->
+          <l-tooltip>{{interest.name}}</l-tooltip>
 
-            <!-- Icône pour marqueurs -->
-            <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-            </l-icon>
+          <!-- Icône pour marqueurs -->
+          <l-icon :icon-size="interest.iconSize" :icon-url="icon">
+          </l-icon>
 
-            <!-- Popup -->
-            <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span>{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+          <!-- Popup -->
+          <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span>{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
 
-          </l-marker>
+        </l-marker>
 
-        </div>
       </div>
     </div>
+  </div>
 
   <!-- </v-marker-cluster> -->
 
@@ -270,14 +271,27 @@ export default {
     }
   },
 },
-// Evénements récupérés depuis le composant List pour que l'icône grossisse au passage de la souris
 mounted: function(){
+  // Evénements récupérés depuis le composant List pour que l'icône grossisse au passage de la souris
   this.$root.$on('mouse-over-interest', (index) => {
     this.interests[index].iconSize = this.markerLargeIcon
 
   });
   this.$root.$on('mouse-leave-interest', (index) => {
     this.interests[index].iconSize = this.markerNormalIcon
+  });
+  // Evènement récupéré depuis le composant List pour qu'au click sur un intérêt dans la liste :
+  // la carte se centre dessus et zoome un peu
+  this.$root.$on('click-interest', (index) => {
+    // Si un popup est déjà ouvert, je le ferme (sinon bug affichage)
+    this.$refs.myMap.mapObject.closePopup()
+    this.$refs.myMap.mapObject.flyTo([this.interests[index].latitude, this.interests[index].longitude], 7)
+    // this.$refs.myMap.mapObject.openPopup([this.interests[index].latitude, this.interests[index].longitude])
+    // this.$refs.mapObject.openPopup([this.interests[index].latitude, this.interests[index].longitude])
+    // this.$refs.myMarker.mapObject.openPopup([this.interests[index].latitude, this.interests[index].longitude])
+    // console.log(this.$refs.myMarker)
+    // this.$refs.myMarker.openPopup()
+
   });
 },
 created: function(){

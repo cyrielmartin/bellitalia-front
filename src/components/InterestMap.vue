@@ -1,9 +1,9 @@
 <template>
   <div class="">
-    Width: {{ window.width }},
+    <!-- Width: {{ window.width }},
     Height: {{ window.height }}
     Zoom : {{zoom}}
-    Center : {{center}}
+    Center : {{center}} -->
     <div class="row map">
       <div class="container-fluid drop">
 
@@ -281,17 +281,17 @@ mounted: function(){
     this.interests[index].iconSize = this.markerNormalIcon
   });
   // Evènement récupéré depuis le composant List pour qu'au click sur un intérêt dans la liste :
-  // la carte se centre dessus et zoome un peu
   this.$root.$on('click-interest', (index) => {
     // Si un popup est déjà ouvert, je le ferme (sinon bug affichage)
     this.$refs.myMap.mapObject.closePopup()
+    // Je centre le point d'intérêt en question et je zoome légèrement
     this.$refs.myMap.mapObject.flyTo([this.interests[index].latitude, this.interests[index].longitude], 7)
-    // this.$refs.myMap.mapObject.openPopup([this.interests[index].latitude, this.interests[index].longitude])
-    // this.$refs.mapObject.openPopup([this.interests[index].latitude, this.interests[index].longitude])
-    // this.$refs.myMarker.mapObject.openPopup([this.interests[index].latitude, this.interests[index].longitude])
-    // console.log(this.$refs.myMarker)
-    // this.$refs.myMarker.openPopup()
-
+    // this.$refs.myMarker[index].mapObject.openPopup()
+  });
+  // Evènement récupéré depuis le composant List pour qu'au double click sur un intérêt dans la liste :
+  this.$root.$on('dblclick-interest', (index) => {
+    // J'ouvre le popup du point d'intérêt
+    this.$refs.myMarker[index].mapObject.openPopup()
   });
 },
 created: function(){

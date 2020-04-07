@@ -3,15 +3,22 @@
 
   <div class="container-fluid">
     <div class="row">
+      <div class="col-12">
+        <!-- Input filtre recherche -->
+        <input type="text" v-model="search" placeholder="Recherchez un point d'intérêt (nom, ville, région, catégorie...)" class="searchInterest">
+      </div>
+    </div>
+
+    <div class="row">
 
       <!-- Colonne de gauche : tableau -->
       <div class="col-4">
-        <InterestList :interests="interests" />
+        <InterestList :interests="filteredInterests" />
       </div>
 
       <!-- Colonne de droite : carte -->
       <div class="col-8 interest-map">
-        <InterestMap :interests="interests"/>
+        <InterestMap :interests="filteredInterests"/>
       </div>
     </div>
 
@@ -34,6 +41,7 @@ export default {
       // Tableau vide qui contiendra tous les points d'intérêt
       interests: [],
       normalIcon: [30, 30],
+      search:"",
     }
   },
   // Quand le composant est opérationnel
@@ -48,11 +56,26 @@ export default {
       })
     })
   },
+  // Méthode permettant de filtrer les points d'intérêts "en amont", avant leur envoi à la carte et à la liste, via le search
+  // J'utilise toLowerCase pour rendre la recherche insensible à la casse
+  // trim() pour ne pas tenir compte des espaces en début et fin de saisie
+  computed: {
+    filteredInterests: function(){
+      return this.interests.filter((interest) => {
+        return interest.city.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.city.region_id.name.toLowerCase().trim().match(this.search.toLowerCase().trim());
+      });
+    }
+  },
 }
 
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-
+.searchInterest {
+  margin: auto;
+  display: block;
+  margin-bottom: 1em;
+  width:50%;
+}
 </style>

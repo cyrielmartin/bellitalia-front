@@ -8,81 +8,72 @@
       <div class="container-fluid drop">
 
         <!-- Dropdown fltre catégories -->
-        <b-dropdown class="mb-1 mr-1 dropdown-regions" text="Filtrer par catégorie" size="sm">
-          <b-dropdown-form>
-            <b-dropdown-form>
-              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
-              <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
-                <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
-              </div>
-            </b-dropdown-form>
-          </b-dropdown-form>
-        </b-dropdown>
-
-        <!-- Dropdown filtres régions -->
-        <b-dropdown class="mb-1 dropdown-tags" text="Filtrer par région" size="sm">
-          <b-dropdown-form>
-            <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
-            <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
-              <b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
-            </div>
-          </b-dropdown-form>
-        </b-dropdown>
+        <!-- <b-dropdown class="mb-1 mr-1 dropdown-regions" text="Filtrer par catégorie" size="sm">
+        <b-dropdown-form>
+        <b-dropdown-form>
+        <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
+        <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
+        <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
       </div>
+    </b-dropdown-form>
+  </b-dropdown-form>
+</b-dropdown> -->
 
-      <!-- Carte -->
-      <l-map
-      ref="myMap"
-      @update:center="centerUpdate"
-      :options="{ scrollWheelZoom: false, gestureHandling: true}"
-      :zoom="zoom"
-      :max-zoom="maxZoom"
-      :min-zoom="minZoom"
-      :center="center">
-      <!-- Surcouche OSM -->
-      <l-tile-layer :url="url" :attribution="attribution">
-      </l-tile-layer>
+<!-- Dropdown filtres régions -->
+<!-- <b-dropdown class="mb-1 dropdown-tags" text="Filtrer par région" size="sm">
+<b-dropdown-form>
+<b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
+<div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
+<b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
+</div>
+</b-dropdown-form>
+</b-dropdown> -->
+</div>
 
-      <!-- Bouton pour recentrer la carte -->
-      <l-control
-      :position="'topleft'"
-      class="center-button">
-      <div @click="recenterMap">
-        <i class="far fa-dot-circle"></i>
-      </div>
-    </l-control>
+<!-- Carte -->
+<l-map
+ref="myMap"
+@update:center="centerUpdate"
+:options="{ scrollWheelZoom: false, gestureHandling: true}"
+:zoom="zoom"
+:max-zoom="maxZoom"
+:min-zoom="minZoom"
+:center="center">
+<!-- Surcouche OSM -->
+<l-tile-layer :url="url" :attribution="attribution">
+</l-tile-layer>
 
-    <!-- Clusters -->
+<!-- Bouton pour recentrer la carte -->
+<l-control
+:position="'topleft'"
+class="center-button">
+<div @click="recenterMap">
+  <i class="far fa-dot-circle"></i>
+</div>
+</l-control>
 
-    <!-- <v-marker-cluster :options="clusterOptions"> -->
-    <div class="" v-bind:key="interestIndex" v-for="(interest,interestIndex) in interests">
-      <div class="" v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">
-        <div class="" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">
+<!-- Clusters -->
+<!-- <v-marker-cluster :options="clusterOptions"> -->
 
-          <!-- Marqueurs -->
-          <l-marker
-          @popupclose="popupclose"
-          ref="myMarker"
-          v-if="checkedRegions.includes(region.name) && checkedCategories.includes(tag.name)"
-          :lat-lng="[interest.latitude, interest.longitude]">
+<!-- Marqueurs -->
+<l-marker
+@popupclose="popupclose"
+ref="myMarker"
+v-bind:key="interestIndex" v-for="(interest,interestIndex) in interests"
+:lat-lng="[interest.latitude, interest.longitude]">
 
-          <!-- Tool tip au passage de la souris sur un marker -->
-          <l-tooltip>{{interest.name}}</l-tooltip>
+<!-- Tool tip au passage de la souris sur un marker -->
+<l-tooltip>{{interest.name}}{{interest.id}}</l-tooltip>
 
-          <!-- Icône pour marqueurs -->
-          <l-icon :icon-size="interest.iconSize" :icon-url="icon">
-          </l-icon>
+<!-- Icône pour marqueurs -->
+<l-icon :icon-size="interest.iconSize" :icon-url="icon">
+</l-icon>
 
-          <!-- Popup -->
-          <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-info popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span>{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+<!-- Popup -->
+<l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-dark popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-info popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MM/YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div></l-popup>
+</l-marker>
 
-        </l-marker>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- </v-marker-cluster> -->
+<!-- </v-marker-cluster> -->
 
 </l-map>
 
@@ -125,11 +116,11 @@ export default {
       iconSize: [30, 30],
       markerNormalIcon: [30, 30],
       markerLargeIcon: [45, 45],
-      checkedRegions: [],
+      // checkedRegions: [],
       storedRegions: [],
       storedCategories: [],
-      checkedCategories: [],
-      clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: false, maxClusterRadius:30, iconCreateFunction: function() {
+      // checkedCategories: [],
+      clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: true, maxClusterRadius:30, iconCreateFunction: function() {
         return L.divIcon({ html: '<div style="font-size: 2.3em; color:#c0392b;"<i class="fas fa-search-plus"></i></div>', className: ""});
       }},
       window: {
@@ -150,44 +141,25 @@ export default {
 
   },
   methods: {
-    // Récupération des régions en BDD et check de toutes les régions sur le filtre
+    // Récupération des régions en BDD
     getRegions() {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (
-        this.storedRegions = response.data,
-        this.storedRegions.forEach((storedRegion) => {
-          this.checkedRegions.push(storedRegion.name)
-        })
+        this.storedRegions = response.data
+        // this.storedRegions.forEach((storedRegion) => {
+        //   this.checkedRegions.push(storedRegion.name)
+        // })
       ))
     },
+    // Récupération des catégories en BDD
     getCategories() {
       axios.get('http://127.0.0.1:8000/api/tag')
       .then(response => (
-        this.storedCategories = response.data,
-        this.storedCategories.forEach((storedCategory) => {
-          this.checkedCategories.push(storedCategory.name)
-        })
+        this.storedCategories = response.data
+        // this.storedCategories.forEach((storedCategory) => {
+        //   this.checkedCategories.push(storedCategory.name)
+        // })
       ))
-    },
-    // Cocher toutes les régions dans le filtre
-    allRegions: function(){
-      if(this.checkedRegions.length==0) {
-        this.storedRegions.forEach((storedRegion) => {
-          this.checkedRegions.push(storedRegion.name)
-        })
-      } else {
-        this.checkedRegions = []
-      }
-    },
-    // Cocher toutes les catégories dans le filtre
-    allCategories: function(){
-      if(this.checkedCategories.length==0) {
-        this.storedCategories.forEach((storedCategory) => {
-          this.checkedCategories.push(storedCategory.name)
-        })
-      } else {
-        this.checkedCategories = []
-      }
     },
     // Méthode pour recentrer la carte via bouton dédié
     recenterMap: function(){
@@ -272,27 +244,29 @@ export default {
   },
 },
 mounted: function(){
-  // Evénements récupérés depuis le composant List pour que l'icône grossisse au passage de la souris
+  // Au passage de la souris, l'icône grossit
   this.$root.$on('mouse-over-interest', (index) => {
     this.interests[index].iconSize = this.markerLargeIcon
-
   });
+  // Quand la souris n'est plus sur le point, l'icône redevient normale.
   this.$root.$on('mouse-leave-interest', (index) => {
     this.interests[index].iconSize = this.markerNormalIcon
   });
-  // Evènement récupéré depuis le composant List pour qu'au click sur un intérêt dans la liste :
+
+  // Au simple click, je zoom légèrement vers le point d'intérêt
   this.$root.$on('click-interest', (index) => {
-    // Si un popup est déjà ouvert, je le ferme (sinon bug affichage)
+    // Mais avant, si un popup est déjà ouvert, je le ferme
     this.$refs.myMap.mapObject.closePopup()
-    // Je centre le point d'intérêt en question et je zoome légèrement
     this.$refs.myMap.mapObject.flyTo([this.interests[index].latitude, this.interests[index].longitude], 7)
-    // this.$refs.myMarker[index].mapObject.openPopup()
   });
-  // Evènement récupéré depuis le composant List pour qu'au double click sur un intérêt dans la liste :
+
+  // Au double click, j'ouvre le popup
   this.$root.$on('dblclick-interest', (index) => {
-    // J'ouvre le popup du point d'intérêt
+    // Avant, si un popup est déjà ouvert, je le ferme
+    this.$refs.myMap.mapObject.closePopup()
     this.$refs.myMarker[index].mapObject.openPopup()
   });
+
 },
 created: function(){
   this.getRegions(),

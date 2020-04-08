@@ -42,6 +42,7 @@ export default {
       interests: [],
       normalIcon: [30, 30],
       search:"",
+      tags:[],
     }
   },
   // Quand le composant est opérationnel
@@ -61,8 +62,15 @@ export default {
   // trim() pour ne pas tenir compte des espaces en début et fin de saisie
   computed: {
     filteredInterests: function(){
+
       return this.interests.filter((interest) => {
-        return interest.city.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.city.region_id.name.toLowerCase().trim().match(this.search.toLowerCase().trim());
+
+        // Pour accéder aux tags, je suis obligé de boucler
+        interest.tags.forEach((tag) => {
+          this.tags = tag.name;
+
+        });
+        return interest.city.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.city.region_id.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || this.tags.toLowerCase().trim().match(this.search.toLowerCase().trim());
       });
     }
   },

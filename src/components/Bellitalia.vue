@@ -3,9 +3,17 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-12">
-        <!-- Input filtre recherche -->
-        <input type="text" v-model="search" placeholder="Recherchez un point d'intérêt (nom, ville, région, catégorie...)" class="searchInterest">
+      <div class="col-12 inputFilter">
+        <!-- Input filtres recherche -->
+        <div class="searchInterest">
+          <input type="text" v-model="firstSearch" placeholder="Premier input" class="">
+          <i @click="input2visible=!input2visible" v-if="!input2visible" class="fas fa-plus addInput" data-toggle="tooltip" data-placement="top" title="Affinez votre recherche"></i>
+        </div>
+
+        <!--   <i @click="input2visible=!input2visible" v-if="input2visible" class="far fa-minus-square"></i> -->
+        <input type="text" v-if="input2visible" v-model="secondSearch" placeholder="Deuxième input" class="searchInterest">
+        <input type="text" v-if="input3visible" v-model="thirdSearch" placeholder="Troisième input" class="searchInterest">
+        <input type="text" v-if="input4visible" v-model="lastSearch" placeholder="Dernier input" class="searchInterest">
       </div>
     </div>
 
@@ -40,9 +48,16 @@ export default {
     return {
       // Tableau vide qui contiendra tous les points d'intérêt
       interests: [],
+      firstfilter: this.interests,
       normalIcon: [30, 30],
-      search:"",
+      firstSearch:"",
+      secondSearch:"",
+      thirdSearch:"",
+      lastSearch:"",
       tags:[],
+      input2visible: false,
+      input3visible: false,
+      input4visible: false,
     }
   },
   // Quand le composant est opérationnel
@@ -57,23 +72,45 @@ export default {
       })
     })
   },
-  // Méthode permettant de filtrer les points d'intérêts "en amont", avant leur envoi à la carte et à la liste, via le search
-  // J'utilise toLowerCase pour rendre la recherche insensible à la casse
-  // trim() pour ne pas tenir compte des espaces en début et fin de saisie
   computed: {
-    filteredInterests: function(){
-
+    // Pour avoir plusieurs filtres permettant d'affiner la recherche, j'enchaîne les computed.
+    // Le premier récupère la liste complète d'interests.
+    // Chacun filtre le précédent
+    // Le dernier envoie la sélection aux autres composants.
+    // Et donc les interests se mettent dynamiquement à jour sur la liste et sur la carte
+    firstFilteredInterests:function() {
+      var matcher = new RegExp(this.firstSearch.trim(), 'i')
       return this.interests.filter((interest) => {
-
-        // Pour accéder aux tags, je suis obligé de boucler
-        interest.tags.forEach((tag) => {
-          this.tags = tag.name;
-
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
         });
-        return interest.city.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || interest.city.region_id.name.toLowerCase().trim().match(this.search.toLowerCase().trim()) || this.tags.toLowerCase().trim().match(this.search.toLowerCase().trim());
       });
-    }
-  },
+    },
+    secondFilteredInterests:function() {
+      var matcher = new RegExp(this.secondSearch.trim(), 'i')
+      return this.firstFilteredInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+    thirdFilteredInterests:function() {
+      var matcher = new RegExp(this.thirdSearch.trim(), 'i')
+      return this.secondFilteredInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+    filteredInterests:function() {
+      var matcher = new RegExp(this.lastSearch.trim(), 'i')
+      return this.thirdFilteredInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+  }
 }
 
 </script>
@@ -84,6 +121,14 @@ export default {
   margin: auto;
   display: block;
   margin-bottom: 1em;
-  width:50%;
+  // width:50%;
+}
+.inputFilter {
+  display: flex;
+}
+
+.addInput {
+  cursor: pointer;
+  font-size: 1.2em;
 }
 </style>

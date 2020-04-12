@@ -6,14 +6,36 @@
       <div class="col-12 inputFilter">
         <!-- Input filtres recherche -->
         <div class="searchInterest">
-          <input type="text" v-model="firstSearch" placeholder="Premier input" class="">
-          <i @click="input2visible=!input2visible" v-if="!input2visible" class="fas fa-plus addInput" data-toggle="tooltip" data-placement="top" title="Affinez votre recherche"></i>
+          <input type="text" v-model="search" placeholder="Filtrer par mot clé">
         </div>
+        <!-- Dropdown fltre catégories -->
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 selectFilter">
+        <div class="dropdowns">
 
-        <!--   <i @click="input2visible=!input2visible" v-if="input2visible" class="far fa-minus-square"></i> -->
-        <input type="text" v-if="input2visible" v-model="secondSearch" placeholder="Deuxième input" class="searchInterest">
-        <input type="text" v-if="input3visible" v-model="thirdSearch" placeholder="Troisième input" class="searchInterest">
-        <input type="text" v-if="input4visible" v-model="lastSearch" placeholder="Dernier input" class="searchInterest">
+          <!-- Select filtres catégories -->
+          <b-dropdown class="mb-1 mr-1 dropdown-tags" text="Filtrer par catégorie" size="sm">
+            <b-dropdown-form>
+              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
+              <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
+                <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
+              </div>
+            </b-dropdown-form>
+          </b-dropdown>
+
+          <!-- Select filtres régions -->
+          <b-dropdown id="dropdown-dropright" dropright class="mb-1 dropdown-regions" text="Filtrer par région" size="sm">
+            <b-dropdown-form>
+              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
+              <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
+                <b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
+              </div>
+            </b-dropdown-form>
+          </b-dropdown>
+
+        </div>
       </div>
     </div>
 
@@ -46,21 +68,89 @@ export default {
   components: { InterestList, InterestMap },
   data: function() {
     return {
-      // Tableau vide qui contiendra tous les points d'intérêt
       interests: [],
-      firstfilter: this.interests,
       normalIcon: [30, 30],
-      firstSearch:"",
-      secondSearch:"",
-      thirdSearch:"",
-      lastSearch:"",
+      storedRegions: [],
+      storedCategories: [],
+      checkedRegions: [],
+      checkedCategories: [],
+      search:"",
       tags:[],
-      input2visible: false,
-      input3visible: false,
-      input4visible: false,
     }
   },
-  // Quand le composant est opérationnel
+  methods: {
+    // Récupération des régions en BDD
+    getRegions() {
+      axios.get('http://127.0.0.1:8000/api/region')
+      .then(response => (
+        this.storedRegions = response.data,
+        this.storedRegions.forEach((storedRegion) => {
+          this.checkedRegions.push(storedRegion.name)
+        })
+      ))
+    },
+    // Récupération des catégories en BDD
+    getCategories() {
+      axios.get('http://127.0.0.1:8000/api/tag')
+      .then(response => (
+        this.storedCategories = response.data,
+        this.storedCategories.forEach((storedCategory) => {
+          this.checkedCategories.push(storedCategory.name)
+        })
+      ))
+    },
+    allRegions: function(){
+      if(this.checkedRegions.length==0) {
+        this.storedRegions.forEach((storedRegion, index) => {
+          this.checkedRegions.push(storedRegion.name)
+        })
+      } else {
+        this.checkedRegions = []
+      }
+    },
+    // Cocher toutes les catégories dans le filtre
+    allCategories: function(){
+      if(this.checkedCategories.length==0) {
+        this.storedCategories.forEach((storedCategory) => {
+          this.checkedCategories.push(storedCategory.name)
+        })
+      } else {
+        this.checkedCategories = []
+      }
+    },
+  },
+  computed: {
+    // Pour avoir plusieurs filtres permettant d'affiner la recherche, j'enchaîne les computed.
+    // Le premier (select) récupère la liste complète d'interests et filtre les régions.
+    // Le deuxième (select) récupère le premier et filtre les catégories.
+    // Le troisième (input) récupère le deuxième et permet de filtrer "manuellement" sur le reste de la sélection
+    // La sélection ainsi faite est envoyée aux autres composants.
+    // Et donc les interests se mettent dynamiquement à jour sur la liste et sur la carte
+    regionsFilteredInterests:function() {
+      return this.interests.filter((interest) => {
+        return this.checkedRegions.includes(interest.city.region_id.name);
+      });
+    },
+    categoriesFilteredInterests:function(){
+      return this.regionsFilteredInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return this.checkedCategories.includes(tag.name);
+        });
+      });
+    },
+    filteredInterests:function() {
+      var matcher = new RegExp(this.search.trim(), 'i')
+      return this.categoriesFilteredInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+  },
+  created: function(){
+    this.getRegions();
+    this.getCategories();
+  },
   mounted: function() {
     axios
     .get('http://127.0.0.1:8000/api/interest')
@@ -72,63 +162,52 @@ export default {
       })
     })
   },
-  computed: {
-    // Pour avoir plusieurs filtres permettant d'affiner la recherche, j'enchaîne les computed.
-    // Le premier récupère la liste complète d'interests.
-    // Chacun filtre le précédent
-    // Le dernier envoie la sélection aux autres composants.
-    // Et donc les interests se mettent dynamiquement à jour sur la liste et sur la carte
-    firstFilteredInterests:function() {
-      var matcher = new RegExp(this.firstSearch.trim(), 'i')
-      return this.interests.filter((interest) => {
-        return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
-        });
-      });
-    },
-    secondFilteredInterests:function() {
-      var matcher = new RegExp(this.secondSearch.trim(), 'i')
-      return this.firstFilteredInterests.filter((interest) => {
-        return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
-        });
-      });
-    },
-    thirdFilteredInterests:function() {
-      var matcher = new RegExp(this.thirdSearch.trim(), 'i')
-      return this.secondFilteredInterests.filter((interest) => {
-        return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
-        });
-      });
-    },
-    filteredInterests:function() {
-      var matcher = new RegExp(this.lastSearch.trim(), 'i')
-      return this.thirdFilteredInterests.filter((interest) => {
-        return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
-        });
-      });
-    },
-  }
 }
 
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 .searchInterest {
   margin: auto;
   display: block;
-  margin-bottom: 1em;
-  // width:50%;
+  margin-bottom: 0.5em;
+}
+.dropdowns {
+  margin: auto;
+  display: block;
+  margin-bottom: 0.5em;
 }
 .inputFilter {
   display: flex;
 }
-
+.selectFilter{
+  display: flex;
+}
 .addInput {
   cursor: pointer;
   font-size: 1.2em;
+}
+
+.b-dropdown-form {
+  padding: 4px;
+  outline: 0;
+  margin-left: 1px;
+}
+
+.filter-button {
+  margin-bottom: 10%;
+}
+
+// .drop{
+//   display: flex;
+//   justify-content: right;
+// }
+
+.btn-group, .btn-group-vertical {
+  position: relative;
+  display: -ms-inline-flexbox;
+  display: -webkit-inline-box;
+  // display: inline-flex;
+  vertical-align: middle;
 }
 </style>

@@ -2,21 +2,13 @@
 <template>
 
   <div class="container-fluid">
-    <div class="row">
-      <div class="col-12 inputFilter">
-        <!-- Input filtres recherche -->
-        <div class="searchInterest">
-          <input type="text" v-model="search" placeholder="Filtrer par mot clé">
-        </div>
-        <!-- Dropdown fltre catégories -->
-      </div>
-    </div>
+
     <div class="row">
       <div class="col-12 selectFilter">
         <div class="dropdowns">
 
           <!-- Select filtres catégories -->
-          <b-dropdown class="mb-1 mr-1 dropdown-tags" text="Filtrer par catégorie" size="sm">
+          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1 dropdown-tags" text="Filtrer par catégorie" size="sm">
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
               <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
@@ -26,12 +18,56 @@
           </b-dropdown>
 
           <!-- Select filtres régions -->
-          <b-dropdown id="dropdown-dropright" dropright class="mb-1 dropdown-regions" text="Filtrer par région" size="sm">
+          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1 dropdown-regions" text="Filtrer par région" size="sm">
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
               <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
                 <b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
               </div>
+            </b-dropdown-form>
+          </b-dropdown>
+
+          <!-- Select par mot-clé -->
+          <b-dropdown id="dropdown-form" dropright text="Filtrer par mots-clés" ref="dropdown" class="mb-1 mr-1 dropdown-regions" size="sm">
+            <b-dropdown-form>
+              <b-form-group >
+                <b-form-input
+                class="formInput"
+                size="sm"
+                placeholder="mot-clé 1"
+                v-model="search1"
+                @keydown.enter.prevent
+                ></b-form-input>
+                <b-form-input
+                class="formInput"
+                size="sm"
+                placeholder="mot-clé 2"
+                v-model="search2"
+                @keydown.enter.prevent
+                ></b-form-input>
+                <b-form-input
+                class="formInput"
+                size="sm"
+                placeholder="mot-clé 3"
+                v-model="search3"
+                @keydown.enter.prevent
+                ></b-form-input>
+                <b-form-input
+                class="formInput"
+                size="sm"
+                placeholder="mot-clé 4"
+                v-model="search4"
+                @keydown.enter.prevent
+                ></b-form-input>
+                <b-form-input
+                class="formInput"
+                size="sm"
+                placeholder="mot-clé 5"
+                v-model="search5"
+                @keydown.enter.prevent
+                ></b-form-input>
+                <b-button pill variant="outline-secondary" class="filter-button mt-2" size="sm" @click="emptySearchInput">Réinitialiser</b-button>
+              </b-form-group>
             </b-dropdown-form>
           </b-dropdown>
 
@@ -74,11 +110,22 @@ export default {
       storedCategories: [],
       checkedRegions: [],
       checkedCategories: [],
-      search:"",
+      search1:"",
+      search2:"",
+      search3:"",
+      search4:"",
+      search5:"",
       tags:[],
     }
   },
   methods: {
+    emptySearchInput() {
+      this.search1 = "";
+      this.search2 = "";
+      this.search3 = "";
+      this.search4 = "";
+      this.search5 = "";
+    },
     // Récupération des régions en BDD
     getRegions() {
       axios.get('http://127.0.0.1:8000/api/region')
@@ -138,9 +185,41 @@ export default {
         });
       });
     },
-    filteredInterests:function() {
-      var matcher = new RegExp(this.search.trim(), 'i')
+    firstSearchInterests:function() {
+      var matcher = new RegExp(this.search1.trim(), 'i')
       return this.categoriesFilteredInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+    secondSearchInterests:function() {
+      var matcher = new RegExp(this.search2.trim(), 'i')
+      return this.firstSearchInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+    thirdSearchInterests:function() {
+      var matcher = new RegExp(this.search3.trim(), 'i')
+      return this.secondSearchInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+    fourthSearchInterests:function() {
+      var matcher = new RegExp(this.search4.trim(), 'i')
+      return this.thirdSearchInterests.filter((interest) => {
+        return  interest.tags.some((tag) => {
+          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+        });
+      });
+    },
+    filteredInterests:function() {
+      var matcher = new RegExp(this.search5.trim(), 'i')
+      return this.fourthSearchInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
           return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
         });
@@ -171,17 +250,19 @@ export default {
   margin: auto;
   display: block;
   margin-bottom: 0.5em;
+  width:50%;
+  // border-top: none;
+  // border-left: none;
+  // border-right: none;
 }
 .dropdowns {
   margin: auto;
   display: block;
   margin-bottom: 0.5em;
 }
-.inputFilter {
-  display: flex;
-}
 .selectFilter{
   display: flex;
+  margin: inherit;
 }
 .addInput {
   cursor: pointer;
@@ -198,16 +279,18 @@ export default {
   margin-bottom: 10%;
 }
 
-// .drop{
-//   display: flex;
-//   justify-content: right;
-// }
-
 .btn-group, .btn-group-vertical {
   position: relative;
   display: -ms-inline-flexbox;
   display: -webkit-inline-box;
   // display: inline-flex;
   vertical-align: middle;
+}
+
+.formInput {
+border-top: none;
+border-left: none;
+border-right: none;
+border-radius: 0;
 }
 </style>

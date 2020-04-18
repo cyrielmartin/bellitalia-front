@@ -8,7 +8,8 @@
         <div class="dropdowns">
 
           <!-- Select filtres catégories -->
-          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1 dropdown-tags" text="Filtrer par catégorie" size="sm">
+          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
+
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
               <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
@@ -18,7 +19,7 @@
           </b-dropdown>
 
           <!-- Select filtres régions -->
-          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1 dropdown-regions" text="Filtrer par région" size="sm">
+          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1" :variant=regionClass :text=regionSelectText size="sm">
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
               <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
@@ -28,7 +29,7 @@
           </b-dropdown>
 
           <!-- Select par mot-clé -->
-          <b-dropdown id="dropdown-form" dropright text="Filtrer par mots-clés" ref="dropdown" class="mb-1 mr-1 dropdown-regions" size="sm">
+          <b-dropdown id="dropdown-form" dropright :variant=keywordClass :text=keywordSelectText ref="dropdown" class="mb-1 mr-1" size="sm">
             <b-dropdown-form>
               <b-form-group >
                 <b-form-input
@@ -225,6 +226,61 @@ export default {
         });
       });
     },
+    //Affichage dynamique des sélect en fonction du nombre qui a été sélectionné
+    categorySelectText:function(){
+      if(this.checkedCategories.length === this.storedCategories.length) {
+        return "Filtrer par catégorie";
+      } else if (this.checkedCategories.length === 0) {
+        return "Aucune catégorie sélectionnée";
+      }
+      else if(this.checkedCategories.length === 1) {
+        return "1 catégorie sélectionnée";
+      } else {
+        return this.checkedCategories.length+" catégories sélectionnées";
+      }
+    },
+    regionSelectText:function(){
+      if(this.checkedRegions.length === this.storedRegions.length) {
+        return "Filtrer par région";
+      } else if (this.checkedRegions.length === 0) {
+        return "Aucune région sélectionnée";
+      }
+      else if(this.checkedRegions.length === 1) {
+        return "1 région sélectionnée";
+      } else {
+        return this.checkedRegions.length+" régions sélectionnées";
+      }
+    },
+    keywordSelectText:function(){
+      if(this.search1 || this.search2 || this.search3 || this.search4 || this.search5) {
+        return "Au moins 1 mot-clé saisi";
+      } else {
+        return "Filtrer par mot-clé";
+      }
+
+    },
+    // Changement d'apparence des select si tout n'est pas coché
+    categoryClass:function(){
+      if(this.checkedCategories.length === this.storedCategories.length) {
+        return "";
+      } else {
+        return "danger";
+      }
+    },
+    regionClass:function(){
+      if(this.checkedRegions.length === this.storedRegions.length) {
+        return "";
+      } else {
+        return "danger";
+      }
+    },
+    keywordClass:function(){
+      if(this.search1 || this.search2 || this.search3 || this.search4 || this.search5) {
+        return "danger";
+      } else {
+        return "";
+      }
+    }
   },
   created: function(){
     this.getRegions();
@@ -288,9 +344,9 @@ export default {
 }
 
 .formInput {
-border-top: none;
-border-left: none;
-border-right: none;
-border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
 }
 </style>

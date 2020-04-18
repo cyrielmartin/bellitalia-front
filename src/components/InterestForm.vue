@@ -2,14 +2,13 @@
 
   <div class="container">
 
-    <a href="/"><button type="button" class="btn btn-outline-dark"><i class="fas fa-arrow-circle-left"></i> Retour</button></a>
+    <a href="/"><b-button type="button"><i class="fas fa-arrow-circle-left"></i> Retour</b-button></a>
     <div class="row justify-content-center">
       <div class="col-md-10">
-        <div class="card">
-          <div class="card-header" v-if="!edit">Ajouter un nouveau point d'intérêt</div>
-          <div class="card-header" v-if="edit">Modifier un point d'intérêt</div>
+        <span class="formTitle" v-if="!edit">Ajouter un nouveau point d'intérêt</span>
+        <span class="formTitle" v-if="edit">Modifier un point d'intérêt</span>
 
-        </div>
+
         <div class="card-body">
           <form
           novalidate="true">
@@ -103,8 +102,9 @@
             </div>
           </div>
           <div class="d-flex justify-content-center">
-            <button type="submit" v-if="!edit" @click.prevent="submitForm" class="btn btn-fill btn-blue">Enregistrer</button>
-            <button type="submit" v-if="edit" @click.prevent="editForm" class="btn btn-fill btn-blue">Enregistrer les modifications</button>
+            <!-- <b-button>Button</b-button> -->
+            <b-button type="submit" v-if="!edit" @click.prevent="submitForm">Enregistrer</b-button>
+            <b-button type="submit" v-if="edit" @click.prevent="editForm">Enregistrer les modifications</b-button>
           </div>
           <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
         </form>
@@ -420,5 +420,8 @@ export default {
       .imageTrash:hover{
         // color:white;
         cursor: pointer;
+      }
+      .formTitle{
+        font-size: 1.6em;
       }
       </style>

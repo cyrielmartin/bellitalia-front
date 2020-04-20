@@ -25,6 +25,7 @@
       <!-- Bouton pour recentrer la carte -->
       <l-control
       :position="'topleft'"
+      v-b-tooltip.hover.right title="Recentrer la carte"
       class="center-button">
       <div @click="recenterMap">
         <i class="far fa-dot-circle"></i>

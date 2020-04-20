@@ -15,6 +15,7 @@
               <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
                 <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
               </div>
+              <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les catégories</a>
             </b-dropdown-form>
           </b-dropdown>
 
@@ -72,10 +73,12 @@
             </b-dropdown-form>
           </b-dropdown>
 
+          <!-- Réinitialisation de tous les filtres de recherche -->
+          <b-button @click="resetFilters" v-b-tooltip.hover.right="'Réinitialiser tous les filtres'" size="sm" class="mb-1"><i class="fas fa-undo-alt"></i></b-button>
+
         </div>
       </div>
     </div>
-
     <div class="row">
 
       <!-- Colonne de gauche : tableau -->
@@ -120,6 +123,23 @@ export default {
     }
   },
   methods: {
+    // Rénitialisation de tous les filtres de recherche
+    resetFilters() {
+      // Je décoche toutes les régions
+      this.checkedRegions = [];
+      // Et je recoche tout
+      this.storedRegions.forEach((storedRegion, index) => {
+        this.checkedRegions.push(storedRegion.name)
+      });
+      // Je décoche toutes les catégories
+      this.checkedCategories = [];
+      // Et je recoche tout
+      this.storedCategories.forEach((storedCategory) => {
+        this.checkedCategories.push(storedCategory.name)
+      })
+      // Et je vide tous les input du select de recherche
+      this.emptySearchInput();
+    },
     emptySearchInput() {
       this.search1 = "";
       this.search2 = "";
@@ -302,6 +322,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.editTags {
+  font-size: 0.8em;
+}
 .searchInterest {
   margin: auto;
   display: block;

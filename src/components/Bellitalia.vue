@@ -8,7 +8,19 @@
         <div class="dropdowns">
 
           <!-- Select filtres catégories -->
-          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
+          <b-dropdown class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
+
+            <b-dropdown-form>
+              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
+              <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
+                <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
+              </div>
+              <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les catégories</a>
+            </b-dropdown-form>
+          </b-dropdown>
+
+          <!-- Select filtres catégories -->
+          <b-dropdown class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
 
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
@@ -30,7 +42,7 @@
           </b-dropdown>
 
           <!-- Select par mot-clé -->
-          <b-dropdown id="dropdown-form" dropright :variant=keywordClass :text=keywordSelectText ref="dropdown" class="mb-1 mr-1" size="sm">
+          <b-dropdown :variant=keywordClass :text=keywordSelectText ref="dropdown" class="mb-1 mr-1" size="sm">
             <b-dropdown-form>
               <b-form-group >
                 <b-form-input
@@ -338,6 +350,7 @@ export default {
   margin: auto;
   display: block;
   margin-bottom: 0.5em;
+  z-index: 2000;
 }
 .selectFilter{
   display: flex;

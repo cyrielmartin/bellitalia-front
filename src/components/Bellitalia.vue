@@ -7,15 +7,15 @@
       <div class="col-12 selectFilter">
         <div class="dropdowns">
 
-          <!-- Select filtres catégories -->
-          <b-dropdown class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
+          <!-- Select filtres publications -->
+          <b-dropdown no-flip class="mb-1 mr-1" :variant=publicationClass :text=publicationSelectText size="sm">
 
-            <b-dropdown-form>
-              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
-              <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
-                <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
+            <b-dropdown-form id="publicationDropdown">
+              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
+              <div v-bind:key="storedPublication.id" v-for="storedPublication in storedPublications">
+                <b-form-checkbox class="mb-1" size="sm" :value="storedPublication.number" v-model="checkedPublications">n°{{storedPublication.number}}<br>{{storedPublication.publication | moment("MMM YYYY")}}</b-form-checkbox>
               </div>
-              <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les catégories</a>
+              <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a>
             </b-dropdown-form>
           </b-dropdown>
 
@@ -32,7 +32,7 @@
           </b-dropdown>
 
           <!-- Select filtres régions -->
-          <b-dropdown id="dropdown-dropright" dropright class="mb-1 mr-1" :variant=regionClass :text=regionSelectText size="sm">
+          <b-dropdown no-flip class="mb-1 mr-1" :variant=regionClass :text=regionSelectText size="sm">
             <b-dropdown-form>
               <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
               <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
@@ -124,8 +124,10 @@ export default {
       normalIcon: [30, 30],
       storedRegions: [],
       storedCategories: [],
+      storedPublications: [],
       checkedRegions: [],
       checkedCategories: [],
+      checkedPublications: [],
       search1:"",
       search2:"",
       search3:"",
@@ -148,6 +150,12 @@ export default {
       // Et je recoche tout
       this.storedCategories.forEach((storedCategory) => {
         this.checkedCategories.push(storedCategory.name)
+      })
+      // Je décoche tous les numéros
+      this.checkedPublications = [];
+      // Et je recoche tout
+      this.storedPublications.forEach((storedPublication) => {
+        this.checkedPublications.push(storedPublication.number)
       })
       // Et je vide tous les input du select de recherche
       this.emptySearchInput();
@@ -179,6 +187,16 @@ export default {
         })
       ))
     },
+    // Récupération des numéros BI en BDD
+    getPublications() {
+      axios.get('http://127.0.0.1:8000/api/bellitalia')
+      .then(response => (
+        this.storedPublications = response.data,
+        this.storedPublications.forEach((storedPublication) => {
+          this.checkedPublications.push(storedPublication.number)
+        })
+      ))
+    },
     allRegions: function(){
       if(this.checkedRegions.length==0) {
         this.storedRegions.forEach((storedRegion, index) => {
@@ -196,6 +214,16 @@ export default {
         })
       } else {
         this.checkedCategories = []
+      }
+    },
+    // Cocher tous les numéros dans le filtre
+    allPublications: function(){
+      if(this.checkedPublications.length==0) {
+        this.storedPublications.forEach((storedPublication) => {
+          this.checkedPublications.push(storedPublication.number)
+        })
+      } else {
+        this.checkedPublications = []
       }
     },
   },
@@ -218,9 +246,14 @@ export default {
         });
       });
     },
+    publicationsFilteredInterests:function() {
+      return this.categoriesFilteredInterests.filter((interest) => {
+        return this.checkedPublications.includes(interest.bellitalia.number);
+      });
+    },
     firstSearchInterests:function() {
       var matcher = new RegExp(this.search1.trim(), 'i')
-      return this.categoriesFilteredInterests.filter((interest) => {
+      return this.publicationsFilteredInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
           return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
         });
@@ -291,6 +324,18 @@ export default {
       }
 
     },
+    publicationSelectText:function(){
+      if(this.checkedPublications.length === this.storedPublications.length) {
+        return "Filtrer par numéro";
+      } else if (this.checkedPublications.length === 0) {
+        return "Aucun numéro sélectionné";
+      }
+      else if(this.checkedPublications.length === 1) {
+        return "1 numéro sélectionné";
+      } else {
+        return this.checkedPublications.length+" numéros sélectionnés";
+      }
+    },
     // Changement d'apparence des select si tout n'est pas coché
     categoryClass:function(){
       if(this.checkedCategories.length === this.storedCategories.length) {
@@ -312,11 +357,19 @@ export default {
       } else {
         return "";
       }
-    }
+    },
+    publicationClass:function(){
+      if(this.checkedPublications.length === this.storedPublications.length) {
+        return "";
+      } else {
+        return "danger";
+      }
+    },
   },
   created: function(){
     this.getRegions();
     this.getCategories();
+    this.getPublications();
   },
   mounted: function() {
     axios
@@ -365,6 +418,10 @@ export default {
   padding: 4px;
   outline: 0;
   margin-left: 1px;
+}
+
+#publicationDropdown {
+  columns:6;
 }
 
 .filter-button {

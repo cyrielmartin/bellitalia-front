@@ -21,7 +21,12 @@ Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 Vue.use('axios')
-Vue.use(require('vue-moment'))
+const moment = require('moment')
+require('moment/locale/fr')
+
+Vue.use(require('vue-moment'), {
+    moment
+})
 Vue.use(VModal, {dialog: true})
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)

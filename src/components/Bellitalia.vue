@@ -7,104 +7,133 @@
       <div class="col-12 selectFilter">
         <div class="dropdowns">
 
-          <!-- Select filtres publications -->
-          <b-dropdown no-flip class="mb-1 mr-1" :variant=publicationClass :text=publicationSelectText size="sm">
 
-            <b-dropdown-form id="publicationDropdown">
-              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
+          <!-- Filtres publications -->
+          <b-button @click="show=true" class="mr-1 mb-1" size="sm" :variant=publicationClass>{{publicationSelectText}} <i class="fas fa-sort-down coucou"></i></b-button>
+
+          <b-modal
+          v-model="show"
+          title="Modal Variants"
+          :header-bg-variant="headerBgVariant"
+          :header-text-variant="headerTextVariant"
+          :body-bg-variant="bodyBgVariant"
+          :body-text-variant="bodyTextVariant"
+          :footer-bg-variant="footerBgVariant"
+          :footer-text-variant="footerTextVariant"
+          >
+          <b-container fluid>
+
+            <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
+            <b-row class="mb-1 mr-3 ml-4">
               <div v-bind:key="storedPublication.id" v-for="storedPublication in storedPublications">
-                <b-form-checkbox class="mb-1" size="sm" :value="storedPublication.number" v-model="checkedPublications">n°{{storedPublication.number}}<br>{{storedPublication.publication | moment("MMM YYYY")}}</b-form-checkbox>
+                <b-form-checkbox class="mb-1 mr-1" size="sm" :value="storedPublication.number" v-model="checkedPublications">n°{{storedPublication.number}} ({{storedPublication.publication | moment("MMM YYYY")}})</b-form-checkbox>
               </div>
-              <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a>
-            </b-dropdown-form>
-          </b-dropdown>
+            </b-row>
+            <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a>
 
-          <!-- Select filtres catégories -->
-          <b-dropdown class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
+          </b-container>
 
-            <b-dropdown-form>
-              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
-              <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
-                <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
-              </div>
-              <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les catégories</a>
-            </b-dropdown-form>
-          </b-dropdown>
+          <template v-slot:modal-footer>
+            <div class="w-100">
+              <p class="float-left">Modal Footer Content</p>
+              <b-button
+              variant="primary"
+              size="sm"
+              class="float-right"
+              @click="show=false"
+              >
+              Close
+            </b-button>
+          </div>
+        </template>
+      </b-modal>
 
-          <!-- Select filtres régions -->
-          <b-dropdown no-flip class="mb-1 mr-1" :variant=regionClass :text=regionSelectText size="sm">
-            <b-dropdown-form>
-              <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
-              <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
-                <b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
-              </div>
-            </b-dropdown-form>
-          </b-dropdown>
+      <!-- Select filtres catégories -->
+      <b-dropdown class="mb-1 mr-1" :variant=categoryClass :text=categorySelectText size="sm">
 
-          <!-- Select par mot-clé -->
-          <b-dropdown :variant=keywordClass :text=keywordSelectText ref="dropdown" class="mb-1 mr-1" size="sm">
-            <b-dropdown-form>
-              <b-form-group >
-                <b-form-input
-                class="formInput"
-                size="sm"
-                placeholder="mot-clé 1"
-                v-model="search1"
-                @keydown.enter.prevent
-                ></b-form-input>
-                <b-form-input
-                class="formInput"
-                size="sm"
-                placeholder="mot-clé 2"
-                v-model="search2"
-                @keydown.enter.prevent
-                ></b-form-input>
-                <b-form-input
-                class="formInput"
-                size="sm"
-                placeholder="mot-clé 3"
-                v-model="search3"
-                @keydown.enter.prevent
-                ></b-form-input>
-                <b-form-input
-                class="formInput"
-                size="sm"
-                placeholder="mot-clé 4"
-                v-model="search4"
-                @keydown.enter.prevent
-                ></b-form-input>
-                <b-form-input
-                class="formInput"
-                size="sm"
-                placeholder="mot-clé 5"
-                v-model="search5"
-                @keydown.enter.prevent
-                ></b-form-input>
-                <b-button pill variant="outline-secondary" class="filter-button mt-2" size="sm" @click="emptySearchInput">Réinitialiser</b-button>
-              </b-form-group>
-            </b-dropdown-form>
-          </b-dropdown>
+        <b-dropdown-form>
+          <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allCategories">Toutes/Aucune</b-button>
+          <div v-bind:key="storedCategory.id" v-for="storedCategory in storedCategories">
+            <b-form-checkbox class="mb-1" size="sm" :value="storedCategory.name" v-model="checkedCategories">{{storedCategory.name}}</b-form-checkbox>
+          </div>
+          <a href="#" class="editTags"><i class="far fa-edit"></i> Modifier les catégories</a>
+        </b-dropdown-form>
+      </b-dropdown>
 
-          <!-- Réinitialisation de tous les filtres de recherche -->
-          <b-button @click="resetFilters" v-b-tooltip.hover.right="'Réinitialiser tous les filtres'" size="sm" class="mb-1"><i class="fas fa-undo-alt"></i></b-button>
+      <!-- Select filtres régions -->
+      <b-dropdown no-flip class="mb-1 mr-1" :variant=regionClass :text=regionSelectText size="sm">
+        <b-dropdown-form>
+          <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allRegions">Toutes/Aucune</b-button>
+          <div v-bind:key="storedRegion.id" v-for="storedRegion in storedRegions">
+            <b-form-checkbox class="mb-1" size="sm" :value="storedRegion.name" v-model="checkedRegions">{{storedRegion.name}}</b-form-checkbox>
+          </div>
+        </b-dropdown-form>
+      </b-dropdown>
 
-        </div>
-      </div>
+      <!-- Select par mot-clé -->
+      <b-dropdown :variant=keywordClass :text=keywordSelectText ref="dropdown" class="mb-1 mr-1" size="sm">
+        <b-dropdown-form>
+          <b-form-group >
+            <b-form-input
+            class="formInput"
+            size="sm"
+            placeholder="mot-clé 1"
+            v-model="search1"
+            @keydown.enter.prevent
+            ></b-form-input>
+            <b-form-input
+            class="formInput"
+            size="sm"
+            placeholder="mot-clé 2"
+            v-model="search2"
+            @keydown.enter.prevent
+            ></b-form-input>
+            <b-form-input
+            class="formInput"
+            size="sm"
+            placeholder="mot-clé 3"
+            v-model="search3"
+            @keydown.enter.prevent
+            ></b-form-input>
+            <b-form-input
+            class="formInput"
+            size="sm"
+            placeholder="mot-clé 4"
+            v-model="search4"
+            @keydown.enter.prevent
+            ></b-form-input>
+            <b-form-input
+            class="formInput"
+            size="sm"
+            placeholder="mot-clé 5"
+            v-model="search5"
+            @keydown.enter.prevent
+            ></b-form-input>
+            <b-button pill variant="outline-secondary" class="filter-button mt-2" size="sm" @click="emptySearchInput">Réinitialiser</b-button>
+          </b-form-group>
+        </b-dropdown-form>
+      </b-dropdown>
+
+      <!-- Réinitialisation de tous les filtres de recherche -->
+      <b-button @click="resetFilters" v-b-tooltip.hover.right="'Réinitialiser tous les filtres'" size="sm" class="mb-1"><i class="fas fa-undo-alt"></i></b-button>
+
     </div>
-    <div class="row">
-
-      <!-- Colonne de gauche : tableau -->
-      <div class="col-4">
-        <InterestList :interests="filteredInterests" />
-      </div>
-
-      <!-- Colonne de droite : carte -->
-      <div class="col-8 interest-map">
-        <InterestMap :interests="filteredInterests"/>
-      </div>
-    </div>
-
   </div>
+</div>
+<div class="row">
+
+  <!-- Colonne de gauche : tableau -->
+  <div class="col-4">
+    <InterestList :interests="filteredInterests" />
+  </div>
+
+  <!-- Colonne de droite : carte -->
+  <div class="col-8 interest-map">
+    <InterestMap :interests="filteredInterests"/>
+  </div>
+</div>
+
+</div>
 
 </template>
 
@@ -120,6 +149,7 @@ export default {
   components: { InterestList, InterestMap },
   data: function() {
     return {
+      show: false,
       interests: [],
       normalIcon: [30, 30],
       storedRegions: [],
@@ -134,6 +164,13 @@ export default {
       search4:"",
       search5:"",
       tags:[],
+      variants: ['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'light', 'dark'],
+      headerBgVariant: 'dark',
+      headerTextVariant: 'light',
+      bodyBgVariant: 'light',
+      bodyTextVariant: 'dark',
+      footerBgVariant: 'warning',
+      footerTextVariant: 'dark',
     }
   },
   methods: {
@@ -403,7 +440,7 @@ export default {
   margin: auto;
   display: block;
   margin-bottom: 0.5em;
-  z-index: 2000;
+  z-index: 1001;
 }
 .selectFilter{
   display: flex;

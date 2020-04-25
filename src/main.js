@@ -57,6 +57,12 @@ const router = new VueRouter({
   }, {
     path: '*',
     redirect: '/'
+  }, {
+    path: '/publications',
+    component: require('./components/Publications.vue').default
+  }, {
+    path: '/categories',
+    component: require('./components/Categories.vue').default
   }]
 })
 

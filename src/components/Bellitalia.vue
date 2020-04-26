@@ -22,7 +22,11 @@
           button-size="sm"
           >
           <b-container fluid>
-            <b-button pill variant="outline-secondary" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
+            <b-form-checkbox class="mb-1 mr-1" size="sm" @change="lastPublication">Dernier numéro</b-form-checkbox>
+            <b-form-checkbox class="mb-1 mr-1" size="sm" @change="lastTwelvePublications">12 derniers numéros</b-form-checkbox>
+            <!-- <b-form-checkbox class="mb-1 mr-1" size="sm" @change="lastThreeYearsPublications">3 dernières années</b-form-checkbox> -->
+
+            <b-button pill variant="outline-secondary" class="filter-button mt-1" size="sm" @click="allPublications">Tous/Aucun</b-button>
             <b-form-checkbox class="mb-1 mr-1" size="sm" :value="storedPublication.number" v-model="checkedPublications" v-for="storedPublication in sortedPublications">n°{{storedPublication.number}} - {{storedPublication.publication | moment("MMMM YYYY")}}</b-form-checkbox>
             <a href="publications" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a>
           </b-container>
@@ -237,6 +241,44 @@ export default {
         this.checkedPublications = []
       }
     },
+    // Méthode gérant l'affichage direct du dernier numéro publié si case cochée
+    lastPublication:function(){
+      if(this.checkedPublications==this.storedPublications[0].number) {
+        this.checkedPublications = []
+        this.storedPublications.forEach((storedPublication) => {
+          this.checkedPublications.push(storedPublication.number)
+        })
+      } else {
+        this.checkedPublications = []
+        this.checkedPublications.push(this.storedPublications[0].number)
+      }
+    },
+    lastTwelvePublications:function(){
+      if(this.checkedPublications.length == 12) {
+        this.checkedPublications = []
+        this.storedPublications.forEach((storedPublication) => {
+          this.checkedPublications.push(storedPublication.number)
+        })
+      } else {
+        this.checkedPublications = []
+        for (let i = 0; i < 12; i++) {
+          this.checkedPublications.push(this.storedPublications[i].number)
+        }
+      }
+    },
+    // lastThreeYearsPublications:function(){
+    //   if(this.checkedPublications.length == 36) {
+    //     this.checkedPublications = []
+    //     this.storedPublications.forEach((storedPublication) => {
+    //       this.checkedPublications.push(storedPublication.number)
+    //     })
+    //   } else {
+    //     this.checkedPublications = []
+    //     for (let i = 0; i < 36; i++) {
+    //       this.checkedPublications.push(this.storedPublications[i].number)
+    //     }
+    //   }
+    // }
   },
   computed: {
     // Pour avoir plusieurs filtres permettant d'affiner la recherche, j'enchaîne les computed.

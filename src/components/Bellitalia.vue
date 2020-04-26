@@ -8,7 +8,7 @@
         <div class="dropdowns">
 
           <!-- Filtres publications -->
-          <!-- Comme le select était beaucoup trop long, je passe par une modale -->
+          <!-- Comme le select était beaucoup trop long et cassait toute la mise en page, je passe par une modale -->
           <b-button @click="show=true" class="mr-1 mb-1" size="sm" :variant=publicationClass>{{publicationSelectText}} <i class="fas fa-caret-down caret"></i></b-button>
 
           <b-modal
@@ -22,12 +22,16 @@
           button-size="sm"
           >
           <b-container fluid>
-            <b-form-checkbox class="mb-1 mr-1" size="sm" @change="lastPublication">Dernier numéro</b-form-checkbox>
-            <b-form-checkbox class="mb-1 mr-1" size="sm" @change="lastTwelvePublications">12 derniers numéros</b-form-checkbox>
-            <!-- <b-form-checkbox class="mb-1 mr-1" size="sm" @change="lastThreeYearsPublications">3 dernières années</b-form-checkbox> -->
 
-            <b-button pill variant="outline-secondary" class="filter-button mt-1" size="sm" @click="allPublications">Tous/Aucun</b-button>
-            <b-form-checkbox class="mb-1 mr-1" size="sm" :value="storedPublication.number" v-model="checkedPublications" v-for="storedPublication in sortedPublications">n°{{storedPublication.number}} - {{storedPublication.publication | moment("MMMM YYYY")}}</b-form-checkbox>
+            <!-- 3 boutons radios pour accélérer la recherche de numéros -->
+            <b-form-group>
+              <b-form-radio v-model="publicationRadioSelected" value="A" size="sm" @change="lastPublication">Dernier numéro</b-form-radio>
+              <b-form-radio v-model="publicationRadioSelected" value="B" size="sm" @change="lastTwelvePublications">12 derniers numéros</b-form-radio>
+              <b-form-radio v-model="publicationRadioSelected" value="C" size="sm" @change="allPublicationsRadio">Tous les numéros</b-form-radio>
+            </b-form-group>
+
+            <b-button pill variant="outline-secondary" :disabled="publicationsDisabled" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
+            <b-form-checkbox class="mb-1 mr-1" size="sm" :disabled="publicationsDisabled" :value="storedPublication.number" v-model="checkedPublications" v-for="storedPublication in sortedPublications">n°{{storedPublication.number}} - {{storedPublication.publication | moment("MMMM YYYY")}}</b-form-checkbox>
             <a href="publications" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a>
           </b-container>
 
@@ -134,6 +138,8 @@ export default {
   components: { InterestList, InterestMap },
   data: function() {
     return {
+      publicationsDisabled: false,
+      publicationRadioSelected: "C",
       show: false,
       interests: [],
       normalIcon: [30, 30],
@@ -166,12 +172,10 @@ export default {
       this.storedCategories.forEach((storedCategory) => {
         this.checkedCategories.push(storedCategory.name)
       })
-      // Je décoche tous les numéros
-      this.checkedPublications = [];
-      // Et je recoche tout
-      this.storedPublications.forEach((storedPublication) => {
-        this.checkedPublications.push(storedPublication.number)
-      })
+      // Je resélectionne tous les numéros
+      this.allPublicationsRadio()
+      // Je coche le bon bouton radio dans la modale filtre publications
+      this.publicationRadioSelected = "C"
       // Et je vide tous les input du select de recherche
       this.emptySearchInput();
     },
@@ -221,7 +225,7 @@ export default {
         this.checkedRegions = []
       }
     },
-    // Cocher toutes les catégories dans le filtre
+    // Bouton cocher/décocher toutes les catégories dans le filtre
     allCategories: function(){
       if(this.checkedCategories.length==0) {
         this.storedCategories.forEach((storedCategory) => {
@@ -231,7 +235,7 @@ export default {
         this.checkedCategories = []
       }
     },
-    // Cocher tous les numéros dans le filtre
+    // Bouton cocher/décocher tous les numéros dans le filtre
     allPublications: function(){
       if(this.checkedPublications.length==0) {
         this.storedPublications.forEach((storedPublication) => {
@@ -243,6 +247,7 @@ export default {
     },
     // Méthode gérant l'affichage direct du dernier numéro publié si case cochée
     lastPublication:function(){
+      this.publicationsDisabled = true
       if(this.checkedPublications==this.storedPublications[0].number) {
         this.checkedPublications = []
         this.storedPublications.forEach((storedPublication) => {
@@ -253,7 +258,9 @@ export default {
         this.checkedPublications.push(this.storedPublications[0].number)
       }
     },
+    // Méthode gérant l'affichage direct des 12 derniers numéros publiés si case cochée
     lastTwelvePublications:function(){
+      this.publicationsDisabled = true
       if(this.checkedPublications.length == 12) {
         this.checkedPublications = []
         this.storedPublications.forEach((storedPublication) => {
@@ -266,19 +273,18 @@ export default {
         }
       }
     },
-    // lastThreeYearsPublications:function(){
-    //   if(this.checkedPublications.length == 36) {
-    //     this.checkedPublications = []
-    //     this.storedPublications.forEach((storedPublication) => {
-    //       this.checkedPublications.push(storedPublication.number)
-    //     })
-    //   } else {
-    //     this.checkedPublications = []
-    //     for (let i = 0; i < 36; i++) {
-    //       this.checkedPublications.push(this.storedPublications[i].number)
-    //     }
-    //   }
-    // }
+    // Méthode gérant l'affichage par défaut de tous les numéros
+    allPublicationsRadio: function(){
+      this.publicationsDisabled = false
+      this.checkedPublications = []
+      if(this.checkedPublications.length==0) {
+        this.storedPublications.forEach((storedPublication) => {
+          this.checkedPublications.push(storedPublication.number)
+        })
+      } else {
+        this.checkedPublications = []
+      }
+    },
   },
   computed: {
     // Pour avoir plusieurs filtres permettant d'affiner la recherche, j'enchaîne les computed.

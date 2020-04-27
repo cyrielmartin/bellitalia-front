@@ -96,6 +96,7 @@
           cancel-title="Annuler"
           size="lg"
           button-size="sm"
+          @ok="handleOkPublicationModal"
           >
 
           <b-container fluid>
@@ -109,11 +110,11 @@
               <vue-monthly-picker
               v-model="selectedMonthPublicationModal"
               dateFormat="MMMM YYYY"
-              :monthLabels=monthLabelsPublicationModal>
+              :monthLabels="monthLabelsPublicationModal"
+              @selected="monthSelectedPublicationModal"
+              value="value"
+              >
             </vue-monthly-picker>
-            <div class="">
-            </div>
-
 
           </div>
 
@@ -181,6 +182,7 @@ export default {
       interestDate: '',
       errors: {},
       newPublication:0,
+      createdPublication:{},
       NotANumberModal: false,
       okDisabledPublicationModal: false,
       selectedMonthPublicationModal: moment(),
@@ -189,9 +191,24 @@ export default {
   },
 
   methods: {
+    // Validation de la modal d'ajout d'une publication
+    handleOkPublicationModal() {
+      console.log('number', this.interestNumber[0]);
+      console.log('date', this.selectedMonthPublicationModal._d);
+      axios.post('http://127.0.0.1:8000/api/bellitalia', {
+        number: this.interestNumber[0],
+        date: this.selectedMonthPublicationModal,
+      })
+
+      // WIP : afficher la publication qui vient d'être créée dans le multiselect.
+      this.storedPublications.push(this.createdPublication)
+    },
+    // WIP : peut être utile pour alerter d'une date déjà associée
+    monthSelectedPublicationModal(){
+      console.log('nouveau mois sélectionné');
+    },
     // Méthodes gérant l'ajout et la suppression d'une image
     onFileChange(e) {
-      console.log('coucou');
       var files = e.target.files || e.dataTransfer.files;
       if (!files.length)
       return;
@@ -226,13 +243,14 @@ export default {
     },
     // Ajout d'une nouvelle publication à la volée
     addPublication(newPublication) {
-      const createdPublication = {
+      this.createdPublication = {
         number: newPublication,
       }
+      console.log('created', this.createdPublication);
       // Le JS empêche la saisie de lettres, mais Multiselect en laisse passer malgré tout une.
       // Et comme, en plus, le multiselect ne renvoie que des strings :
       // On parseInt tout ce qui est envoyé par le Multiselect
-      var parsedPublication = parseInt(createdPublication.number)
+      var parsedPublication = parseInt(this.createdPublication.number)
       // Pour une raison que j'ignore, je dois redire que interestNumber est un tableau, sinon bug à l'update.
       this.interestNumber = new Array()
       // On affiche ensuite la nouvelle publication dans l'input
@@ -255,34 +273,34 @@ export default {
       // Ouverture de la modale d'ajout d'un nouveau numéro
       this.$refs['addPublicationModal'].show()
 
-      this.$modal.show('dialog', {
-        title: 'Création d\'une publication',
-        text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
-        buttons: [
-          {
-            title: 'Enregistrer',
-            //On envoie tout ça à l'API pour enregistrement
-            handler: () => {
-              axios.post('http://127.0.0.1:8000/api/bellitalia', {
-                number: newPublication,
-                date: document.querySelector('input#date').value,
-              }).then(() =>
-              //On referme la modale, mais avant on vérifie que le numéro de publication est bien valide
-              //(vérif nécessaire car multiselect laisse passer 1 lettre malgré contrôle JS)
-              this.hideModal()).catch(function (error) {
-                alert(error.response.data.number[0])
-              });
-              //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
-              this.storedPublications.push(createdPublication)
-            }
-          },
-          {
-            // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
-            handler:()=> {this.interestNumber.pop(), this.hideModal()},
-            title: 'Annuler',
-          }
-        ]
-      })
+      // this.$modal.show('dialog', {
+      //   title: 'Création d\'une publication',
+      //   text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
+      //   buttons: [
+      //     {
+      //       title: 'Enregistrer',
+      //       //On envoie tout ça à l'API pour enregistrement
+      //       handler: () => {
+      //         axios.post('http://127.0.0.1:8000/api/bellitalia', {
+      //           number: newPublication,
+      //           date: document.querySelector('input#date').value,
+      //         }).then(() =>
+      //         //On referme la modale, mais avant on vérifie que le numéro de publication est bien valide
+      //         //(vérif nécessaire car multiselect laisse passer 1 lettre malgré contrôle JS)
+      //         this.hideModal()).catch(function (error) {
+      //           alert(error.response.data.number[0])
+      //         });
+      //         //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
+      //         this.storedPublications.push(createdPublication)
+      //       }
+      //     },
+      //     {
+      //       // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
+      //       handler:()=> {this.interestNumber.pop(), this.hideModal()},
+      //       title: 'Annuler',
+      //     }
+      //   ]
+      // })
 
     },
     //Petite méthode gérant la fermeture de la modale

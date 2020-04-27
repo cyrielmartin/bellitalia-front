@@ -9,7 +9,7 @@ import VModal from 'vue-js-modal'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
+import VueMonthlyPicker from 'vue-monthly-picker'
 
 Vue.use(FlashMessage);
 

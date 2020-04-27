@@ -9,11 +9,10 @@
 
           <!-- Filtres publications -->
           <!-- Comme le select était beaucoup trop long et cassait toute la mise en page, je passe par une modale -->
-          <b-button @click="show=true" class="mr-1 mb-1" size="sm" :variant=publicationClass>{{publicationSelectText}} <i class="fas fa-caret-down caret"></i></b-button>
+          <b-button @click="publicationModalShow=true" class="mr-1 mb-1" size="sm" :variant=publicationClass>{{publicationSelectText}} <i class="fas fa-caret-down caret"></i></b-button>
 
           <b-modal
-          id="modal-1"
-          v-model="show"
+          v-model="publicationModalShow"
           scrollable
           title="Filtrer par numéro"
           ok-title="Valider"
@@ -140,7 +139,7 @@ export default {
     return {
       publicationsDisabled: false,
       publicationRadioSelected: "C",
-      show: false,
+      publicationModalShow: false,
       interests: [],
       normalIcon: [30, 30],
       storedRegions: [],

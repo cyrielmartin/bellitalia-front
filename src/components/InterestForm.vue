@@ -123,11 +123,6 @@
 
       </b-modal>
 
-      <!-- Plugin vue-js-modal gérant l'ajout dynamique de nouveaux numéros BI + date publication -->
-      <modal name="publication">
-      </modal>
-      <v-dialog/>
-
       <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
       <div class="form-group">
         <div>

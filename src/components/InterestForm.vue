@@ -8,14 +8,13 @@
         <span class="formTitle" v-if="!edit">Ajouter un nouveau point d'intérêt</span>
         <span class="formTitle" v-if="edit">Modifier un point d'intérêt</span>
 
-
         <div class="card-body">
           <form
           novalidate="true">
           <div class="form-group">
             <label>Nom du point d'intérêt <span class="redStar">*</span></label>
-            <input class="form-control" v-model="interestName" :class="{'border-red': errors.name}">
-            <p class="text-error" v-if="errors.name" v-text="errors.name[0]"></p>
+            <input class="form-control" v-model="interestName" :class="nameErrorClass" @click="inputNameChange">
+            <p id="name-error" :class="nameErrorTextClass" v-if="errors.name" v-text="errors.name[0]"></p>
           </div>
 
           <div class="form-group">
@@ -43,26 +42,26 @@
 
           <div class="form-group">
             <label>Latitude <span class="redStar">*</span></label>
-            <input id="latitude" min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="{'border-red': errors.latitude}">
+            <input min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="latitudeErrorClass" @click="inputLatitudeChange">
             <small class="helpText">Le séparateur décimal doit être un point</small><br/>
             <small class="helpText">La saisie des lettres est désactivée</small>
-            <p class="text-error" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
+            <p :class="latitudeErrorTextClass" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
           </div>
 
           <div class="form-group">
             <label>Longitude <span class="redStar">*</span></label>
-            <input id="longitude" min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="{'border-red': errors.longitude}">
+            <input min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="longitudeErrorClass" @click="inputLongitudeChange">
             <small class="helpText">Le séparateur décimal doit être un point</small><br/>
             <small class="helpText">La saisie des lettres est désactivée</small>
-            <p class="text-error" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
+            <p :class="longitudeErrorTextClass" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
           </div>
 
           <!-- Villes gérées grâce à plugin Vue Multiselect -->
           <div class="form-group">
             <div>
               <label>Ville <span class="redStar">*</span></label>
-              <multiselect v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" :class="{'multiselect__tags': errors.city_id}"></multiselect>
-              <p class="text-error" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
+              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass"></multiselect>
+              <p :class="cityErrorTextClass" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
             </div>
           </div>
 
@@ -70,10 +69,10 @@
           <div class="form-group">
             <div>
               <label>Région <span class="redStar">*</span></label>
-              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="{'multiselect__tags': errors.region_id}">
+              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="regionErrorClass" @open="inputRegionChange">
                 <span slot="noResult">Aucune région correspondante</span>
               </multiselect>
-              <p class="text-error" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+              <p :class="regionErrorTextClass" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
             </div>
           </div>
 
@@ -81,9 +80,9 @@
             <div>
               <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
               <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="{'multiselect__tags': errors.bellitalia_id}"></multiselect>
+              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange"></multiselect>
               <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
-              <p class="text-error" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+              <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
             </div>
           </div>
 
@@ -114,6 +113,7 @@
               @selected="monthSelectedPublicationModal"
               value="value"
               placeHolder="Cliquez ici pour sélectionner une date de publication"
+              id="month-picker"
               >
             </vue-monthly-picker>
             <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
@@ -132,8 +132,8 @@
       <div class="form-group">
         <div>
           <label>Catégorie(s) <span class="redStar">*</span></label>
-          <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="{'multiselect__tags': errors.tag_id}"></multiselect>
-          <p class="text-error" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
+          <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange"></multiselect>
+          <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
         </div>
       </div>
       <div class="d-flex justify-content-center">
@@ -182,6 +182,20 @@ export default {
       storedPublications:[],
       interestDate: '',
       errors: {},
+      nameErrorClass: "",
+      nameErrorTextClass: "",
+      latitudeErrorClass: "",
+      latitudeErrorTextClass: "",
+      longitudeErrorClass: "",
+      longitudeErrorTextClass: "",
+      cityErrorClass: "",
+      cityErrorTextClass: "",
+      regionErrorClass: "",
+      regionErrorTextClass:"",
+      publicationErrorClass: "",
+      publicationErrorTextClass: "",
+      tagErrorClass:"",
+      tagErrorTextClass:"",
       newPublication:0,
       createdPublication:{},
       NotANumberPublicationModal: false,
@@ -193,27 +207,75 @@ export default {
   },
 
   methods: {
+    // Pour chaque input du formulaire
+    // Si un message d'erreur est affiché, si la bordure est rouge
+    // Au clic sur chaque input :
+    // - J'enlève la bordure rouge
+    // - J'enlève le message d'erreur
+    // Comme tout est réactif, si je revalide et qu'il y a encore des erreurs :
+    // les messages et les bordures réapparaissent.
+    inputNameChange(){
+      this.nameErrorClass = ""
+      this.nameErrorTextClass = "text-error-hidden"
+    },
+    inputLatitudeChange(){
+      this.latitudeErrorClass = ""
+      this.latitudeErrorTextClass = "text-error-hidden"
+    },
+    inputLongitudeChange(){
+      this.longitudeErrorClass = ""
+      this.longitudeErrorTextClass = "text-error-hidden"
+    },
+    inputCityChange(){
+      this.cityErrorClass=""
+      this.cityErrorTextClass = "text-error-hidden"
+    },
+    inputRegionChange(){
+      this.regionErrorClass=""
+      this.regionErrorTextClass= "text-error-hidden"
+    },
+    inputPublicationChange(){
+      this.publicationErrorClass=""
+      this.publicationErrorTextClass="text-error-hidden"
+    },
+    inputTagChange(){
+      this.tagErrorClass=""
+      this.tagErrorTextClass="text-error-hidden"
+    },
     // Validation de la modale d'ajout d'une publication
     handleOkPublicationModal(bvModalEvt) {
+      var element = document.getElementById("month-picker")
       // Si une date a bien été renseignée, je peux valider la modale
       if(this.selectedMonthPublicationModal) {
+        // J'enlève le message d'erreur s'il est présent
         this.NoDatePublicationModal = false
+        // J'enlève le border rouge s'il est présent
+        element.classList.remove("vue-monthly-picker-red");
+        // J'enregistre mon nouveau numéro en base
         axios.post('http://127.0.0.1:8000/api/bellitalia', {
           number: this.interestNumber[0],
           date: this.selectedMonthPublicationModal,
-          // Si pas de date, j'empêche la validation et j'affiche un message d'erreur
+          // Si pas de date, j'empêche la validation et :
+          // - j'affiche un message d'erreur
+          // - je passe le border en rouge
         }) } else {
           bvModalEvt.preventDefault()
           this.NoDatePublicationModal = true
+          element.classList.add("vue-monthly-picker-red")
+
         }
         // Une fois le numéro créé, je l'ajoute à la liste déroulante du Multiselect
         this.storedPublications.push(this.createdPublication)
         // Et je le sélectionne dans l'input du Multiselect
         this.interestNumber = {"number": this.interestNumber[0], "publication": this.selectedMonthPublicationModal._d }
       },
-      // WIP : peut être utile pour alerter d'une date déjà associée
+      // Pour tout changement dans le MonthPicker :
       monthSelectedPublicationModal(){
-        console.log('nouveau mois sélectionné');
+        var element = document.getElementById("month-picker")
+        // J'enlève le message d'erreur s'il est présent
+        this.NoDatePublicationModal = false
+        // J'enlève le border rouge s'il est présent
+        element.classList.remove("vue-monthly-picker-red");
       },
       // Méthodes gérant l'ajout et la suppression d'une image
       onFileChange(e) {
@@ -278,40 +340,6 @@ export default {
         }
         // Ouverture de la modale d'ajout d'un nouveau numéro
         this.$refs['addPublicationModal'].show()
-
-        // this.$modal.show('dialog', {
-        //   title: 'Création d\'une publication',
-        //   text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
-        //   buttons: [
-        //     {
-        //       title: 'Enregistrer',
-        //       //On envoie tout ça à l'API pour enregistrement
-        //       handler: () => {
-        //         axios.post('http://127.0.0.1:8000/api/bellitalia', {
-        //           number: newPublication,
-        //           date: document.querySelector('input#date').value,
-        //         }).then(() =>
-        //         //On referme la modale, mais avant on vérifie que le numéro de publication est bien valide
-        //         //(vérif nécessaire car multiselect laisse passer 1 lettre malgré contrôle JS)
-        //         this.hideModal()).catch(function (error) {
-        //           alert(error.response.data.number[0])
-        //         });
-        //         //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
-        //         this.storedPublications.push(createdPublication)
-        //       }
-        //     },
-        //     {
-        //       // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
-        //       handler:()=> {this.interestNumber.pop(), this.hideModal()},
-        //       title: 'Annuler',
-        //     }
-        //   ]
-        // })
-
-      },
-      //Petite méthode gérant la fermeture de la modale
-      hideModal () {
-        this.$modal.hide('dialog')
       },
       // Récupération des publications BI en BDD
       getStoredPublications() {
@@ -371,6 +399,20 @@ export default {
         })
         .catch(error => {
           this.errors = error.response.data
+          this.cityErrorClass= "multiselect__tags-red"
+          this.cityErrorTextClass="text-error"
+          this.regionErrorClass= "multiselect__tags-red"
+          this.regionErrorTextClass= "text-error"
+          this.publicationErrorClass= "multiselect__tags-red"
+          this.publicationErrorTextClass= "text-error"
+          this.tagErrorClass= "multiselect__tags-red"
+          this.tagErrorTextClass="text-error"
+          this.nameErrorClass= "border-red"
+          this.nameErrorTextClass="text-error"
+          this.latitudeErrorClass= "border-red"
+          this.latitudeErrorTextClass="text-error"
+          this.longitudeErrorClass= "border-red"
+          this.longitudeErrorTextClass="text-error"
         })
       },
       // Modification d'un point d'intérêt
@@ -479,8 +521,13 @@ export default {
         .border-red {
           border-color: red;
         }
-        .multiselect__tags {
-          border-color: red;
+        .multiselect__tags-red {
+          border: 1px solid red;
+          border-radius: 5px;
+        }
+        .multiselect__tags-black {
+          border: 1px solid black;
+          border-radius: 5px;
         }
         .helpText {
           color: #ADADAD;
@@ -502,5 +549,11 @@ export default {
         }
         .publicationModal{
           min-height: 100vh;
+        }
+        .vue-monthly-picker-red {
+          border: 1px solid red;
+        }
+        .text-error-hidden {
+          display: none;
         }
         </style>

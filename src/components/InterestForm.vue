@@ -102,22 +102,23 @@
           <b-container fluid>
 
             <!-- Message d'erreur affiché si le numéro contient une lettre -->
-            <div class="text-error" v-if="NotANumberModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
+            <div class="text-error" v-if="NotANumberPublicationModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
 
             <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
-            <div class="publicationModal" v-if="!NotANumberModal">
-              <div class="mb-3">Merci de préciser la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :</div>
+            <div class="publicationModal" v-if="!NotANumberPublicationModal">
+              <div class="mb-3">Merci de préciser la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
               <vue-monthly-picker
               v-model="selectedMonthPublicationModal"
               dateFormat="MMMM YYYY"
               :monthLabels="monthLabelsPublicationModal"
               @selected="monthSelectedPublicationModal"
               value="value"
+              placeHolder="Cliquez ici pour sélectionner une date de publication"
               >
             </vue-monthly-picker>
-
+            <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
+            <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
-
         </b-container>
 
       </b-modal>
@@ -183,7 +184,8 @@ export default {
       errors: {},
       newPublication:0,
       createdPublication:{},
-      NotANumberModal: false,
+      NotANumberPublicationModal: false,
+      NoDatePublicationModal: false,
       okDisabledPublicationModal: false,
       selectedMonthPublicationModal: moment(),
       monthLabelsPublicationModal:['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -191,310 +193,314 @@ export default {
   },
 
   methods: {
-    // Validation de la modal d'ajout d'une publication
-    handleOkPublicationModal() {
-      console.log('number', this.interestNumber[0]);
-      console.log('date', this.selectedMonthPublicationModal._d);
-      axios.post('http://127.0.0.1:8000/api/bellitalia', {
-        number: this.interestNumber[0],
-        date: this.selectedMonthPublicationModal,
-      })
-
-      // WIP : afficher la publication qui vient d'être créée dans le multiselect.
-      this.storedPublications.push(this.createdPublication)
-    },
-    // WIP : peut être utile pour alerter d'une date déjà associée
-    monthSelectedPublicationModal(){
-      console.log('nouveau mois sélectionné');
-    },
-    // Méthodes gérant l'ajout et la suppression d'une image
-    onFileChange(e) {
-      var files = e.target.files || e.dataTransfer.files;
-      if (!files.length)
-      return;
-      this.createImage(files[0]);
-    },
-    createImage(file) {
-      var reader = new FileReader();
-      reader.onload = (e) => {
-        this.image = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    },
-    removeImage: function () {
-      this.image = '';
-
-    },
-    // Ajout dynamique d'un tag en cours de saisie du formulaire
-    addTag(newTag) {
-      const createdTag = {
-        name: newTag,
-      }
-      this.storedTags.push(createdTag);
-      this.interestTag.push(createdTag);
-      axios.post('http://127.0.0.1:8000/api/tag', {
-        tag_id: this.interestTag,
-      })
-    },
-    // Récupération des tags en BDD
-    getStoredTags() {
-      axios.get('http://127.0.0.1:8000/api/tag')
-      .then(response => (this.storedTags = response.data))
-    },
-    // Ajout d'une nouvelle publication à la volée
-    addPublication(newPublication) {
-      this.createdPublication = {
-        number: newPublication,
-      }
-      console.log('created', this.createdPublication);
-      // Le JS empêche la saisie de lettres, mais Multiselect en laisse passer malgré tout une.
-      // Et comme, en plus, le multiselect ne renvoie que des strings :
-      // On parseInt tout ce qui est envoyé par le Multiselect
-      var parsedPublication = parseInt(this.createdPublication.number)
-      // Pour une raison que j'ignore, je dois redire que interestNumber est un tableau, sinon bug à l'update.
-      this.interestNumber = new Array()
-      // On affiche ensuite la nouvelle publication dans l'input
-      this.interestNumber.push(parsedPublication)
-      // On enlève le message d'erreur s'il était présent
-      // On réactive le bouton valider s'il avait été désactivé
-      this.NotANumberModal = false;
-      this.okDisabledPublicationModal = false;
-      // Si jamais une lettre a réussi à se glisser jusqu'ici, on affiche un message d'erreur
-      // Et on désactive le bouton valider
-      if(isNaN(this.interestNumber[0])) {
-        console.log('pas un nombre');
-        this.NotANumberModal = true;
-        this.okDisabledPublicationModal = true;
-      } else {
-        // On remet tout à la normale si l'utilisateur saisit finalement un nombre valide
-        this.NotANumberModal = false;
-        this.okDisabledPublicationModal = false;
-      }
-      // Ouverture de la modale d'ajout d'un nouveau numéro
-      this.$refs['addPublicationModal'].show()
-
-      // this.$modal.show('dialog', {
-      //   title: 'Création d\'une publication',
-      //   text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
-      //   buttons: [
-      //     {
-      //       title: 'Enregistrer',
-      //       //On envoie tout ça à l'API pour enregistrement
-      //       handler: () => {
-      //         axios.post('http://127.0.0.1:8000/api/bellitalia', {
-      //           number: newPublication,
-      //           date: document.querySelector('input#date').value,
-      //         }).then(() =>
-      //         //On referme la modale, mais avant on vérifie que le numéro de publication est bien valide
-      //         //(vérif nécessaire car multiselect laisse passer 1 lettre malgré contrôle JS)
-      //         this.hideModal()).catch(function (error) {
-      //           alert(error.response.data.number[0])
-      //         });
-      //         //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
-      //         this.storedPublications.push(createdPublication)
-      //       }
-      //     },
-      //     {
-      //       // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
-      //       handler:()=> {this.interestNumber.pop(), this.hideModal()},
-      //       title: 'Annuler',
-      //     }
-      //   ]
-      // })
-
-    },
-    //Petite méthode gérant la fermeture de la modale
-    hideModal () {
-      this.$modal.hide('dialog')
-    },
-    // Récupération des publications BI en BDD
-    getStoredPublications() {
-      axios.get('http://127.0.0.1:8000/api/bellitalia')
-      .then(response => (this.storedPublications = response.data))
-    },
-    // Récupération des régions en BDD
-    getStoredRegions() {
-      axios.get('http://127.0.0.1:8000/api/region')
-      .then(response => (this.storedRegions = response.data))
-    },
-    // Récupération des villes en BDD
-    getStoredCities() {
-      axios.get('http://127.0.0.1:8000/api/city')
-      .then(response => (this.storedCities = response.data))
-    },
-    // Ajout d'une ville
-    addCity(newCity) {
-      const createdCity = {
-        name: newCity,
-      }
-      this.interestCity = createdCity;
-    },
-    // Enregistrement d'un nouveau point d'intérêt
-    submitForm() {
-      axios.post('http://127.0.0.1:8000/api/interest', {
-        name: this.interestName,
-        description: this.interestDescription,
-        link: this.interestLink,
-        latitude: this.interestLatitude,
-        longitude: this.interestLongitude,
-        city_id: this.interestCity,
-        region_id: this.interestRegion,
-        bellitalia_id: this.interestNumber,
-        tag_id: this.interestTag,
-        image: this.image,
-      })
-      .then(() => {
-        this.interestName = ""
-        this.interestDescription = ""
-        this.interestLink = ""
-        this.interestLatitude = ""
-        this.interestLongitude = ""
-        this.interestCity = ""
-        this.interestRegion = ""
-        this.interestNumber = ""
-        this.interestDate = ""
-        this.interestTag = ""
-        this.image = ""
-        this.errors = {}
-        this.$router.push('/')
-        this.flashMessage.show({
-          status: 'success',
-          title: 'Confirmation',
-          message: 'Le point d\'intérêt a bien été enregistré'
-        });
-      })
-      .catch(error => {
-        this.errors = error.response.data
-      })
-    },
-    // Modification d'un point d'intérêt
-    editForm() {
-      axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
-        name: this.interestName,
-        description: this.interestDescription,
-        link: this.interestLink,
-        latitude: this.interestLatitude,
-        longitude: this.interestLongitude,
-        city_id: this.interestCity,
-        region_id: this.interestRegion,
-        bellitalia_id: this.interestNumber,
-        tag_id: this.interestTag,
-        image: this.image,
-      })
-      .then(() => {
-        this.interestName = ""
-        this.interestDescription = ""
-        this.interestLink = ""
-        this.interestLatitude = ""
-        this.interestLongitude = ""
-        this.interestCity = ""
-        this.interestRegion = ""
-        this.interestNumber = ""
-        this.interestDate = ""
-        this.interestTag = ""
-        this.image = ""
-        this.errors = {}
-        this.$router.push('/')
-        this.flashMessage.show({
-          status: 'success',
-          title: 'Confirmation',
-          message: 'Le point d\'intérêt a bien été modifié'
-        });
-      })
-      .catch(error => {
-        this.errors = error.response.data
-      })
-    },
-    // Récupération d'un point d'intérêt existant pour édit
-    getInterest() {
-      axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
-      .then(r => {
-        this.edit = true
-        this.interest = r.data.data
-        this.interestName = r.data.data.name
-        this.interestDescription = r.data.data.description
-        this.interestLink = r.data.data.link
-        this.interestLatitude = r.data.data.latitude
-        this.interestLongitude = r.data.data.longitude
-        this.interestCity = {"name": r.data.data.city.name}
-        this.interestRegion = {"name": r.data.data.city.region_id.name}
-        this.image = r.data.data.image
-        this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
-        this.interestTag = this.interestTag.concat(r.data.data.tags)
-      })
-    },
-  },
-  mounted: function(){
-    this.getStoredRegions();
-    this.getStoredTags();
-    this.getStoredPublications();
-    this.getInterest();
-    this.getStoredCities();
-
-    // Méthode JS empêchant de saisir autre chose que des chiffres
-    function setInputFilter(textbox, inputFilter) {
-      ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
-        textbox.addEventListener(event, function() {
-          if (inputFilter(this.value)) {
-            this.oldValue = this.value;
-            this.oldSelectionStart = this.selectionStart;
-            this.oldSelectionEnd = this.selectionEnd;
-          } else if (this.hasOwnProperty("oldValue")) {
-            this.value = this.oldValue;
-            this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
-          }
-        });
-      });
-    }
-    // On applique cette méthode sur notre input numéro de Bell'Italia
-    setInputFilter(document.getElementById("number"), function(value) {
-      return /^\d*$/.test(value); }),
-
-      //On applique une méthode légèrement différente pour la latitude et la longitude (que des chiffres + points)
-      setInputFilter(document.getElementById("latitude"), function(value) {
-        return /^-?\d*[.]?\d*$/.test(value); })
-
-        setInputFilter(document.getElementById("longitude"), function(value) {
-          return /^-?\d*[.]?\d*$/.test(value); })
+    // Validation de la modale d'ajout d'une publication
+    handleOkPublicationModal(bvModalEvt) {
+      // Si une date a bien été renseignée, je peux valider la modale
+      if(this.selectedMonthPublicationModal) {
+        this.NoDatePublicationModal = false
+        axios.post('http://127.0.0.1:8000/api/bellitalia', {
+          number: this.interestNumber[0],
+          date: this.selectedMonthPublicationModal,
+          // Si pas de date, j'empêche la validation et j'affiche un message d'erreur
+        }) } else {
+          bvModalEvt.preventDefault()
+          this.NoDatePublicationModal = true
         }
-      }
-      </script>
-      <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
-      <style lang="scss" scoped >
+        // Une fois le numéro créé, je l'ajoute à la liste déroulante du Multiselect
+        this.storedPublications.push(this.createdPublication)
+        // Et je le sélectionne dans l'input du Multiselect
+        this.interestNumber = {"number": this.interestNumber[0], "publication": this.selectedMonthPublicationModal._d }
+      },
+      // WIP : peut être utile pour alerter d'une date déjà associée
+      monthSelectedPublicationModal(){
+        console.log('nouveau mois sélectionné');
+      },
+      // Méthodes gérant l'ajout et la suppression d'une image
+      onFileChange(e) {
+        var files = e.target.files || e.dataTransfer.files;
+        if (!files.length)
+        return;
+        this.createImage(files[0]);
+      },
+      createImage(file) {
+        var reader = new FileReader();
+        reader.onload = (e) => {
+          this.image = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      },
+      removeImage: function () {
+        this.image = '';
 
-      img {
-        width: 30%;
-        display: block;
-        margin-bottom: 10px;
+      },
+      // Ajout dynamique d'un tag en cours de saisie du formulaire
+      addTag(newTag) {
+        const createdTag = {
+          name: newTag,
+        }
+        this.storedTags.push(createdTag);
+        this.interestTag.push(createdTag);
+        axios.post('http://127.0.0.1:8000/api/tag', {
+          tag_id: this.interestTag,
+        })
+      },
+      // Récupération des tags en BDD
+      getStoredTags() {
+        axios.get('http://127.0.0.1:8000/api/tag')
+        .then(response => (this.storedTags = response.data))
+      },
+      // Ajout d'une nouvelle publication à la volée
+      addPublication(newPublication) {
+        this.createdPublication = {
+          number: newPublication,
+        }
+        // Le JS empêche la saisie de lettres, mais Multiselect en laisse passer malgré tout une.
+        // Et comme, en plus, le multiselect ne renvoie que des strings :
+        // On parseInt tout ce qui est envoyé par le Multiselect
+        var parsedPublication = parseInt(this.createdPublication.number)
+        // Pour une raison que j'ignore, je dois redire que interestNumber est un tableau, sinon bug à l'update.
+        this.interestNumber = new Array()
+        // On affiche ensuite la nouvelle publication dans l'input
+        this.interestNumber.push(parsedPublication)
+        // On enlève le message d'erreur s'il était présent
+        // On réactive le bouton valider s'il avait été désactivé
+        this.NotANumberPublicationModal = false;
+        this.okDisabledPublicationModal = false;
+        // Si jamais une lettre a réussi à se glisser jusqu'ici, on affiche un message d'erreur
+        // Et on désactive le bouton valider
+        if(isNaN(this.interestNumber[0])) {
+          this.NotANumberPublicationModal = true;
+          this.okDisabledPublicationModal = true;
+        } else {
+          // On remet tout à la normale si l'utilisateur saisit finalement un nombre valide
+          this.NotANumberPublicationModal = false;
+          this.okDisabledPublicationModal = false;
+        }
+        // Ouverture de la modale d'ajout d'un nouveau numéro
+        this.$refs['addPublicationModal'].show()
+
+        // this.$modal.show('dialog', {
+        //   title: 'Création d\'une publication',
+        //   text: '<p>Merci de préciser la date de parution du n°<strong>'+newPublication+ '</strong> de Bell\'Italia : </p><input id="date" type="date" class="form-control" v-model="interestDate"><small>Seuls le mois et l\'année seront enregistrés</small>',
+        //   buttons: [
+        //     {
+        //       title: 'Enregistrer',
+        //       //On envoie tout ça à l'API pour enregistrement
+        //       handler: () => {
+        //         axios.post('http://127.0.0.1:8000/api/bellitalia', {
+        //           number: newPublication,
+        //           date: document.querySelector('input#date').value,
+        //         }).then(() =>
+        //         //On referme la modale, mais avant on vérifie que le numéro de publication est bien valide
+        //         //(vérif nécessaire car multiselect laisse passer 1 lettre malgré contrôle JS)
+        //         this.hideModal()).catch(function (error) {
+        //           alert(error.response.data.number[0])
+        //         });
+        //         //Et on ajoute dynamiquement au menu déroulant la publication que l'on vient de créer
+        //         this.storedPublications.push(createdPublication)
+        //       }
+        //     },
+        //     {
+        //       // Dans le cas où on clique sur Annuler, on vide l'input et on ferme la modale
+        //       handler:()=> {this.interestNumber.pop(), this.hideModal()},
+        //       title: 'Annuler',
+        //     }
+        //   ]
+        // })
+
+      },
+      //Petite méthode gérant la fermeture de la modale
+      hideModal () {
+        this.$modal.hide('dialog')
+      },
+      // Récupération des publications BI en BDD
+      getStoredPublications() {
+        axios.get('http://127.0.0.1:8000/api/bellitalia')
+        .then(response => (this.storedPublications = response.data))
+      },
+      // Récupération des régions en BDD
+      getStoredRegions() {
+        axios.get('http://127.0.0.1:8000/api/region')
+        .then(response => (this.storedRegions = response.data))
+      },
+      // Récupération des villes en BDD
+      getStoredCities() {
+        axios.get('http://127.0.0.1:8000/api/city')
+        .then(response => (this.storedCities = response.data))
+      },
+      // Ajout d'une ville
+      addCity(newCity) {
+        const createdCity = {
+          name: newCity,
+        }
+        this.interestCity = createdCity;
+      },
+      // Enregistrement d'un nouveau point d'intérêt
+      submitForm() {
+        axios.post('http://127.0.0.1:8000/api/interest', {
+          name: this.interestName,
+          description: this.interestDescription,
+          link: this.interestLink,
+          latitude: this.interestLatitude,
+          longitude: this.interestLongitude,
+          city_id: this.interestCity,
+          region_id: this.interestRegion,
+          bellitalia_id: this.interestNumber,
+          tag_id: this.interestTag,
+          image: this.image,
+        })
+        .then(() => {
+          this.interestName = ""
+          this.interestDescription = ""
+          this.interestLink = ""
+          this.interestLatitude = ""
+          this.interestLongitude = ""
+          this.interestCity = ""
+          this.interestRegion = ""
+          this.interestNumber = ""
+          this.interestDate = ""
+          this.interestTag = ""
+          this.image = ""
+          this.errors = {}
+          this.$router.push('/')
+          this.flashMessage.show({
+            status: 'success',
+            title: 'Confirmation',
+            message: 'Le point d\'intérêt a bien été enregistré'
+          });
+        })
+        .catch(error => {
+          this.errors = error.response.data
+        })
+      },
+      // Modification d'un point d'intérêt
+      editForm() {
+        axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
+          name: this.interestName,
+          description: this.interestDescription,
+          link: this.interestLink,
+          latitude: this.interestLatitude,
+          longitude: this.interestLongitude,
+          city_id: this.interestCity,
+          region_id: this.interestRegion,
+          bellitalia_id: this.interestNumber,
+          tag_id: this.interestTag,
+          image: this.image,
+        })
+        .then(() => {
+          this.interestName = ""
+          this.interestDescription = ""
+          this.interestLink = ""
+          this.interestLatitude = ""
+          this.interestLongitude = ""
+          this.interestCity = ""
+          this.interestRegion = ""
+          this.interestNumber = ""
+          this.interestDate = ""
+          this.interestTag = ""
+          this.image = ""
+          this.errors = {}
+          this.$router.push('/')
+          this.flashMessage.show({
+            status: 'success',
+            title: 'Confirmation',
+            message: 'Le point d\'intérêt a bien été modifié'
+          });
+        })
+        .catch(error => {
+          this.errors = error.response.data
+        })
+      },
+      // Récupération d'un point d'intérêt existant pour édit
+      getInterest() {
+        axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
+        .then(r => {
+          this.edit = true
+          this.interest = r.data.data
+          this.interestName = r.data.data.name
+          this.interestDescription = r.data.data.description
+          this.interestLink = r.data.data.link
+          this.interestLatitude = r.data.data.latitude
+          this.interestLongitude = r.data.data.longitude
+          this.interestCity = {"name": r.data.data.city.name}
+          this.interestRegion = {"name": r.data.data.city.region_id.name}
+          this.image = r.data.data.image
+          this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
+          this.interestTag = this.interestTag.concat(r.data.data.tags)
+        })
+      },
+    },
+    mounted: function(){
+      this.getStoredRegions();
+      this.getStoredTags();
+      this.getStoredPublications();
+      this.getInterest();
+      this.getStoredCities();
+
+      // Méthode JS empêchant de saisir autre chose que des chiffres
+      function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+          textbox.addEventListener(event, function() {
+            if (inputFilter(this.value)) {
+              this.oldValue = this.value;
+              this.oldSelectionStart = this.selectionStart;
+              this.oldSelectionEnd = this.selectionEnd;
+            } else if (this.hasOwnProperty("oldValue")) {
+              this.value = this.oldValue;
+              this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+            }
+          });
+        });
       }
-      .text-error {
-        color: red;
-      }
-      .border-red {
-        border-color: red;
-      }
-      .multiselect__tags {
-        border-color: red;
-      }
-      .helpText {
-        color: #ADADAD;
-      }
-      .redStar {
-        color:red;
-      }
-      .imageTrash {
-        // color:red;
-      }
-      .imageTrash:hover{
-        // color:white;
-        cursor: pointer;
-      }
-      .formTitle{
-        font-size: 1.6em;
-        display: flex;
-        justify-content: center;
-      }
-      .publicationModal{
-        min-height: 100vh;
-      }
-      </style>
+      // On applique cette méthode sur notre input numéro de Bell'Italia
+      setInputFilter(document.getElementById("number"), function(value) {
+        return /^\d*$/.test(value); }),
+
+        //On applique une méthode légèrement différente pour la latitude et la longitude (que des chiffres + points)
+        setInputFilter(document.getElementById("latitude"), function(value) {
+          return /^-?\d*[.]?\d*$/.test(value); })
+
+          setInputFilter(document.getElementById("longitude"), function(value) {
+            return /^-?\d*[.]?\d*$/.test(value); })
+          }
+        }
+        </script>
+        <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+        <style lang="scss" scoped >
+
+        img {
+          width: 30%;
+          display: block;
+          margin-bottom: 10px;
+        }
+        .text-error {
+          color: red;
+        }
+        .border-red {
+          border-color: red;
+        }
+        .multiselect__tags {
+          border-color: red;
+        }
+        .helpText {
+          color: #ADADAD;
+        }
+        .redStar {
+          color:red;
+        }
+        .imageTrash {
+          // color:red;
+        }
+        .imageTrash:hover{
+          // color:white;
+          cursor: pointer;
+        }
+        .formTitle{
+          font-size: 1.6em;
+          display: flex;
+          justify-content: center;
+        }
+        .publicationModal{
+          min-height: 100vh;
+        }
+        </style>

@@ -429,12 +429,15 @@ export default {
           });
         })
         .catch(error => {
-          console.log('catch')
           this.errors = error.response.data
-          this.cityErrorClass= "multiselect__tags-red"
-          this.cityErrorTextClass="text-error"
-          this.regionErrorClass= "multiselect__tags-red"
-          this.regionErrorTextClass= "text-error"
+          if(this.errors.city_id) {
+            this.cityErrorClass= "multiselect__tags-red"
+            this.cityErrorTextClass="text-error"
+          }
+          if(this.errors.region_id) {
+            this.regionErrorClass= "multiselect__tags-red"
+            this.regionErrorTextClass= "text-error"
+          }
           if(this.errors.bellitalia_id) {
             this.publicationErrorClass= "multiselect__tags-red"
             this.publicationErrorTextClass= "text-error"
@@ -443,12 +446,18 @@ export default {
             this.tagErrorClass= "multiselect__tags-red"
             this.tagErrorTextClass="text-error"
           }
-          this.nameErrorClass= "border-red"
-          this.nameErrorTextClass="text-error"
-          this.latitudeErrorClass= "border-red"
-          this.latitudeErrorTextClass="text-error"
-          this.longitudeErrorClass= "border-red"
-          this.longitudeErrorTextClass="text-error"
+          if(this.errors.name) {
+            this.nameErrorClass= "border-red"
+            this.nameErrorTextClass="text-error"
+          }
+          if(this.errors.latitude) {
+            this.latitudeErrorClass= "border-red"
+            this.latitudeErrorTextClass="text-error"
+          }
+          if(this.errors.longitude) {
+            this.longitudeErrorClass= "border-red"
+            this.longitudeErrorTextClass="text-error"
+          }
         })
       },
       // Modification d'un point d'intérêt

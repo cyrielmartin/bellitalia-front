@@ -83,11 +83,13 @@
               <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange"></multiselect>
               <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
               <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+
             </div>
           </div>
 
           <b-modal
           ref="addPublicationModal"
+          id="addPublicationModal"
           scrollable
           title="Ajout d'un nouveau numéro"
           ok-title="Valider"
@@ -96,6 +98,7 @@
           size="lg"
           button-size="sm"
           @ok="handleOkPublicationModal"
+          @cancel="handleCancelPublicationModal"
           >
 
           <b-container fluid>
@@ -116,7 +119,12 @@
               id="month-picker"
               >
             </vue-monthly-picker>
+            <!-- Message d'erreur si pb validation front -->
             <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
+            <!-- Messages d'erreur si pb validation back -->
+            <p class="text-error" v-if="errors.date" v-text="errors.date[0]"></p>
+            <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
+
             <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
         </b-container>
@@ -240,7 +248,12 @@ export default {
     // Validation de la modale d'ajout d'une publication
     handleOkPublicationModal(bvModalEvt) {
       var element = document.getElementById("month-picker")
-      // Si une date a bien été renseignée, je peux valider la modale
+
+      // Double contrôle d'intégrité des données : front et back.
+      // Le front est le premier rempart
+      // Si on arrive à cette étape, c'est que le numéro est valide côté front
+      // (sinon message d'erreur dans la modale qui empêche l'accès à cette méthode)
+      // Si la date est bien renseignée, validation front ok, on peut valider la modale
       if(this.selectedMonthPublicationModal) {
         // J'enlève le message d'erreur s'il est présent
         this.NoDatePublicationModal = false
@@ -250,19 +263,41 @@ export default {
         axios.post('http://127.0.0.1:8000/api/bellitalia', {
           number: this.interestNumber[0],
           date: this.selectedMonthPublicationModal,
-          // Si pas de date, j'empêche la validation et :
-          // - j'affiche un message d'erreur
-          // - je passe le border en rouge
-        }) } else {
-          bvModalEvt.preventDefault()
-          this.NoDatePublicationModal = true
+        })
+        // Validation front ET back : si tout va bien des 2 côtés
+        .then(() => {
+          // Une fois le numéro créé, je l'ajoute à la liste déroulante du Multiselect
+          this.storedPublications.push(this.createdPublication)
+          // Et je le sélectionne dans l'input du Multiselect
+          this.interestNumber = {"number": this.interestNumber[0], "publication": this.selectedMonthPublicationModal._d }
+          // Je ferme la modale
+          this.$bvModal.hide('addPublicationModal')
+        })
+        // Validation back : si problème avec validator API, erreur renvoyée
+        .catch(error => {
+          // J'ajoute la bordure rouge
           element.classList.add("vue-monthly-picker-red")
+          // Je remonte les messages d'erreur du validator API
+          this.errors = error.response.data})
 
+          // Dans tous les cas, on empêche la fermeture de la modale par défaut
+          // (ce qui permet d'afficher les messages d'erreur du validator sur la modale)
+          bvModalEvt.preventDefault()
+
+          // Validation front : si pas de date renseignée
+        } else {
+          // J'empêche la validation
+          bvModalEvt.preventDefault()
+          // J'affiche un message d'erreur
+          this.NoDatePublicationModal = true
+          // Je passe le border en rouge
+          element.classList.add("vue-monthly-picker-red")
         }
-        // Une fois le numéro créé, je l'ajoute à la liste déroulante du Multiselect
-        this.storedPublications.push(this.createdPublication)
-        // Et je le sélectionne dans l'input du Multiselect
-        this.interestNumber = {"number": this.interestNumber[0], "publication": this.selectedMonthPublicationModal._d }
+      },
+      // Si la validation back a échoué, le message d'erreur reste affiché dans la modale.
+      // Cette méthode permet de l'effacer quand on clique sur Annuler
+      handleCancelPublicationModal(){
+        this.errors = {}
       },
       // Pour tout changement dans le MonthPicker :
       monthSelectedPublicationModal(){
@@ -373,6 +408,7 @@ export default {
           image: this.image,
         })
         .then(() => {
+          console.log('then')
           this.interestName = ""
           this.interestDescription = ""
           this.interestLink = ""
@@ -393,15 +429,20 @@ export default {
           });
         })
         .catch(error => {
+          console.log('catch')
           this.errors = error.response.data
           this.cityErrorClass= "multiselect__tags-red"
           this.cityErrorTextClass="text-error"
           this.regionErrorClass= "multiselect__tags-red"
           this.regionErrorTextClass= "text-error"
-          this.publicationErrorClass= "multiselect__tags-red"
-          this.publicationErrorTextClass= "text-error"
-          this.tagErrorClass= "multiselect__tags-red"
-          this.tagErrorTextClass="text-error"
+          if(this.errors.bellitalia_id) {
+            this.publicationErrorClass= "multiselect__tags-red"
+            this.publicationErrorTextClass= "text-error"
+          }
+          if(this.errors.tag_id) {
+            this.tagErrorClass= "multiselect__tags-red"
+            this.tagErrorTextClass="text-error"
+          }
           this.nameErrorClass= "border-red"
           this.nameErrorTextClass="text-error"
           this.latitudeErrorClass= "border-red"

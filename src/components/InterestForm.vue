@@ -108,17 +108,38 @@
 
             <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
             <div class="publicationModal" v-if="!NotANumberPublicationModal">
-              <div class="mb-3">Merci de préciser la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+              <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+
+              <!-- Month Picker pour date publication -->
               <vue-monthly-picker
               v-model="selectedMonthPublicationModal"
               dateFormat="MMMM YYYY"
               :monthLabels="monthLabelsPublicationModal"
               @selected="monthSelectedPublicationModal"
-              value="value"
               placeHolder="Cliquez ici pour sélectionner une date de publication"
               id="month-picker"
               >
             </vue-monthly-picker>
+
+            <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+
+            <!-- Upload photo pour couverture publication -->
+            <b-form-file
+            v-model="image"
+            placeholder="Choisissez un fichier ou déposez-le ici..."
+            drop-placeholder="Déposez le fichier ici..."
+            browse-text="Choisir un fichier"
+            @change="onFileChange"
+            accept="image/jpeg, image/png, image/gif"
+            ></b-form-file>
+
+            <div class="mt-4" v-if="image">
+              <img :src="image" :class="imagePublicationModal" @click="clickPublicationImage" />
+              <button class="btn btn-outline-danger" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
+
+            </div>
+            <div id="preview" ref="preview"></div>
+
             <!-- Message d'erreur si pb validation front -->
             <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
             <!-- Messages d'erreur si pb validation back -->
@@ -169,6 +190,7 @@ export default {
   data() {
     return {
       image: '',
+      file: '',
       edit: false,
       interestTag: [],
       storedTags: [],
@@ -197,10 +219,12 @@ export default {
       regionErrorTextClass:"",
       publicationErrorClass: "",
       publicationErrorTextClass: "",
+      imagePublicationErrorClass:"",
       tagErrorClass:"",
       tagErrorTextClass:"",
       newPublication:0,
       createdPublication:{},
+      imagePublicationModal:"previewImage",
       NotANumberPublicationModal: false,
       NoDatePublicationModal: false,
       okDisabledPublicationModal: false,
@@ -208,7 +232,6 @@ export default {
       monthLabelsPublicationModal:['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
     }
   },
-
   methods: {
     // Pour chaque input du formulaire
     // Si un message d'erreur est affiché, si la bordure est rouge
@@ -247,6 +270,7 @@ export default {
     },
     // Validation de la modale d'ajout d'une publication
     handleOkPublicationModal(bvModalEvt) {
+
       var element = document.getElementById("month-picker")
 
       // Double contrôle d'intégrité des données : front et back.
@@ -255,6 +279,7 @@ export default {
       // (sinon message d'erreur dans la modale qui empêche l'accès à cette méthode)
       // Si la date est bien renseignée, validation front ok, on peut valider la modale
       if(this.selectedMonthPublicationModal) {
+        console.log(this.image)
         // J'enlève le message d'erreur s'il est présent
         this.NoDatePublicationModal = false
         // J'enlève le border rouge s'il est présent
@@ -263,6 +288,7 @@ export default {
         axios.post('http://127.0.0.1:8000/api/bellitalia', {
           number: this.interestNumber[0],
           date: this.selectedMonthPublicationModal,
+          image: this.image,
         })
         // Validation front ET back : si tout va bien des 2 côtés
         .then(() => {
@@ -323,7 +349,14 @@ export default {
       },
       removeImage: function () {
         this.image = '';
-
+      },
+      // Méthode permettant de zoomer sur la preview de la photo de publication en cours de chargement
+      clickPublicationImage(){
+        if(this.imagePublicationModal != "zoomImage") {
+          this.imagePublicationModal = "zoomImage"
+        } else {
+          this.imagePublicationModal = "previewImage"
+        }
       },
       // Ajout dynamique d'un tag en cours de saisie du formulaire
       addTag(newTag) {
@@ -600,5 +633,17 @@ export default {
         }
         .text-error-hidden {
           display: none;
+        }
+        .previewImage {
+          width:50%;
+        }
+        .previewImage:hover {
+          cursor: pointer;
+        }
+        .zoomImage {
+          width:100%;
+        }
+        .zoomImage:hover {
+          cursor: pointer;
         }
         </style>

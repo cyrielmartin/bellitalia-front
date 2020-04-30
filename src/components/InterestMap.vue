@@ -327,15 +327,16 @@ h1 {
   font-size: 0.7rem;
 }
 .popupImage {
-  max-width:35%;
+  max-width:100px;
+  border-radius: 0.25rem;
   -webkit-transform: scale(1);
   transform: scale(1);
   -webkit-transition: .3s ease-in-out;
   transition: .3s ease-in-out;
 }
 .popupImage:hover {
-  -webkit-transform: scale(5);
-  transform: scale(5);
+  -webkit-transform: scale(4.5);
+  transform: scale(4.5);
   z-index: 10;
 }
 

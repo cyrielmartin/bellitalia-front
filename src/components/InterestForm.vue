@@ -90,7 +90,6 @@
           <b-modal
           ref="addPublicationModal"
           id="addPublicationModal"
-          scrollable
           title="Ajout d'un nouveau numéro"
           ok-title="Valider"
           :ok-disabled="okDisabledPublicationModal"
@@ -134,8 +133,8 @@
             ></b-form-file>
 
             <div class="mt-4" v-if="image">
-              <img :src="image" :class="imagePublicationModal" @click="clickPublicationImage" />
-              <button class="btn btn-outline-danger" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
+              <img :src="image" class="previewImage" />
+              <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
 
             </div>
             <div id="preview" ref="preview"></div>
@@ -224,7 +223,6 @@ export default {
       tagErrorTextClass:"",
       newPublication:0,
       createdPublication:{},
-      imagePublicationModal:"previewImage",
       NotANumberPublicationModal: false,
       NoDatePublicationModal: false,
       okDisabledPublicationModal: false,
@@ -349,14 +347,6 @@ export default {
       },
       removeImage: function () {
         this.image = '';
-      },
-      // Méthode permettant de zoomer sur la preview de la photo de publication en cours de chargement
-      clickPublicationImage(){
-        if(this.imagePublicationModal != "zoomImage") {
-          this.imagePublicationModal = "zoomImage"
-        } else {
-          this.imagePublicationModal = "previewImage"
-        }
       },
       // Ajout dynamique d'un tag en cours de saisie du formulaire
       addTag(newTag) {
@@ -635,15 +625,21 @@ export default {
           display: none;
         }
         .previewImage {
-          width:50%;
+          max-width:30%;
+          margin:auto;
+          -webkit-transform: scale(1);
+          transform: scale(1);
+          -webkit-transition: .3s ease-in-out;
+          transition: .3s ease-in-out;
         }
         .previewImage:hover {
-          cursor: pointer;
+          -webkit-transform: scale(2);
+          transform: scale(2);
+          z-index: 3;
         }
-        .zoomImage {
-          width:100%;
-        }
-        .zoomImage:hover {
-          cursor: pointer;
+        .deleteImageIcon {
+          margin: auto;
+          display: flex;
+          margin-top:2%;
         }
         </style>

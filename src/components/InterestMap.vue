@@ -50,7 +50,33 @@
     </l-icon>
 
     <!-- Popup -->
-    <l-popup :options="{ keepInView: true}"><div><span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div><h1 class="mt-3 mb-3">{{interest.name}}</h1><img :src="interest.image" width="300" class="popupImage"/><div class="badge badge-dark popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div><p class="popupText">{{interest.description}}</p><p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p><div class="badge badge-info popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div><br><div class="mt-4"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a><span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span></div>
+    <l-popup :options="{ keepInView: true, minWidth:180}">
+
+      <!-- Popup : catégories -->
+      <div class="popupContent">
+        <div>
+          <span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span>
+        </div>
+        <!-- Popup : nom du point d'intérêt -->
+        <h1 class="mt-3 mb-1">{{interest.name}}</h1>
+        <!-- Popup : photo du point d'intérêt -->
+        <div class="">
+          <img :src="interest.image" width="300" class="popupImage"/>
+        </div>
+        <!-- Popup : lieu du point d'intérêt -->
+        <div class="badge badge-light popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div>
+        <!-- Popup : description du point d'intérêt -->
+        <p class="popupText">{{interest.description}}</p>
+        <!-- Popup : lien -->
+        <!-- <p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p> -->
+        <!-- Popup : numéro de Bell'Italia concerné (image + infos) -->
+        <img :src="interest.bellitalia.image" class="popupImage"/><br>
+        <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+        <!-- Popup : liens modifier et supprimer -->
+        <div class="mt-2"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a>
+          <span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span>
+        </div>
+      </div>
     </l-popup>
   </l-marker>
 
@@ -58,10 +84,11 @@
 
 </l-map>
 
-<!-- Modal suppression marqueur -->
+<!-- Modal confirmation suppression point d'intérêt -->
 <modal name="delete">
 </modal>
 <v-dialog/>
+
 </div>
 </div>
 
@@ -118,6 +145,9 @@ export default {
 
   },
   methods: {
+    openPublicationImage(){
+      console.log('open')
+    },
     // Méthode pour recentrer la carte via bouton dédié
     recenterMap: function(){
       this.$nextTick(() => {
@@ -257,20 +287,13 @@ props: {
 .map {
   height: 100vh;
 }
-
-.popupText {
-  font-size: 0.8rem;
-}
-
 .deleteLink {
   color: red;
   cursor: pointer;
 }
-
 .hideMarker {
   opacity: 100%;
 }
-
 .center-button {
   font-size: 1.6em;
   background-color: white;
@@ -280,23 +303,40 @@ props: {
   border-radius: 8%;
   cursor: pointer;
 }
-
 .center-button:hover{
   background-color: #F4F4F4;
 }
-
 .leaflet-control {
   max-height: 90vh;
   overflow: auto;
 }
-
 h1,.muted {
   color: #2c3e5099;
 }
-
 h1 {
   font-size: 30px;
   font-weight:600;
+}
+.popupContent {
+  text-align: center;
+}
+.popupText {
+  font-size: 0.8rem;
+}
+.popupPublicationText {
+  font-size: 0.7rem;
+}
+.popupImage {
+  max-width:35%;
+  -webkit-transform: scale(1);
+  transform: scale(1);
+  -webkit-transition: .3s ease-in-out;
+  transition: .3s ease-in-out;
+}
+.popupImage:hover {
+  -webkit-transform: scale(5);
+  transform: scale(5);
+  z-index: 10;
 }
 
 </style>

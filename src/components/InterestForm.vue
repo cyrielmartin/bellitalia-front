@@ -106,7 +106,7 @@
             <div class="text-error" v-if="NotANumberPublicationModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
 
             <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
-            <div class="publicationModal" v-if="!NotANumberPublicationModal">
+            <div v-if="!NotANumberPublicationModal">
               <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
 
               <!-- Month Picker pour date publication -->
@@ -136,6 +136,8 @@
             browse-text="Choisir un fichier"
             accept="image/jpeg, image/jpg, image/png"
             @change="onFileChange"
+            :state=publicationImageValid
+            id="publication-file-form"
             ></b-form-file>
 
             <div class="mt-4" v-if="image">
@@ -222,6 +224,7 @@ export default {
       publicationErrorClass: "",
       publicationErrorTextClass: "",
       imagePublicationErrorClass:"",
+      publicationImageValid: null,
       tagErrorClass:"",
       tagErrorTextClass:"",
       newPublication:0,
@@ -272,20 +275,21 @@ export default {
     // Validation de la modale d'ajout d'une publication
     handleOkPublicationModal(bvModalEvt) {
 
-      var element = document.getElementById("month-picker")
-      // WIP : créer un autre élément pour cibler input ajout image
-      // Et ajouter l'image à toutes les étapes ci-dessous
+      var monthPicker = document.getElementById("month-picker")
 
       // Double contrôle d'intégrité des données : front et back.
       // Le front est le premier rempart
       // Si on arrive à cette étape, c'est que le numéro est valide côté front
       // (sinon message d'erreur dans la modale qui empêche l'accès à cette méthode)
       // Si la date est bien renseignée, validation front ok, on peut valider la modale
+      // L'image est validée via le front pour son format. Sa présence et sa taille son validés via le back.
+
       if(this.selectedMonthPublicationModal) {
         // J'enlève le message d'erreur s'il est présent
         this.NoDatePublicationModal = false
-        // J'enlève le border rouge s'il est présent
-        element.classList.remove("vue-monthly-picker-red");
+        // J'enlève les border rouge des 2 input (s'ils sont présents)
+        monthPicker.classList.remove("vue-monthly-picker-red")
+        this.publicationImageValid = null
         // J'enregistre mon nouveau numéro en base
         axios.post('http://127.0.0.1:8000/api/bellitalia', {
           number: this.interestNumber[0],
@@ -296,22 +300,21 @@ export default {
         .then(() => {
           // Une fois le numéro créé, je l'ajoute à la liste déroulante du Multiselect
           this.storedPublications.push(this.createdPublication)
-          // Et je le sélectionne dans l'input du Multiselect
+          // Je le sélectionne dans l'input du Multiselect
           this.interestNumber = {"number": this.interestNumber[0], "publication": this.selectedMonthPublicationModal._d }
           // Je ferme la modale
           this.$bvModal.hide('addPublicationModal')
         })
         // Validation back : si problème avec validator API, erreur renvoyée
         .catch(error => {
-          // J'ajoute la bordure rouge
-          // element.classList.add("vue-monthly-picker-red")
           // Je remonte les messages d'erreur du validator API
+          // Pour chaque erreur remontée, j'ajoute la bordure rouge
           this.errors = error.response.data
           if(this.errors.date){
-            element.classList.add("vue-monthly-picker-red")
+            monthPicker.classList.add("vue-monthly-picker-red")
           }
           if(this.errors.image) {
-            // WIP : ajouter bordure rouge en cas de pb back
+            this.publicationImageValid = false
           }
         })
 
@@ -326,24 +329,30 @@ export default {
         // J'affiche un message d'erreur
         this.NoDatePublicationModal = true
         // Je passe le border en rouge
-        element.classList.add("vue-monthly-picker-red")
+        monthPicker.classList.add("vue-monthly-picker-red")
       }
     },
     // Si la validation back a échoué, le message d'erreur reste affiché dans la modale.
     // Cette méthode permet de l'effacer quand on clique sur Annuler
     handleCancelPublicationModal(){
       this.errors = {}
+      this.image = ''
     },
     // Pour tout changement dans le MonthPicker :
     monthSelectedPublicationModal(){
-      var element = document.getElementById("month-picker")
+      var monthPicker = document.getElementById("month-picker")
       // J'enlève le message d'erreur s'il est présent
       this.NoDatePublicationModal = false
       // J'enlève le border rouge s'il est présent
-      element.classList.remove("vue-monthly-picker-red");
+      monthPicker.classList.remove("vue-monthly-picker-red");
     },
     // Méthodes gérant l'ajout et la suppression d'une image
     onFileChange(e) {
+      // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
+      this.publicationImageValid = null
+      // J'enlève le message d'erreur s'il était présent
+      this.errors.image = []
+      // Et je traite la nouvelle photo envoyée
       var files = e.target.files || e.dataTransfer.files;
       if (!files.length)
       return;
@@ -626,9 +635,6 @@ export default {
         display: flex;
         justify-content: center;
       }
-      .publicationModal{
-        min-height: 100vh;
-      }
       .vue-monthly-picker-red {
         border: 1px solid red;
       }
@@ -642,6 +648,7 @@ export default {
         transform: scale(1);
         -webkit-transition: .3s ease-in-out;
         transition: .3s ease-in-out;
+        z-index: 3;
       }
       .previewImage:hover {
         -webkit-transform: scale(2);

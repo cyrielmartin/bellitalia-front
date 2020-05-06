@@ -22,18 +22,18 @@
             <textarea cols="50" rows="5" class="form-control" v-model="interestDescription"></textarea>
           </div>
 
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label>Image</label>
-            <div v-if="!image">
-              <input type="file" @change="onFileChange">
+            <div v-if="!interestImage">
+              <input type="file" @change="onInterestFileChange">
             </div>
             <div v-else>
-              <img :src="image" />
-              <button class="btn btn-outline-danger" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
+              <img :src="interestImage" />
+              <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
             <small class="helpText">L'image ne doit pas peser plus de 30Mo</small><br/>
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-          </div>
+          </div> -->
 
           <div class="form-group">
             <label>Lien</label>
@@ -130,19 +130,19 @@
 
             <!-- Upload photo pour couverture publication -->
             <b-form-file
-            v-model="image"
+            v-model="publicationImage"
             placeholder="Choisissez un fichier ou déposez-le ici..."
             drop-placeholder="Déposez le fichier ici..."
             browse-text="Choisir un fichier"
             accept="image/jpeg, image/jpg, image/png"
-            @change="onFileChange"
+            @change="onPublicationFileChange"
             :state=publicationImageValid
             id="publication-file-form"
             ></b-form-file>
-
-            <div class="mt-4" v-if="image">
-              <img :src="image" class="previewImage" />
-              <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removeImage"><i class="far fa-trash-alt imageTrash"></i></button>
+            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
+            <div class="mt-4" v-if="publicationImage">
+              <img :src="publicationImage" class="previewImage" />
+              <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
 
             </div>
             <div id="preview" ref="preview"></div>
@@ -193,8 +193,9 @@ export default {
   name: 'InterestForm',
   data() {
     return {
-      image: '',
-      file: '',
+      publicationImage: '',
+      publicationFile:'',
+      interestImage:'',
       edit: false,
       interestTag: [],
       storedTags: [],
@@ -294,7 +295,7 @@ export default {
         axios.post('http://127.0.0.1:8000/api/bellitalia', {
           number: this.interestNumber[0],
           date: this.selectedMonthPublicationModal,
-          image: this.image,
+          image: this.publicationImage,
         })
         // Validation front ET back : si tout va bien des 2 côtés
         .then(() => {
@@ -336,7 +337,7 @@ export default {
     // Cette méthode permet de l'effacer quand on clique sur Annuler
     handleCancelPublicationModal(){
       this.errors = {}
-      this.image = ''
+      this.publicationImage = ''
     },
     // Pour tout changement dans le MonthPicker :
     monthSelectedPublicationModal(){
@@ -346,8 +347,8 @@ export default {
       // J'enlève le border rouge s'il est présent
       monthPicker.classList.remove("vue-monthly-picker-red");
     },
-    // Méthodes gérant l'ajout et la suppression d'une image
-    onFileChange(e) {
+    // Méthodes gérant l'ajout et la suppression d'une image de couverture
+    onPublicationFileChange(e) {
       // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
       this.publicationImageValid = null
       // J'enlève le message d'erreur s'il était présent
@@ -358,16 +359,38 @@ export default {
       return;
       this.createImage(files[0]);
     },
-    createImage(file) {
+    createImage(publicationFile) {
       var reader = new FileReader();
       reader.onload = (e) => {
-        this.image = e.target.result;
+        this.publicationImage = e.target.result;
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(publicationFile);
     },
-    removeImage: function () {
-      this.image = '';
+    removePublicationImage: function () {
+      this.publicationImage = '';
     },
+    // // Méthodes gérant l'ajout et la suppression d'une image du point d'intérêt
+    // onInterestFileChange(e) {
+    //   // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
+    //   // this.publicationImageValid = null
+    //   // J'enlève le message d'erreur s'il était présent
+    //   // this.errors.image = []
+    //   // Et je traite la nouvelle photo envoyée
+    //   var files = e.target.files || e.dataTransfer.files;
+    //   if (!files.length)
+    //   return;
+    //   this.createImage(files[0]);
+    // },
+    // createImage(file) {
+    //   var reader = new FileReader();
+    //   reader.onload = (e) => {
+    //     this.interestImage = e.target.result;
+    //   };
+    //   reader.readAsDataURL(file);
+    // },
+    // removeInterestImage: function () {
+    //   this.interestImage = '';
+    // },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
       const createdTag = {
@@ -451,7 +474,6 @@ export default {
         image: this.image,
       })
       .then(() => {
-        console.log('then')
         this.interestName = ""
         this.interestDescription = ""
         this.interestLink = ""

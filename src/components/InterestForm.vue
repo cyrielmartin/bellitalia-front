@@ -23,155 +23,155 @@
           </div>
 
           <div class="form-group">
-          <label>Image</label>
-          <div v-if="!interestImage">
-          <input type="file" enctype='multipart/form-data' multiple @change="onInterestFileChange">
+            <label>Image</label>
+            <div v-if="!interestImage">
+              <input type="file" enctype='multipart/form-data' multiple @change="onInterestFileChange">
+            </div>
+            <div v-else>
+              <img v-for="image in interestImageArray" :src="image" />
+              <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
+            </div>
+            <small class="helpText">L'image ne doit pas peser plus de 30Mo</small><br/>
+            <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <label>Lien</label>
+            <input class="form-control" v-model="interestLink">
+          </div>
+
+          <div class="form-group">
+            <label>Latitude <span class="redStar">*</span></label>
+            <input min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="latitudeErrorClass" @click="inputLatitudeChange">
+            <small class="helpText">Le séparateur décimal doit être un point</small><br/>
+            <small class="helpText">La saisie des lettres est désactivée</small>
+            <p :class="latitudeErrorTextClass" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
+          </div>
+
+          <div class="form-group">
+            <label>Longitude <span class="redStar">*</span></label>
+            <input min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="longitudeErrorClass" @click="inputLongitudeChange">
+            <small class="helpText">Le séparateur décimal doit être un point</small><br/>
+            <small class="helpText">La saisie des lettres est désactivée</small>
+            <p :class="longitudeErrorTextClass" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
+          </div>
+
+          <!-- Villes gérées grâce à plugin Vue Multiselect -->
+          <div class="form-group">
+            <div>
+              <label>Ville <span class="redStar">*</span></label>
+              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass"></multiselect>
+              <p :class="cityErrorTextClass" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
+            </div>
+          </div>
+
+          <!-- Régions gérées grâce à plugin Vue Multiselect -->
+          <div class="form-group">
+            <div>
+              <label>Région <span class="redStar">*</span></label>
+              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="regionErrorClass" @open="inputRegionChange">
+                <span slot="noResult">Aucune région correspondante</span>
+              </multiselect>
+              <p :class="regionErrorTextClass" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div>
+              <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
+              <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
+              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange"></multiselect>
+              <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
+              <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+
+            </div>
+          </div>
+
+          <b-modal
+          ref="addPublicationModal"
+          id="addPublicationModal"
+          title="Ajout d'un nouveau numéro"
+          ok-title="Valider"
+          :ok-disabled="okDisabledPublicationModal"
+          cancel-title="Annuler"
+          size="lg"
+          button-size="sm"
+          @ok="handleOkPublicationModal"
+          @cancel="handleCancelPublicationModal"
+          >
+
+          <b-container fluid>
+
+            <!-- Message d'erreur affiché si le numéro contient une lettre -->
+            <div class="text-error" v-if="NotANumberPublicationModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
+
+            <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
+            <div v-if="!NotANumberPublicationModal">
+              <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+
+              <!-- Month Picker pour date publication -->
+              <vue-monthly-picker
+              v-model="selectedMonthPublicationModal"
+              dateFormat="MMMM YYYY"
+              :monthLabels="monthLabelsPublicationModal"
+              @selected="monthSelectedPublicationModal"
+              placeHolder="Cliquez ici pour sélectionner une date de publication"
+              id="month-picker"
+              >
+            </vue-monthly-picker>
+
+            <!-- Message d'erreur si pb validation date front -->
+            <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
+
+            <!-- Messages d'erreur si pb validation date back -->
+            <p class="text-error" v-if="errors.date" v-text="errors.date[0]"></p>
+
+            <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+
+            <!-- Upload photo pour couverture publication -->
+            <b-form-file
+            v-model="publicationImage"
+            placeholder="Choisissez un fichier ou déposez-le ici..."
+            drop-placeholder="Déposez le fichier ici..."
+            browse-text="Choisir un fichier"
+            accept="image/jpeg, image/jpg, image/png"
+            @change="onPublicationFileChange"
+            :state=publicationImageValid
+            id="publication-file-form"
+            ></b-form-file>
+            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
+            <div class="mt-4" v-if="publicationImage">
+              <img :src="publicationImage" class="previewImage" />
+              <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
+
+            </div>
+            <div id="preview" ref="preview"></div>
+
+            <!-- Messages d'erreur si pb validation numéro et image back -->
+            <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
+            <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
+            <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
+          </div>
+        </b-container>
+
+      </b-modal>
+
+      <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
+      <div class="form-group">
+        <div>
+          <label>Catégorie(s) <span class="redStar">*</span></label>
+          <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange"></multiselect>
+          <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
         </div>
-        <div v-else>
-        <img :src="interestImage" />
-        <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
       </div>
-      <small class="helpText">L'image ne doit pas peser plus de 30Mo</small><br/>
-      <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-    </div>
-
-    <div class="form-group">
-      <label>Lien</label>
-      <input class="form-control" v-model="interestLink">
-    </div>
-
-    <div class="form-group">
-      <label>Latitude <span class="redStar">*</span></label>
-      <input min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="latitudeErrorClass" @click="inputLatitudeChange">
-      <small class="helpText">Le séparateur décimal doit être un point</small><br/>
-      <small class="helpText">La saisie des lettres est désactivée</small>
-      <p :class="latitudeErrorTextClass" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
-    </div>
-
-    <div class="form-group">
-      <label>Longitude <span class="redStar">*</span></label>
-      <input min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="longitudeErrorClass" @click="inputLongitudeChange">
-      <small class="helpText">Le séparateur décimal doit être un point</small><br/>
-      <small class="helpText">La saisie des lettres est désactivée</small>
-      <p :class="longitudeErrorTextClass" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
-    </div>
-
-    <!-- Villes gérées grâce à plugin Vue Multiselect -->
-    <div class="form-group">
-      <div>
-        <label>Ville <span class="redStar">*</span></label>
-        <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass"></multiselect>
-        <p :class="cityErrorTextClass" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
+      <div class="d-flex justify-content-center">
+        <!-- <b-button>Button</b-button> -->
+        <b-button type="submit" v-if="!edit" @click.prevent="submitForm">Enregistrer</b-button>
+        <b-button type="submit" v-if="edit" @click.prevent="editForm">Enregistrer les modifications</b-button>
       </div>
-    </div>
-
-    <!-- Régions gérées grâce à plugin Vue Multiselect -->
-    <div class="form-group">
-      <div>
-        <label>Région <span class="redStar">*</span></label>
-        <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="regionErrorClass" @open="inputRegionChange">
-          <span slot="noResult">Aucune région correspondante</span>
-        </multiselect>
-        <p :class="regionErrorTextClass" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <div>
-        <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-        <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-        <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange"></multiselect>
-        <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
-        <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
-
-      </div>
-    </div>
-
-    <b-modal
-    ref="addPublicationModal"
-    id="addPublicationModal"
-    title="Ajout d'un nouveau numéro"
-    ok-title="Valider"
-    :ok-disabled="okDisabledPublicationModal"
-    cancel-title="Annuler"
-    size="lg"
-    button-size="sm"
-    @ok="handleOkPublicationModal"
-    @cancel="handleCancelPublicationModal"
-    >
-
-    <b-container fluid>
-
-      <!-- Message d'erreur affiché si le numéro contient une lettre -->
-      <div class="text-error" v-if="NotANumberPublicationModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
-
-      <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
-      <div v-if="!NotANumberPublicationModal">
-        <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
-
-        <!-- Month Picker pour date publication -->
-        <vue-monthly-picker
-        v-model="selectedMonthPublicationModal"
-        dateFormat="MMMM YYYY"
-        :monthLabels="monthLabelsPublicationModal"
-        @selected="monthSelectedPublicationModal"
-        placeHolder="Cliquez ici pour sélectionner une date de publication"
-        id="month-picker"
-        >
-      </vue-monthly-picker>
-
-      <!-- Message d'erreur si pb validation date front -->
-      <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
-
-      <!-- Messages d'erreur si pb validation date back -->
-      <p class="text-error" v-if="errors.date" v-text="errors.date[0]"></p>
-
-      <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
-
-      <!-- Upload photo pour couverture publication -->
-      <b-form-file
-      v-model="publicationImage"
-      placeholder="Choisissez un fichier ou déposez-le ici..."
-      drop-placeholder="Déposez le fichier ici..."
-      browse-text="Choisir un fichier"
-      accept="image/jpeg, image/jpg, image/png"
-      @change="onPublicationFileChange"
-      :state=publicationImageValid
-      id="publication-file-form"
-      ></b-form-file>
-      <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
-      <div class="mt-4" v-if="publicationImage">
-        <img :src="publicationImage" class="previewImage" />
-        <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
-
-      </div>
-      <div id="preview" ref="preview"></div>
-
-      <!-- Messages d'erreur si pb validation numéro et image back -->
-      <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-      <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
       <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
-    </div>
-  </b-container>
-
-</b-modal>
-
-<!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
-<div class="form-group">
-  <div>
-    <label>Catégorie(s) <span class="redStar">*</span></label>
-    <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange"></multiselect>
-    <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
+    </form>
   </div>
-</div>
-<div class="d-flex justify-content-center">
-  <!-- <b-button>Button</b-button> -->
-  <b-button type="submit" v-if="!edit" @click.prevent="submitForm">Enregistrer</b-button>
-  <b-button type="submit" v-if="edit" @click.prevent="editForm">Enregistrer les modifications</b-button>
-</div>
-<span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
-</form>
-</div>
 </div>
 </div>
 </div>
@@ -196,6 +196,7 @@ export default {
       publicationImage: '',
       publicationFile:'',
       interestImage:'',
+      interestImageArray:[],
       interestFile:'',
       edit: false,
       interestTag: [],
@@ -370,29 +371,34 @@ export default {
     removePublicationImage: function () {
       this.publicationImage = '';
     },
-    // // Méthodes gérant l'ajout et la suppression d'une image du point d'intérêt
+    // // Méthodes gérant l'ajout et la suppression des images du point d'intérêt
     onInterestFileChange(e) {
       // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
       // this.publicationImageValid = null
       // J'enlève le message d'erreur s'il était présent
       // this.errors.image = []
-      // Et je traite la nouvelle photo envoyée
+      // Et je traite la ou les nouvelles photos envoyées
       var files = e.target.files || e.dataTransfer.files;
-      console.log('files', files)
-      if (!files.length)
-      return;
-      this.createInterestImage(files);
+
+      // Si aucune photo n'est chargée, je ne renvoie rien.
+      if (!files.length) {
+        return;
+        // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
+      } else {
+        var i;
+        for(i=0;i<files.length;i++) {
+          this.createInterestImage(files[i])
+        }
+      }
     },
     createInterestImage(interestFile) {
-      console.log('createInterestImage', interestFile)
-      console.log('length', interestFile.length)
-for(i=0;i<interestFile.length;i++) {
-console.log()
-}
+
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
-        console.log('interestImage', this.interestImage)
+        // Je mets chacune des photos envoyées dans un tableau.
+        // C'est ce tableau qui sert à l'affichage des photos.
+        this.interestImageArray.push(this.interestImage);
       };
       reader.readAsDataURL(interestFile);
     },

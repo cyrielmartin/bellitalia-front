@@ -23,16 +23,27 @@
           </div>
 
           <div class="form-group">
-            <label>Image</label>
+            <label>Image(s)</label>
             <div v-if="!interestImage">
               <input type="file" enctype='multipart/form-data' multiple @change="onInterestFileChange">
             </div>
             <div v-else>
-              <img v-for="image in interestImageArray" :src="image" />
+              <div class="interestImageArrayClass">
+                <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image" @click="showModal" />
+              </div>
               <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
             <small class="helpText">L'image ne doit pas peser plus de 30Mo</small><br/>
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
+          </div>
+
+          <div>
+
+            <b-modal ref="my-modal" id="modal-1" title="BootstrapVue" hide-footer hide-header content-class="bg-transparent">
+              <!-- <p class="my-4">Hello from modal!</p> -->
+              <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image" />
+            </b-modal>
+
           </div>
 
           <div class="form-group">
@@ -247,6 +258,9 @@ export default {
     // - J'enlève le message d'erreur
     // Comme tout est réactif, si je revalide et qu'il y a encore des erreurs :
     // les messages et les bordures réapparaissent.
+    showModal() {
+      this.$refs['my-modal'].show()
+    },
     inputNameChange(){
       this.nameErrorClass = ""
       this.nameErrorTextClass = "text-error-hidden"
@@ -637,9 +651,10 @@ export default {
       <style lang="scss" scoped >
 
       img {
-        width: 30%;
-        display: block;
-        margin-bottom: 10px;
+        // width: 30%;
+        // display: block;
+        // margin-bottom: 10px;
+        // margin: 10px;
       }
       .text-error {
         color: red;
@@ -697,5 +712,26 @@ export default {
         margin: auto;
         display: flex;
         margin-top:2%;
+      }
+      .interestImageArrayClass {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .interestImageClass {
+        margin:10px;
+        height: max-content;
+        // max-height: 25em;
+        width: 200px;
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-transition: .3s ease-in-out;
+        transition: .3s ease-in-out;
+        z-index: 3;
+      }
+      .interestImageClass:hover {
+        -webkit-transform: scale(3);
+        transform: scale(3);
+        z-index: 4;
       }
       </style>

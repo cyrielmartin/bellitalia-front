@@ -10,6 +10,7 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueMonthlyPicker from 'vue-monthly-picker'
+import Viewer from 'v-viewer'
 
 Vue.use(FlashMessage);
 
@@ -31,6 +32,7 @@ Vue.use(VModal, {dialog: true})
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
+Vue.use(Viewer)
 
 // Chargement du router dans VueJS
 Vue.use(VueRouter)

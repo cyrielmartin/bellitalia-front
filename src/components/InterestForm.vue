@@ -25,24 +25,20 @@
           <div class="form-group">
             <label>Image(s)</label>
             <div v-if="!interestImage">
-              <input type="file" enctype='multipart/form-data' multiple @change="onInterestFileChange">
+              <input type="file" enctype='multipart/form-data' accept="image/png, image/jpeg" multiple @change="onInterestFileChange">
             </div>
             <div v-else>
-              <div class="interestImageArrayClass">
-                <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image" @click="showModal" />
+              <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
+              <div class="interestImageArrayClass" v-viewer="viewerInterestOptions">
+                <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image"/>
               </div>
               <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
-            <small class="helpText">L'image ne doit pas peser plus de 30Mo</small><br/>
+            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
           </div>
 
           <div>
-
-            <b-modal ref="my-modal" id="modal-1" title="BootstrapVue" hide-footer hide-header content-class="bg-transparent">
-              <!-- <p class="my-4">Hello from modal!</p> -->
-              <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image" />
-            </b-modal>
 
           </div>
 
@@ -151,7 +147,8 @@
             id="publication-file-form"
             ></b-form-file>
             <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
-            <div class="mt-4" v-if="publicationImage">
+            <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
+            <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImage">
               <img :src="publicationImage" class="previewImage" />
               <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
 
@@ -176,7 +173,6 @@
         </div>
       </div>
       <div class="d-flex justify-content-center">
-        <!-- <b-button>Button</b-button> -->
         <b-button type="submit" v-if="!edit" @click.prevent="submitForm">Enregistrer</b-button>
         <b-button type="submit" v-if="edit" @click.prevent="editForm">Enregistrer les modifications</b-button>
       </div>
@@ -195,6 +191,7 @@ import axios from 'axios'
 import Multiselect from 'vue-multiselect'
 import moment from 'moment'
 import VueMonthlyPicker from 'vue-monthly-picker'
+import 'viewerjs/dist/viewer.css'
 
 export default {
   components: {
@@ -239,6 +236,8 @@ export default {
       publicationErrorTextClass: "",
       imagePublicationErrorClass:"",
       publicationImageValid: null,
+      viewerInterestOptions: {movable: false, title: false, scalable: false},
+      viewerPublicationOptions: {movable: false, title: false, scalable: false, navbar: false},
       tagErrorClass:"",
       tagErrorTextClass:"",
       newPublication:0,
@@ -258,9 +257,6 @@ export default {
     // - J'enlève le message d'erreur
     // Comme tout est réactif, si je revalide et qu'il y a encore des erreurs :
     // les messages et les bordures réapparaissent.
-    showModal() {
-      this.$refs['my-modal'].show()
-    },
     inputNameChange(){
       this.nameErrorClass = ""
       this.nameErrorTextClass = "text-error-hidden"
@@ -650,12 +646,6 @@ export default {
       <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
       <style lang="scss" scoped >
 
-      img {
-        // width: 30%;
-        // display: block;
-        // margin-bottom: 10px;
-        // margin: 10px;
-      }
       .text-error {
         color: red;
       }
@@ -676,11 +666,7 @@ export default {
       .redStar {
         color:red;
       }
-      .imageTrash {
-        // color:red;
-      }
       .imageTrash:hover{
-        // color:white;
         cursor: pointer;
       }
       .formTitle{
@@ -697,15 +683,10 @@ export default {
       .previewImage {
         max-width:30%;
         margin:auto;
-        -webkit-transform: scale(1);
-        transform: scale(1);
-        -webkit-transition: .3s ease-in-out;
-        transition: .3s ease-in-out;
-        z-index: 3;
+        display: flex;
       }
       .previewImage:hover {
-        -webkit-transform: scale(2);
-        transform: scale(2);
+        cursor: zoom-in;
         z-index: 3;
       }
       .deleteImageIcon {
@@ -721,17 +702,10 @@ export default {
       .interestImageClass {
         margin:10px;
         height: max-content;
-        // max-height: 25em;
         width: 200px;
-        -webkit-transform: scale(1);
-        transform: scale(1);
-        -webkit-transition: .3s ease-in-out;
-        transition: .3s ease-in-out;
         z-index: 3;
       }
       .interestImageClass:hover {
-        -webkit-transform: scale(3);
-        transform: scale(3);
-        z-index: 4;
+        cursor: zoom-in;
       }
       </style>

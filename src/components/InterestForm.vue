@@ -370,9 +370,11 @@ export default {
       if (!files.length)
       return;
       this.createPublicationImage(files[0]);
+
     },
     createPublicationImage(publicationFile) {
       var reader = new FileReader();
+      // console.log(reader)
       reader.onload = (e) => {
         this.publicationImage = e.target.result;
       };
@@ -497,7 +499,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
-        image: this.image,
+        image: this.interestImageArray,
       })
       .then(() => {
         this.interestName = ""

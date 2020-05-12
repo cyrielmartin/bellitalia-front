@@ -36,6 +36,11 @@
             </div>
             <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
+            <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
+            <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
+            <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
+            <p class="text-error" v-if="this.interestImageError" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p>
+
           </div>
 
           <div>
@@ -229,6 +234,7 @@ export default {
       interestDate: '',
       errors: {},
       error: false,
+      interestImageError:false,
       nameErrorClass: "",
       nameErrorTextClass: "",
       latitudeErrorClass: "",
@@ -437,6 +443,7 @@ export default {
     },
     removeInterestImage: function () {
       this.interestImage = '';
+      this.interestImageError = false
     },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {
@@ -535,6 +542,7 @@ export default {
         this.interestTag = ""
         this.image = ""
         this.errors = {}
+        this.interestImageError = false
         this.$router.push('/')
         this.flashMessage.show({
           status: 'success',
@@ -543,34 +551,48 @@ export default {
         });
       })
       .catch(error => {
+
+        // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
+        if (error) {
+          // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+          this.interestImageError = true
+        }
+
         this.errors = error.response.data
         if(this.errors.city_id) {
           this.cityErrorClass= "multiselect__tags-red"
           this.cityErrorTextClass="text-error"
+          this.interestImageError = false
         }
         if(this.errors.region_id) {
           this.regionErrorClass= "multiselect__tags-red"
           this.regionErrorTextClass= "text-error"
+          this.interestImageError = false
         }
         if(this.errors.bellitalia_id) {
           this.publicationErrorClass= "multiselect__tags-red"
           this.publicationErrorTextClass= "text-error"
+          this.interestImageError = false
         }
         if(this.errors.tag_id) {
           this.tagErrorClass= "multiselect__tags-red"
           this.tagErrorTextClass="text-error"
+          this.interestImageError = false
         }
         if(this.errors.name) {
           this.nameErrorClass= "border-red"
           this.nameErrorTextClass="text-error"
+          this.interestImageError = false
         }
         if(this.errors.latitude) {
           this.latitudeErrorClass= "border-red"
           this.latitudeErrorTextClass="text-error"
+          this.interestImageError = false
         }
         if(this.errors.longitude) {
           this.longitudeErrorClass= "border-red"
           this.longitudeErrorTextClass="text-error"
+          this.interestImageError = false
         }
       })
     },

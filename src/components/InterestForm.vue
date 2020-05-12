@@ -25,7 +25,7 @@
           <div class="form-group">
             <label>Image(s)</label>
             <div v-if="!interestImage">
-              <input type="file" enctype='multipart/form-data' accept="image/png, image/jpeg" multiple @change="onInterestFileChange">
+              <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
             </div>
             <div v-else>
               <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
@@ -158,6 +158,12 @@
             <!-- Messages d'erreur si pb validation numéro et image back -->
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
             <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
+
+            <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
+            <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
+            <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
+            <p class="text-error" v-if="this.error" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p>
+
             <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
         </b-container>
@@ -222,6 +228,7 @@ export default {
       storedPublications:[],
       interestDate: '',
       errors: {},
+      error: false,
       nameErrorClass: "",
       nameErrorTextClass: "",
       latitudeErrorClass: "",
@@ -296,7 +303,6 @@ export default {
       // (sinon message d'erreur dans la modale qui empêche l'accès à cette méthode)
       // Si la date est bien renseignée, validation front ok, on peut valider la modale
       // L'image est validée via le front pour son format. Sa présence et sa taille son validés via le back.
-
       if(this.selectedMonthPublicationModal) {
         // J'enlève le message d'erreur s'il est présent
         this.NoDatePublicationModal = false
@@ -320,14 +326,23 @@ export default {
         })
         // Validation back : si problème avec validator API, erreur renvoyée
         .catch(error => {
-          // Je remonte les messages d'erreur du validator API
+          // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
+          if (error) {
+            // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+            this.error = true
+            this.publicationImageValid = false
+          }
+          // Pour tous les messages d'erreur du validator
           // Pour chaque erreur remontée, j'ajoute la bordure rouge
           this.errors = error.response.data
+
           if(this.errors.date){
             monthPicker.classList.add("vue-monthly-picker-red")
+            this.error = false
           }
           if(this.errors.image) {
             this.publicationImageValid = false
+            this.error = false
           }
         })
 
@@ -350,6 +365,8 @@ export default {
     handleCancelPublicationModal(){
       this.errors = {}
       this.publicationImage = ''
+      this.error = false
+      this.publicationImageValid = null
     },
     // Pour tout changement dans le MonthPicker :
     monthSelectedPublicationModal(){
@@ -363,8 +380,9 @@ export default {
     onPublicationFileChange(e) {
       // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
       this.publicationImageValid = null
-      // J'enlève le message d'erreur s'il était présent
+      // J'enlève les messages d'erreur s'ils étaient présents
       this.errors.image = []
+      this.error = false
       // Et je traite la nouvelle photo envoyée
       var files = e.target.files || e.dataTransfer.files;
       if (!files.length)
@@ -382,6 +400,9 @@ export default {
     },
     removePublicationImage: function () {
       this.publicationImage = '';
+      this.error = false;
+      this.errors = {};
+      this.publicationImageValid = null;
     },
     // // Méthodes gérant l'ajout et la suppression des images du point d'intérêt
     onInterestFileChange(e) {

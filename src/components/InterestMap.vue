@@ -70,7 +70,9 @@
         <!-- Popup : lien -->
         <!-- <p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p> -->
         <!-- Popup : numéro de Bell'Italia concerné (image + infos) -->
-        <img :src="interest.bellitalia.image" class="popupImage"/><br>
+        <div v-viewer="viewerPublicationOptions" class="">
+          <img :src="interest.bellitalia.image" class="popupImage"/><br>
+        </div>
         <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
         <!-- Popup : liens modifier et supprimer -->
         <div class="mt-2"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a>
@@ -105,7 +107,7 @@ import "leaflet/dist/leaflet.css"
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
-
+import "viewerjs/dist/viewer.css"
 import marker from '../assets/marker.png'
 
 export default {
@@ -127,6 +129,7 @@ export default {
       clusterOptions: {disableClusteringAtZoom: 7, showCoverageOnHover: false, spiderfyOnMaxZoom: true, maxClusterRadius:30, iconCreateFunction: function() {
         return L.divIcon({ html: '<div style="font-size: 2.3em; color:#c0392b;"<i class="fas fa-search-plus"></i></div>', className: ""});
       }},
+      viewerPublicationOptions: {title: false, scalable: false, navbar: false},
       window: {
         width: 0,
         height: 0
@@ -329,15 +332,9 @@ h1 {
 .popupImage {
   max-width:100px;
   border-radius: 0.25rem;
-  -webkit-transform: scale(1);
-  transform: scale(1);
-  -webkit-transition: .3s ease-in-out;
-  transition: .3s ease-in-out;
 }
 .popupImage:hover {
-  -webkit-transform: scale(4.5);
-  transform: scale(4.5);
-  z-index: 10;
+  cursor: zoom-in;
 }
 
 </style>

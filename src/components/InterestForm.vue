@@ -233,7 +233,7 @@ export default {
       storedPublications:[],
       interestDate: '',
       errors: {},
-      error: false,
+      publicationImageError: false,
       interestImageError:false,
       nameErrorClass: "",
       nameErrorTextClass: "",
@@ -249,8 +249,8 @@ export default {
       publicationErrorTextClass: "",
       imagePublicationErrorClass:"",
       publicationImageValid: null,
-      viewerInterestOptions: {movable: false, title: false, scalable: false},
-      viewerPublicationOptions: {movable: false, title: false, scalable: false, navbar: false},
+      viewerInterestOptions: {title: false, scalable: false},
+      viewerPublicationOptions: {title: false, scalable: false, navbar: false},
       tagErrorClass:"",
       tagErrorTextClass:"",
       newPublication:0,
@@ -335,7 +335,7 @@ export default {
           // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
           if (error) {
             // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-            this.error = true
+            this.publicationImageError = true
             this.publicationImageValid = false
           }
           // Pour tous les messages d'erreur du validator
@@ -344,11 +344,11 @@ export default {
 
           if(this.errors.date){
             monthPicker.classList.add("vue-monthly-picker-red")
-            this.error = false
+            this.publicationImageError = false
           }
           if(this.errors.image) {
             this.publicationImageValid = false
-            this.error = false
+            this.publicationImageError = false
           }
         })
 
@@ -371,7 +371,7 @@ export default {
     handleCancelPublicationModal(){
       this.errors = {}
       this.publicationImage = ''
-      this.error = false
+      this.publicationImageError = false
       this.publicationImageValid = null
     },
     // Pour tout changement dans le MonthPicker :
@@ -394,7 +394,6 @@ export default {
       if (!files.length)
       return;
       this.createPublicationImage(files[0]);
-
     },
     createPublicationImage(publicationFile) {
       var reader = new FileReader();
@@ -406,7 +405,7 @@ export default {
     },
     removePublicationImage: function () {
       this.publicationImage = '';
-      this.error = false;
+      this.publicationImageError = false
       this.errors = {};
       this.publicationImageValid = null;
     },
@@ -431,7 +430,6 @@ export default {
       }
     },
     createInterestImage(interestFile) {
-
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;

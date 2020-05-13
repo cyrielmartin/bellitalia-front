@@ -72,7 +72,9 @@
           <div class="form-group">
             <div>
               <label>Ville <span class="redStar">*</span></label>
-              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass"></multiselect>
+              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass">
+                <span slot="noOptions">Aucune ville</span>
+              </multiselect>
               <p :class="cityErrorTextClass" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
             </div>
           </div>
@@ -92,7 +94,9 @@
             <div>
               <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
               <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange"></multiselect>
+              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
+                <span slot="noOptions">Aucune publication</span>
+              </multiselect>
               <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
               <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
 
@@ -179,7 +183,9 @@
       <div class="form-group">
         <div>
           <label>Catégorie(s) <span class="redStar">*</span></label>
-          <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange"></multiselect>
+          <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange">
+            <span slot="noOptions">Aucune catégorie</span>
+          </multiselect>
           <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
         </div>
       </div>

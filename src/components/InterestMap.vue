@@ -60,9 +60,10 @@
         <!-- Popup : nom du point d'intérêt -->
         <h1 class="mt-3 mb-1">{{interest.name}}</h1>
         <!-- Popup : photo du point d'intérêt -->
-        <div class="">
-
-          <img :src="interest.image" width="300" class="popupImage"/>
+        <div class="" v-viewer="viewerInterestOptions">
+          <div v-for="image in interest.images" class="">
+            <img :src="image.url" width="300" class="popupImage"/>
+          </div>
         </div>
         <!-- Popup : lieu du point d'intérêt -->
         <div class="badge badge-light popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div>

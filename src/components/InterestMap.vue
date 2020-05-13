@@ -61,6 +61,7 @@
         <h1 class="mt-3 mb-1">{{interest.name}}</h1>
         <!-- Popup : photo du point d'intérêt -->
         <div class="">
+
           <img :src="interest.image" width="300" class="popupImage"/>
         </div>
         <!-- Popup : lieu du point d'intérêt -->

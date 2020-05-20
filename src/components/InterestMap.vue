@@ -50,7 +50,7 @@
     </l-icon>
 
     <!-- Popup -->
-    <l-popup :options="{ keepInView: true, minWidth:180}">
+    <l-popup :options="{ keepInView: true, minWidth:300, maxWidth:500, closeOnEscapeKey:false}">
 
       <!-- Popup : catégories -->
       <div class="popupContent">
@@ -59,21 +59,23 @@
         </div>
         <!-- Popup : nom du point d'intérêt -->
         <h1 class="mt-3 mb-1">{{interest.name}}</h1>
-        <!-- Popup : photo du point d'intérêt -->
-        <div class="" v-viewer="viewerInterestOptions">
-          <div v-for="image in interest.images" class="">
-            <img :src="image.url" width="300" class="popupImage"/>
-          </div>
-        </div>
         <!-- Popup : lieu du point d'intérêt -->
         <div class="badge badge-light popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div>
+        <!-- Popup : photos du point d'intérêt -->
+        <div class="" v-viewer="viewerInterestOptions">
+          <div class="popupImageContainer row">
+            <div v-for="image in interest.images" class="col popupImageCol">
+              <img :src="image.url" class="popupImages"/>
+            </div>
+          </div>
+        </div>
         <!-- Popup : description du point d'intérêt -->
         <p class="popupText">{{interest.description}}</p>
         <!-- Popup : lien -->
         <!-- <p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p> -->
         <!-- Popup : numéro de Bell'Italia concerné (image + infos) -->
         <div v-viewer="viewerPublicationOptions" class="">
-          <img :src="interest.bellitalia.image" class="popupImage"/><br>
+          <img :src="interest.bellitalia.image" class="popupImages"/><br>
         </div>
         <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
         <!-- Popup : liens modifier et supprimer -->
@@ -324,6 +326,9 @@ h1 {
 }
 .popupContent {
   text-align: center;
+  overflow: auto;
+  max-height: 550px;
+    padding: 0 10% 0 10%;
 }
 .popupText {
   font-size: 0.8rem;
@@ -331,11 +336,19 @@ h1 {
 .popupPublicationText {
   font-size: 0.7rem;
 }
-.popupImage {
+.popupImageContainer {
+  display: flex;
+  align-items: center;
+}
+.popupImageCol {
+  padding: unset;
+}
+.popupImages {
   max-width:100px;
   border-radius: 0.25rem;
+  margin-bottom: 5px;
 }
-.popupImage:hover {
+.popupImages:hover {
   cursor: zoom-in;
 }
 

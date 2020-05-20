@@ -447,7 +447,8 @@ export default {
     },
     removeInterestImage: function () {
       this.interestImage = '';
-      this.interestImageError = false
+      this.interestImageArray = [];
+      this.interestImageError = false;
     },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {

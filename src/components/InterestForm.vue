@@ -24,10 +24,11 @@
 
           <div class="form-group">
             <label>Image(s)</label>
-            <div v-if="!interestImageArray">
+            {{interestImageArray.length}}
+            <!-- <div v-if="!interestImageArray"> -->
               <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
-            </div>
-            <div v-else>
+            <!-- </div> -->
+            <div>
               <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
               <div class="interestImageArrayClass" v-viewer="viewerInterestOptions">
                 <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image"/>
@@ -445,10 +446,11 @@ export default {
       };
       reader.readAsDataURL(interestFile);
     },
-    removeInterestImage: function () {
+    removeInterestImage: function (e) {
       this.interestImage = '';
       this.interestImageArray = [];
       this.interestImageError = false;
+      e.preventDefault();
     },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
     addTag(newTag) {

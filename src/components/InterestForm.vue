@@ -24,7 +24,7 @@
 
           <div class="form-group">
             <label>Image(s)</label>
-            <div v-if="!interestImage">
+            <div v-if="!interestImageArray">
               <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
             </div>
             <div v-else>
@@ -546,6 +546,7 @@ export default {
         this.interestDate = ""
         this.interestTag = ""
         this.image = ""
+        this.interestImageArray = []
         this.errors = {}
         this.interestImageError = false
         this.$router.push('/')
@@ -613,7 +614,7 @@ export default {
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
-        image: this.image,
+        image: this.interestImageArray,
       })
       .then(() => {
         this.interestName = ""
@@ -643,6 +644,11 @@ export default {
     getInterest() {
       axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
       .then(r => {
+        var image = ''
+        for(image of r.data.data.images) {
+          console.log(image.url)
+        this.interestImageArray.push(image.url)
+        }
         this.edit = true
         this.interest = r.data.data
         this.interestName = r.data.data.name
@@ -652,7 +658,6 @@ export default {
         this.interestLongitude = r.data.data.longitude
         this.interestCity = {"name": r.data.data.city.name}
         this.interestRegion = {"name": r.data.data.city.region_id.name}
-        this.image = r.data.data.image
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
       })

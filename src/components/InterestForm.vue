@@ -24,10 +24,10 @@
 
           <div class="form-group">
             <label>Image(s)</label>
-            <!-- <div v-if="!interestImageArray"> -->
+            <div v-if="interestImageArray.length<1">
             <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
-            <!-- </div> -->
-            <div>
+            </div>
+            <div v-else>
               <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
               <div class="interestImageArrayClass" v-viewer="viewerInterestOptions">
                 <img class="interestImageClass" v-for="image,imageIndex in interestImageArray" :src="image"/>

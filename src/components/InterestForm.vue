@@ -24,9 +24,8 @@
 
           <div class="form-group">
             <label>Image(s)</label>
-            {{interestImageArray.length}}
             <!-- <div v-if="!interestImageArray"> -->
-              <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
+            <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
             <!-- </div> -->
             <div>
               <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
@@ -125,7 +124,6 @@
             <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
             <div v-if="!NotANumberPublicationModal">
               <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
-
               <!-- Month Picker pour date publication -->
               <vue-monthly-picker
               v-model="selectedMonthPublicationModal"
@@ -146,8 +144,8 @@
             <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
 
             <!-- Upload photo pour couverture publication -->
+                    <!-- v-model="publicationImageArray" -->
             <b-form-file
-            v-model="publicationImage"
             placeholder="Choisissez un fichier ou déposez-le ici..."
             drop-placeholder="Déposez le fichier ici..."
             browse-text="Choisir un fichier"
@@ -158,8 +156,8 @@
             ></b-form-file>
             <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
             <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
-            <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImage">
-              <img :src="publicationImage" class="previewImage" />
+            <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImageArray">
+              <img v-for="image,imageIndex in publicationImageArray" :src="image" class="previewImage" />
               <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
 
             </div>
@@ -220,6 +218,7 @@ export default {
   data() {
     return {
       publicationImage: '',
+      publicationImageArray:[],
       publicationFile:'',
       interestImage:'',
       interestImageArray:[],
@@ -326,7 +325,7 @@ export default {
         axios.post('http://127.0.0.1:8000/api/bellitalia', {
           number: this.interestNumber[0],
           date: this.selectedMonthPublicationModal,
-          image: this.publicationImage,
+          image: this.publicationImageArray,
         })
         // Validation front ET back : si tout va bien des 2 côtés
         .then(() => {
@@ -398,23 +397,33 @@ export default {
       this.error = false
       // Et je traite la nouvelle photo envoyée
       var files = e.target.files || e.dataTransfer.files;
-      if (!files.length)
-      return;
-      this.createPublicationImage(files[0]);
+
+      // Si aucune photo n'est chargée, je ne renvoie rien.
+      if (!files.length) {
+        return;
+        // Sinon, pour chaque photo envoyée, j'appelle la méthode createPublicationImage
+      } else {
+        var i;
+        for(i=0;i<files.length;i++) {
+          this.createPublicationImage(files[i])
+        }
+      }
     },
     createPublicationImage(publicationFile) {
       var reader = new FileReader();
-      // console.log(reader)
       reader.onload = (e) => {
         this.publicationImage = e.target.result;
+        this.publicationImageArray.push(this.publicationImage);
       };
       reader.readAsDataURL(publicationFile);
     },
-    removePublicationImage: function () {
+    removePublicationImage: function (e) {
       this.publicationImage = '';
+      this.publicationImageArray = [];
       this.publicationImageError = false
       this.errors = {};
       this.publicationImageValid = null;
+      e.preventDefault();
     },
     // // Méthodes gérant l'ajout et la suppression des images du point d'intérêt
     onInterestFileChange(e) {
@@ -472,6 +481,7 @@ export default {
     addPublication(newPublication) {
       // Si une image est déjà chargée, je l'enlève
       this.publicationImage = ""
+      this.publicationImageArray =[]
       this.createdPublication = {
         number: newPublication,
       }
@@ -630,6 +640,7 @@ export default {
         this.interestDate = ""
         this.interestTag = ""
         this.image = ""
+        this.interestImageArray = []
         this.errors = {}
         this.$router.push('/')
         this.flashMessage.show({
@@ -649,7 +660,7 @@ export default {
         var image = ''
         for(image of r.data.data.images) {
           console.log(image.url)
-        this.interestImageArray.push(image.url)
+          this.interestImageArray.push(image.url)
         }
         this.edit = true
         this.interest = r.data.data

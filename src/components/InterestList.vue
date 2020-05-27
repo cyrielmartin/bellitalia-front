@@ -11,14 +11,28 @@
         @click="click(index)"
         @dblclick="dblclick(index)"
         class="list-group-item">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-6">
+        <div class="container-fluid ">
+          <div class="row listElement">
+            <div class="col-7">
+              <!-- Nom du point d'intérêt -->
               <span>{{interest.name}}</span>
-              <br><div class="badge badge-light popupText"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span>, <span v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</span></div><br><div><span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div><div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+              <!-- Lieu -->
+              <div class="badge badge-light interestLocation"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span><div v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</div></div>
+              <!-- Catégorie(s) -->
+              <div><span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div>
+              <!-- Publication -->
+              <div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
             </div>
-            <div class="col-6">
-              <img :src="interest.image" width="150" class="popupImage"/>
+            <div v-if="interest.images.length" class="col-5 interestItem">
+              <!-- Image(s) -->
+              <!-- S'il y a plusieurs images, je ne prends que la première -->
+              <div v-for="(image,imageIndex) in interest.images.slice(0,4)">
+                <img :src="image.url" :class="`listImage${imageIndex}`"/>
+              </div>
+              <!-- <img :src="interest.image" width="150" class="popupImage"/> -->
+            </div>
+            <div v-else class="col-5">
+
             </div>
           </div>
         </div>
@@ -34,6 +48,11 @@
 
 export default {
   name: 'InterestList',
+  data: function() {
+    return {
+      // listImage: 'listImage0',
+    }
+  },
   props: {
     interests: Array
   },
@@ -60,15 +79,103 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-
 .interest-list {
   overflow-y: scroll;
   height: 95vh;
   li {
     &:hover {
-      background-color: darkgrey;
+      background-color: lightgrey;
+      cursor: pointer;
     }
   }
+}
+.interestLocation {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: max-content;
+}
+.interestLocation:hover {
+  position: sticky;
+  z-index: 10;
+}
+.listElement{
+  max-height: 212px;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 5px;
+}
+.interestItem{
+  min-height: 212px;
+}
+.listImage0 {
+  border: 6px solid #fff;
+  float: left;
+  max-height: 212px;
+  max-width: 150px;
+  z-index: 4;
+  position: relative;
+  margin-left: -10px;
+  -webkit-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  -moz-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+.listImage1 {
+  border: 6px solid #fff;
+  float: left;
+  max-height: 212px;
+  max-width: 150px;
+  position: absolute;
+  z-index: 3;
+  top: 0px;
+  left: 0px;
+  -webkit-transform: rotate(-5deg);
+  -moz-transform: rotate(-5deg);
+  -o-transform: rotate(-5deg);
+  -ms-transform: rotate(-5deg);
+  transform: rotate(-5deg);
+  -webkit-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  -moz-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+.listImage2 {
+  border: 6px solid #fff;
+  float: left;
+  max-height: 212px;
+  max-width: 150px;
+  position: absolute;
+  z-index: 2;
+  top: 0px;
+  left: -5px;
+  -webkit-transform: rotate(-10deg);
+  -moz-transform: rotate(-10deg);
+  -o-transform: rotate(-10deg);
+  -ms-transform: rotate(-10deg);
+  transform: rotate(-10deg);
+  -webkit-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  -moz-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+.listImage3 {
+  border: 6px solid #fff;
+  float: left;
+  max-height: 212px;
+  max-width: 150px;
+  position: absolute;
+  z-index: 1;
+  top: 0px;
+  left: -10px;
+  -webkit-transform: rotate(-15deg);
+  -moz-transform: rotate(-15deg);
+  -o-transform: rotate(-15deg);
+  -ms-transform: rotate(-15deg);
+  transform: rotate(-15deg);
+  -webkit-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  -moz-box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 </style>

@@ -25,7 +25,7 @@
             </div>
             <div v-if="interest.images.length" class="col-5 interestItem">
               <!-- Image(s) -->
-              <!-- S'il y a plusieurs images, je ne prends que la première -->
+              <!-- S'il y a plusieurs images, je ne prends que les 4 premières -->
               <div v-for="(image,imageIndex) in interest.images.slice(0,4)">
                 <img :src="image.url" :class="`listImage${imageIndex}`"/>
               </div>

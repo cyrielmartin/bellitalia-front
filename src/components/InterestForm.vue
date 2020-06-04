@@ -25,7 +25,7 @@
           <div class="form-group">
             <label>Image(s)</label>
             <div v-if="interestImageArray.length<1">
-            <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
+              <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
             </div>
             <div v-else>
               <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
@@ -94,7 +94,7 @@
             <div>
               <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
               <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
+              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
                 <span slot="noOptions">Aucune publication</span>
               </multiselect>
               <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
@@ -144,7 +144,7 @@
             <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
 
             <!-- Upload photo pour couverture publication -->
-                    <!-- v-model="publicationImageArray" -->
+            <!-- v-model="publicationImageArray" -->
             <b-form-file
             placeholder="Choisissez un fichier ou déposez-le ici..."
             drop-placeholder="Déposez le fichier ici..."
@@ -269,6 +269,11 @@ export default {
     }
   },
   methods: {
+    // Pour affichage numéro + date de publication dans multiselect publication
+    numberWithPublication ({ number, publication }) {
+      return `n°${number}`+ ` (` + moment(`${publication}`).format('MMMM YYYY')+ `)`
+    },
+    // Méthodes gérant l'affichage des erreurs sur les input 
     // Pour chaque input du formulaire
     // Si un message d'erreur est affiché, si la bordure est rouge
     // Au clic sur chaque input :

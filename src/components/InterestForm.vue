@@ -72,7 +72,7 @@
           <div class="form-group">
             <div>
               <label>Ville <span class="redStar">*</span></label>
-              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass">
+              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" :custom-label="nameWithRegion" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass">
                 <span slot="noOptions">Aucune ville</span>
               </multiselect>
               <p :class="cityErrorTextClass" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
@@ -269,11 +269,21 @@ export default {
     }
   },
   methods: {
+    // Pour affichage villes + régions déjà associées
+    nameWithRegion ({ name, region_id }) {
+      var regionName = ''
+      this.storedRegions.forEach(region => {
+        if(region_id == region.id) {
+          regionName = region.name
+        }
+      });
+      return `${name} (${regionName})`
+    },
     // Pour affichage numéro + date de publication dans multiselect publication
     numberWithPublication ({ number, publication }) {
       return `n°${number}`+ ` (` + moment(`${publication}`).format('MMMM YYYY')+ `)`
     },
-    // Méthodes gérant l'affichage des erreurs sur les input 
+    // Méthodes gérant l'affichage des erreurs sur les input
     // Pour chaque input du formulaire
     // Si un message d'erreur est affiché, si la bordure est rouge
     // Au clic sur chaque input :
@@ -675,7 +685,7 @@ export default {
         this.interestLatitude = r.data.data.latitude
         this.interestLongitude = r.data.data.longitude
         this.interestCity = {"name": r.data.data.city.name}
-        this.interestRegion = {"name": r.data.data.city.region_id.name}
+        this.interestRegion = {"name": r.data.data.city.region.name, "id": r.data.data.city.region.id}
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
       })

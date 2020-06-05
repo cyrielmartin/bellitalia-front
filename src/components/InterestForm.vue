@@ -80,10 +80,10 @@
           </div>
 
           <!-- Régions gérées grâce à plugin Vue Multiselect -->
-          <div class="form-group">
+          <div class="form-group" v-if="interestRegionVisible">
             <div>
               <label>Région <span class="redStar">*</span></label>
-              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="regionErrorClass" @open="inputRegionChange">
+              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" :custom-label="dynamicRegionName" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="regionErrorClass" @open="inputRegionChange">
                 <span slot="noResult">Aucune région correspondante</span>
               </multiselect>
               <p :class="regionErrorTextClass" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
@@ -235,6 +235,8 @@ export default {
       interestLongitude:'',
       interestCity:'',
       interestRegion:'',
+      interestRegionVisible: false,
+      interestRegionIds:[],
       interestNumber:[],
       storedPublications:[],
       interestDate: '',
@@ -271,13 +273,30 @@ export default {
   methods: {
     // Pour affichage villes + régions déjà associées
     nameWithRegion ({ name, region_id }) {
+      // Si le select Ville est vide (= affichage par défaut), on n'affiche pas le select Region
+      if(!this.interestCity) {
+        this.interestRegionVisible = false
+      }
+      // Pour le menu déroulant du select Ville
       var regionName = ''
       this.storedRegions.forEach(region => {
         if(region_id == region.id) {
           regionName = region.name
         }
       });
-      return `${name} (${regionName})`
+      // Si les villes ont déjà une région associée (= sont déjà en BDD)
+      if(name && region_id) {
+        // Précaution pour corriger un bug : si une ville a été saisie et qu'elle a déjà une région, on enlève le select région s'il était présent.
+        if(this.interestCity && this.interestCity.region_id) {
+          this.interestRegionVisible = false
+        }
+        // On affiche le nom de la ville + la région
+        return `${name} (${regionName})`
+      } else {
+        // Sinon (= création de ville à la volée), on n'affiche que le nom saisi
+        this.interestRegionVisible = true
+        return name
+      }
     },
     // Pour affichage numéro + date de publication dans multiselect publication
     numberWithPublication ({ number, publication }) {
@@ -545,7 +564,7 @@ export default {
       const createdCity = {
         name: newCity,
       }
-      this.interestCity = createdCity;
+      this.interestCity = createdCity
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {

@@ -6,7 +6,6 @@
     Center : {{center}} -->
     <div class="row map">
       <div class="container-fluid drop">
-
       </div>
 
       <!-- Carte -->
@@ -128,9 +127,9 @@ export default {
         keepResult: true,
         showPopup: true,
         style: 'bar',
-        popupFormat: function() {
-          return `<a href="#">Créer un point d'intérêt à cet endroit</a>`
-        }
+        popupFormat: function(query) {
+          return `<a href="add">Créer un point d'intérêt à cet endroit</a>`
+        },
       },
       zoom: 0,
       maxZoom: 15,
@@ -253,6 +252,15 @@ export default {
   },
 },
 mounted: function(){
+  // Récupération de la requête envoyée dans le geosearch
+  this.$refs.myMap.mapObject.on('geosearch/showlocation', function(result){
+    console.log('result', result)
+    console.log('ville', result.location.raw.address.city)
+    console.log('région', result.location.raw.address.state)
+    console.log('longitude', result.location.x)
+    console.log('latitude', result.location.y)
+
+  });
   // Au passage de la souris, l'icône grossit
   this.$root.$on('mouse-over-interest', (index) => {
     this.interests[index].iconSize = this.markerLargeIcon

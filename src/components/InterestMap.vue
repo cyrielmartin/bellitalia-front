@@ -22,6 +22,7 @@
       <l-tile-layer :url="url" :attribution="attribution">
       </l-tile-layer>
 
+      <v-geosearch :options="geosearchOptions" ></v-geosearch>
       <!-- Bouton pour recentrer la carte -->
       <l-control
       :position="'topleft'"
@@ -113,11 +114,24 @@ import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "viewerjs/dist/viewer.css"
 import marker from '../assets/marker.png'
+import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
+import VGeosearch from 'vue2-leaflet-geosearch'
 
 export default {
   name: 'InterestMap',
   data: function() {
     return {
+      geosearchOptions: { // Important part Here
+        provider: new OpenStreetMapProvider(),
+        searchLabel: 'Recherchez un lieu',
+        autoClose: true,
+        keepResult: true,
+        showPopup: true,
+        style: 'bar',
+        popupFormat: function() {
+          return `<a href="#">Créer un point d'intérêt à cet endroit</a>`
+        }
+      },
       zoom: 0,
       maxZoom: 15,
       minZoom:2,
@@ -149,6 +163,7 @@ export default {
     LControl,
     LTooltip,
     'v-marker-cluster': Vue2LeafletMarkerCluster,
+    VGeosearch,
 
   },
   methods: {
@@ -328,7 +343,7 @@ h1 {
   text-align: center;
   overflow: auto;
   max-height: 550px;
-    padding: 0 10% 0 10%;
+  padding: 0 10% 0 10%;
 }
 .popupText {
   font-size: 0.8rem;

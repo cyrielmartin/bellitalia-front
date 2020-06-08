@@ -1,5 +1,7 @@
 <template>
   <div class="">
+
+
     <!-- Width: {{ window.width }},
     Height: {{ window.height }}
     Zoom : {{zoom}}
@@ -120,24 +122,34 @@ export default {
   name: 'InterestMap',
   data: function() {
     return {
-      geosearchOptions: { // Important part Here
-        provider: new OpenStreetMapProvider(),
+      geosearchOptions: {
+        provider: new OpenStreetMapProvider({
+          params: {
+            countrycodes: "it",
+            // limit: 1
+          }
+        }),
         searchLabel: 'Recherchez un lieu',
         autoClose: true,
         keepResult: true,
         showPopup: true,
         style: 'bar',
         popupFormat: function(query) {
-          return `<a href="add">Créer un point d'intérêt à cet endroit</a>`
+          // return `<a href="add">Créer un point d'intérêt à cet endroit</a>`
+          return `<span>${query.result.label} </span><br><a href="add/?nom=${query.result.label}&longitude=${query.result.x}&latitude=${query.result.y}">Créer un point d'intérêt à cet endroit</a>`
         },
       },
       zoom: 0,
+      ville:'',
+      query:false,
       maxZoom: 15,
       minZoom:2,
       center: [],
       url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       href:'',
+      // city:'',
+      link:'',
       linkUrl: 'https://',
       icon: marker,
       iconSize: [30, 30],
@@ -253,14 +265,15 @@ export default {
 },
 mounted: function(){
   // Récupération de la requête envoyée dans le geosearch
-  this.$refs.myMap.mapObject.on('geosearch/showlocation', function(result){
-    console.log('result', result)
-    console.log('ville', result.location.raw.address.city)
-    console.log('région', result.location.raw.address.state)
-    console.log('longitude', result.location.x)
-    console.log('latitude', result.location.y)
-
-  });
+  // this.$refs.myMap.mapObject.on('geosearch/showlocation', function(result){
+  //   console.log('result', result)
+  //   console.log('ville', result.location.raw.address.city)
+  //   console.log('région', result.location.raw.address.state)
+  //   console.log('longitude', result.location.x)
+  //   console.log('latitude', result.location.y)
+  //   this.ville = result.location.raw.address.city
+  //   console.log('ville2', this.ville)
+  // });
   // Au passage de la souris, l'icône grossit
   this.$root.$on('mouse-over-interest', (index) => {
     this.interests[index].iconSize = this.markerLargeIcon

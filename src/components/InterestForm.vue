@@ -716,6 +716,9 @@ export default {
     this.getStoredPublications();
     this.getInterest();
     this.getStoredCities();
+    this.interestName = this.$route.query.nom;
+    this.interestLongitude = this.$route.query.longitude;
+    this.interestLatitude = this.$route.query.latitude;
 
     // Méthode JS empêchant de saisir autre chose que des chiffres
     function setInputFilter(textbox, inputFilter) {

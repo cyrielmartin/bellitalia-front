@@ -26,7 +26,7 @@ const moment = require('moment')
 require('moment/locale/fr')
 
 Vue.use(require('vue-moment'), {
-    moment
+  moment
 })
 Vue.use(VModal, {dialog: true})
 Vue.config.productionTip = false
@@ -46,6 +46,7 @@ const router = new VueRouter({
     component: require('./components/Bellitalia.vue').default
   }, {
     path: '/add',
+    name: 'add',
     component: require('./components/InterestForm.vue').default
   }, {
     path: '/interest/:id',

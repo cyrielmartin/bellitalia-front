@@ -125,7 +125,7 @@ export default {
       geosearchOptions: {
         provider: new OpenStreetMapProvider({
           params: {
-            countrycodes: "it",
+            countrycodes: ['it', 'sm', 'va']
           }
         }),
         searchLabel: 'Recherchez un lieu',

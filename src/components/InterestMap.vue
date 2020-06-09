@@ -1,6 +1,5 @@
 <template>
   <div class="">
-
     <!-- Width: {{ window.width }},
     Height: {{ window.height }}
     Zoom : {{zoom}}
@@ -18,11 +17,20 @@
       :max-zoom="maxZoom"
       :min-zoom="minZoom"
       :center="center">
-      <!-- Surcouche OSM -->
-      <l-tile-layer :url="url" :attribution="attribution">
-      </l-tile-layer>
 
+      <!-- Gestion multi cartes (plan et satellite) -->
+      <l-tile-layer
+      v-for="tileProvider in tileProviders"
+      :key="tileProvider.name"
+      :name="tileProvider.name"
+      :visible="tileProvider.visible"
+      :url="tileProvider.url"
+      :attribution="tileProvider.attribution"
+      layer-type="base"/>
+
+      <!-- Barre de recherche pour géolocalisation -->
       <v-geosearch :options="geosearchOptions" ></v-geosearch>
+
       <!-- Bouton pour recentrer la carte -->
       <l-control
       :position="'topleft'"
@@ -35,6 +43,9 @@
 
     <!-- Clusters -->
     <!-- <v-marker-cluster :options="clusterOptions"> -->
+
+    <!-- Bouton pour affichage alterné des cartes plan/satellite -->
+    <l-control-layers position="topright"  ></l-control-layers>
 
     <!-- Marqueurs -->
     <l-marker
@@ -103,7 +114,7 @@
 
 <script>
 
-import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl, LTooltip } from 'vue2-leaflet'
+import { LMap, LTileLayer, LControlLayers, LMarker, LIcon, LPopup, LControl, LTooltip } from 'vue2-leaflet'
 import L from 'leaflet'
 import "leaflet/dist/leaflet.css"
 import axios from 'axios'
@@ -141,12 +152,27 @@ export default {
       },
       zoom: 0,
       latlng:[],
-      maxZoom: 15,
+      maxZoom: 18,
       minZoom:2,
       center: [],
       viewerInterestOptions: {title: false, scalable: false},
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      // Gestion multi cartes plan/satellite
+      tileProviders: [
+        {
+          name: 'Plan',
+          visible: true,
+          attribution:
+          '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        },
+        {
+          name: 'Satellite',
+          visible: false,
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          attribution:
+          '&copy; <a target="_blank" href="https://www.esri.com/arcgis-blog/products/constituent-engagement/constituent-engagement/esri-world-imagery-in-openstreetmap/">Esri</a> contributors',
+        },
+      ],
       href:'',
       linkUrl: 'https://',
       icon: marker,
@@ -166,6 +192,7 @@ export default {
   components: {
     LMap,
     LTileLayer,
+    LControlLayers,
     LMarker,
     LIcon,
     LPopup,

@@ -716,6 +716,7 @@ export default {
     this.getStoredPublications();
     this.getInterest();
     this.getStoredCities();
+    // A l'ouverture du formulaire, je récupère les infos passées en URL s'il y en a 
     this.interestName = this.$route.query.nom;
     this.interestLongitude = this.$route.query.longitude;
     this.interestLatitude = this.$route.query.latitude;

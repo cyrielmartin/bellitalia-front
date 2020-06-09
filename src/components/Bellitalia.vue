@@ -293,7 +293,7 @@ export default {
     // Et donc les interests se mettent dynamiquement à jour sur la liste et sur la carte
     regionsFilteredInterests:function() {
       return this.interests.filter((interest) => {
-        return this.checkedRegions.includes(interest.city.region_id.name);
+        return this.checkedRegions.includes(interest.city.region.name);
       });
     },
     categoriesFilteredInterests:function(){
@@ -312,7 +312,7 @@ export default {
       var matcher = new RegExp(this.search1.trim(), 'i')
       return this.publicationsFilteredInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+          return matcher.test([interest.city.name,interest.name,interest.city.region.name,tag.name].join())
         });
       });
     },
@@ -320,7 +320,7 @@ export default {
       var matcher = new RegExp(this.search2.trim(), 'i')
       return this.firstSearchInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+          return matcher.test([interest.city.name,interest.name,interest.city.region.name,tag.name].join())
         });
       });
     },
@@ -328,7 +328,7 @@ export default {
       var matcher = new RegExp(this.search3.trim(), 'i')
       return this.secondSearchInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+          return matcher.test([interest.city.name,interest.name,interest.city.region.name,tag.name].join())
         });
       });
     },
@@ -336,7 +336,7 @@ export default {
       var matcher = new RegExp(this.search4.trim(), 'i')
       return this.thirdSearchInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+          return matcher.test([interest.city.name,interest.name,interest.city.region.name,tag.name].join())
         });
       });
     },
@@ -344,7 +344,7 @@ export default {
       var matcher = new RegExp(this.search5.trim(), 'i')
       return this.fourthSearchInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
-          return matcher.test([interest.city.name,interest.name,interest.city.region_id.name,tag.name].join())
+          return matcher.test([interest.city.name,interest.name,interest.city.region.name,tag.name].join())
         });
       });
     },

@@ -1,7 +1,6 @@
 <template>
   <div class="">
 
-
     <!-- Width: {{ window.width }},
     Height: {{ window.height }}
     Zoom : {{zoom}}
@@ -10,10 +9,10 @@
       <div class="container-fluid drop">
       </div>
 
+      <!-- @update:center="centerUpdate" -->
       <!-- Carte -->
       <l-map
       ref="myMap"
-      @update:center="centerUpdate"
       :options="{ scrollWheelZoom: false, gestureHandling: true}"
       :zoom="zoom"
       :max-zoom="maxZoom"
@@ -106,10 +105,10 @@
 
 import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControl, LTooltip } from 'vue2-leaflet'
 import L from 'leaflet'
+import "leaflet/dist/leaflet.css"
 import axios from 'axios'
 import { GestureHandling } from "leaflet-gesture-handling"
 import Vue2LeafletMarkerCluster from 'vue2-leaflet-markercluster'
-import "leaflet/dist/leaflet.css"
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
@@ -122,11 +121,11 @@ export default {
   name: 'InterestMap',
   data: function() {
     return {
+      // Tous les éléments geosearchOptions = recherche géographique sur la carte
       geosearchOptions: {
         provider: new OpenStreetMapProvider({
           params: {
             countrycodes: "it",
-            // limit: 1
           }
         }),
         searchLabel: 'Recherchez un lieu',
@@ -134,22 +133,21 @@ export default {
         keepResult: true,
         showPopup: true,
         style: 'bar',
+        // Dans le popup qui s'affiche, on met un lien avec les infos du lieu dans l'url pour pouvoir les récupérer dans le formulaire d'ajout d'un point d'intérêt
         popupFormat: function(query) {
-          // return `<a href="add">Créer un point d'intérêt à cet endroit</a>`
+          console.log(query)
           return `<span>${query.result.label} </span><br><a href="add/?nom=${query.result.label}&longitude=${query.result.x}&latitude=${query.result.y}">Créer un point d'intérêt à cet endroit</a>`
         },
       },
       zoom: 0,
-      ville:'',
-      query:false,
+      latlng:[],
       maxZoom: 15,
       minZoom:2,
       center: [],
-      url: 'https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png',
-      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      viewerInterestOptions: {title: false, scalable: false},
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       href:'',
-      // city:'',
-      link:'',
       linkUrl: 'https://',
       icon: marker,
       iconSize: [30, 30],
@@ -178,9 +176,6 @@ export default {
 
   },
   methods: {
-    openPublicationImage(){
-      console.log('open')
-    },
     // Méthode pour recentrer la carte via bouton dédié
     recenterMap: function(){
       this.$nextTick(() => {
@@ -264,15 +259,10 @@ export default {
   },
 },
 mounted: function(){
+
   // Récupération de la requête envoyée dans le geosearch
   // this.$refs.myMap.mapObject.on('geosearch/showlocation', function(result){
   //   console.log('result', result)
-  //   console.log('ville', result.location.raw.address.city)
-  //   console.log('région', result.location.raw.address.state)
-  //   console.log('longitude', result.location.x)
-  //   console.log('latitude', result.location.y)
-  //   this.ville = result.location.raw.address.city
-  //   console.log('ville2', this.ville)
   // });
   // Au passage de la souris, l'icône grossit
   this.$root.$on('mouse-over-interest', (index) => {
@@ -299,7 +289,7 @@ mounted: function(){
 
 },
 created: function(){
-  window.addEventListener('resize', this.handleResize)
+  window.addEventListener('resize', this.handleResize);
   this.handleResize();
   this.setMapZoom();
 },
@@ -325,7 +315,7 @@ props: {
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
 .map {
   height: 100vh;

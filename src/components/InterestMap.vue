@@ -28,6 +28,9 @@
       :attribution="tileProvider.attribution"
       layer-type="base"/>
 
+      <!-- Pour tracer une ligne droite entre 2 points -->
+      <l-polygon :lat-lngs="polygon.latlngs" :color="polygon.color"></l-polygon>
+
       <!-- Barre de recherche pour géolocalisation -->
       <v-geosearch :options="geosearchOptions" ></v-geosearch>
 
@@ -114,7 +117,7 @@
 
 <script>
 
-import { LMap, LTileLayer, LControlLayers, LMarker, LIcon, LPopup, LControl, LTooltip } from 'vue2-leaflet'
+import { LMap, LTileLayer, LControlLayers, LMarker, LIcon, LPopup, LControl, LTooltip, LPolygon } from 'vue2-leaflet'
 import L from 'leaflet'
 import "leaflet/dist/leaflet.css"
 import axios from 'axios'
@@ -173,6 +176,11 @@ export default {
           '&copy; <a target="_blank" href="https://www.esri.com/arcgis-blog/products/constituent-engagement/constituent-engagement/esri-world-imagery-in-openstreetmap/">Esri</a> contributors',
         },
       ],
+      // Pour tracer une ligne droite entre 2 points
+      polygon: {
+        // latlngs: [[41.9002044, 12.4457442], [41.9073912, 12.4583653]],
+        color: 'green'
+      },
       href:'',
       linkUrl: 'https://',
       icon: marker,
@@ -198,6 +206,7 @@ export default {
     LPopup,
     LControl,
     LTooltip,
+    LPolygon,
     'v-marker-cluster': Vue2LeafletMarkerCluster,
     VGeosearch,
 
@@ -286,7 +295,6 @@ export default {
   },
 },
 mounted: function(){
-
   // Récupération de la requête envoyée dans le geosearch
   // this.$refs.myMap.mapObject.on('geosearch/showlocation', function(result){
   //   console.log('result', result)

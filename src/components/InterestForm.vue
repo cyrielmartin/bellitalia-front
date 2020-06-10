@@ -18,6 +18,12 @@
           </div>
 
           <div class="form-group">
+            <label>Adresse <span class="redStar">*</span></label>
+            <input class="form-control" v-model="interestAddress" :class="addressErrorClass" @click="inputAddressChange">
+            <p id="address-error" :class="addressErrorTextClass" v-if="errors.address" v-text="errors.address[0]"></p>
+          </div>
+
+          <div class="form-group">
             <label>Description</label>
             <textarea cols="50" rows="5" class="form-control" v-model="interestDescription"></textarea>
           </div>
@@ -219,6 +225,7 @@ export default {
   name: 'InterestForm',
   data() {
     return {
+      error:'',
       publicationImage: '',
       publicationImageArray:[],
       publicationFile:'',
@@ -231,6 +238,7 @@ export default {
       storedCities: [],
       storedRegions: [],
       interestName: '',
+      interestAddress: '',
       interestDescription:'',
       interestLink:'',
       interestLatitude:'',
@@ -247,6 +255,8 @@ export default {
       interestImageError:false,
       nameErrorClass: "",
       nameErrorTextClass: "",
+      addressErrorClass:"",
+      addressErrorTextClass: "",
       latitudeErrorClass: "",
       latitudeErrorTextClass: "",
       longitudeErrorClass: "",
@@ -315,6 +325,10 @@ export default {
     inputNameChange(){
       this.nameErrorClass = ""
       this.nameErrorTextClass = "text-error-hidden"
+    },
+    inputAddressChange(){
+      this.addressErrorClass = ""
+      this.addressErrorTextClass = "text-error-hidden"
     },
     inputLatitudeChange(){
       this.latitudeErrorClass = ""
@@ -572,6 +586,7 @@ export default {
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
+        address: this.interestAddress,
         description: this.interestDescription,
         link: this.interestLink,
         latitude: this.interestLatitude,
@@ -584,6 +599,7 @@ export default {
       })
       .then(() => {
         this.interestName = ""
+        this.interestAddress = ""
         this.interestDescription = ""
         this.interestLink = ""
         this.interestLatitude = ""
@@ -638,6 +654,11 @@ export default {
           this.nameErrorTextClass="text-error"
           this.interestImageError = false
         }
+        if(this.errors.address) {
+          this.addressErrorClass= "border-red"
+          this.addressErrorTextClass="text-error"
+          this.interestImageError = false
+        }
         if(this.errors.latitude) {
           this.latitudeErrorClass= "border-red"
           this.latitudeErrorTextClass="text-error"
@@ -654,6 +675,7 @@ export default {
     editForm() {
       axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
         name: this.interestName,
+        address: this.interestAddress,
         description: this.interestDescription,
         link: this.interestLink,
         latitude: this.interestLatitude,
@@ -666,6 +688,7 @@ export default {
       })
       .then(() => {
         this.interestName = ""
+        this.interestAddress = ""
         this.interestDescription = ""
         this.interestLink = ""
         this.interestLatitude = ""
@@ -701,6 +724,7 @@ export default {
         this.edit = true
         this.interest = r.data.data
         this.interestName = r.data.data.name
+        this.interestAddress = r.data.data.address
         this.interestDescription = r.data.data.description
         this.interestLink = r.data.data.link
         this.interestLatitude = r.data.data.latitude
@@ -718,8 +742,9 @@ export default {
     this.getStoredPublications();
     this.getInterest();
     this.getStoredCities();
-    // A l'ouverture du formulaire, je récupère les infos passées en URL s'il y en a
-    this.interestName = this.$route.query.nom;
+    // A l'ouverture du formulaire, je récupère les infos passées en URL
+    this.interestName = this.$route.query.name;
+    this.interestAddress = this.$route.query.address;
     this.interestLongitude = this.$route.query.longitude;
     this.interestLatitude = this.$route.query.latitude;
 

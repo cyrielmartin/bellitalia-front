@@ -58,7 +58,7 @@
     :lat-lng="[interest.latitude, interest.longitude]">
 
     <!-- Tool tip au passage de la souris sur un marker -->
-    <l-tooltip>{{interest.name}}{{interest.id}}</l-tooltip>
+    <l-tooltip>{{interest.name}}</l-tooltip>
 
     <!-- Icône pour marqueurs -->
     <l-icon :icon-size="interest.iconSize" :icon-url="icon">
@@ -150,7 +150,7 @@ export default {
         // Dans le popup qui s'affiche, on met un lien avec les infos du lieu dans l'url pour pouvoir les récupérer dans le formulaire d'ajout d'un point d'intérêt
         popupFormat: function(query) {
           console.log(query)
-          return `<span>${query.result.label} </span><br><a href="add/?nom=${query.result.label}&longitude=${query.result.x}&latitude=${query.result.y}">Créer un point d'intérêt à cet endroit</a>`
+          return `<span>${query.result.label} </span><br><a href="add/?name=${query.result.label}&address=${query.result.label}&longitude=${query.result.x}&latitude=${query.result.y}">Créer un point d'intérêt à cet endroit</a>`
         },
       },
       zoom: 0,

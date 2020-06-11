@@ -66,7 +66,8 @@
 
     <!-- Popup -->
     <l-popup :options="{ keepInView: true, minWidth:300, maxWidth:500, closeOnEscapeKey:false}">
-
+      <!-- Popup : lieu du point d'intérêt -->
+      <div class="badge badge-light popupAddress popupText"><span><i class="fas fa-location-arrow"></i> {{interest.address}}</span></div>
       <!-- Popup : catégories -->
       <div class="popupContent">
         <div>
@@ -74,8 +75,6 @@
         </div>
         <!-- Popup : nom du point d'intérêt -->
         <h1 class="mt-3 mb-1">{{interest.name}}</h1>
-        <!-- Popup : lieu du point d'intérêt -->
-        <div class="badge badge-light popupText"><span><i class="fas fa-location-arrow"></i> {{interest.address}}</span></div>
         <!-- Popup : photos du point d'intérêt -->
         <div class="" v-viewer="viewerInterestOptions">
           <div class="popupImageContainer row">
@@ -89,10 +88,11 @@
         <!-- Popup : lien -->
         <!-- <p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p> -->
         <!-- Popup : numéro de Bell'Italia concerné (image + infos) -->
+        <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
         <div v-viewer="viewerPublicationOptions" class="">
           <img :src="interest.bellitalia.image" class="popupImages"/><br>
         </div>
-        <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+
         <!-- Popup : liens modifier et supprimer -->
         <div class="mt-2"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a>
           <span class="ml-4 deleteLink" @click="deleteButton($event, interest.id)"><i class="far fa-trash-alt deleteLink"></i> Supprimer</span>
@@ -396,6 +396,11 @@ h1 {
 }
 .popupText {
   font-size: 0.8rem;
+  margin-bottom: 1em;
+}
+.popupAddress {
+  display: flex;
+  justify-content:center;
 }
 .popupPublicationText {
   font-size: 0.7rem;

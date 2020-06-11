@@ -12,15 +12,17 @@
         class="list-group-item">
         <div class="container-fluid ">
           <div class="row listElement">
-            <div class="col-7">
-              <!-- Nom du point d'intérêt -->
+            <!-- Lieu du point d'intérêt -->
+            <div class="container-fluid">
+              <div class="badge badge-light interestLocation mb-2"><span><i class="fas fa-location-arrow"></i> {{interest.address}}</span></div>
+            </div>
+            <div class="col-7 mt-3">
+              <!-- Nom -->
               <span>{{interest.name}}</span>
-              <!-- Lieu -->
-              <div class="badge badge-light interestLocation"><span><i class="fas fa-location-arrow"></i> {{interest.address}}</span></div>
               <!-- Catégorie(s) -->
-              <div><span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div>
+              <div><span class="badge badge-warning mt-1 mr-1 mb-2" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div>
               <!-- Publication -->
-              <div class="badge badge-secondary popupText"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+              <div class="badge badge-secondary mb-2"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
             </div>
             <div v-if="interest.images.length" class="col-5 interestItem">
               <!-- Image(s) -->
@@ -80,7 +82,8 @@ export default {
 <style lang="scss" scoped>
 .interest-list {
   overflow-y: scroll;
-  height: 95vh;
+  overflow-x: hidden;
+  height: 100vh;
   li {
     &:hover {
       background-color: lightgrey;
@@ -93,19 +96,17 @@ export default {
   flex-direction: column;
   align-items: start;
   width: max-content;
-}
-.interestLocation:hover {
-  position: sticky;
-  z-index: 10;
+  // margin-bottom: 3px;
 }
 .listElement{
-  max-height: 212px;
+  // max-height: 212px;
   display: flex;
   align-content: center;
   justify-content: center;
   margin-top: 20px;
   margin-bottom: 20px;
   margin-right: 5px;
+  margin-left: -40px;
 }
 .interestItem{
   min-height: 212px;

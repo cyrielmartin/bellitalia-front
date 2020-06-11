@@ -23,6 +23,24 @@
             <p id="address-error" :class="addressErrorTextClass" v-if="errors.address" v-text="errors.address[0]"></p>
           </div>
 
+          <div class="row container-fluid mb-3" style="gap:1%;">
+            <div class="">
+              <label>Latitude <span class="redStar">*</span><span><i v-b-tooltip.hover.right title="Ce champ ne peut pas être modifié" class="fas fa-info-circle informationLogo"></i></span></label>
+              <input disabled min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="latitudeErrorClass" @click="inputLatitudeChange">
+              <!-- <small class="helpText">Le séparateur décimal doit être un point</small><br/>
+              <small class="helpText">La saisie des lettres est désactivée</small> -->
+              <p :class="latitudeErrorTextClass" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
+            </div>
+
+            <div class="">
+              <label>Longitude <span class="redStar">*</span><span><i v-b-tooltip.hover.right title="Ce champ ne peut pas être modifié" class="fas fa-info-circle informationLogo"></i></span></label>
+              <input disabled min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="longitudeErrorClass" @click="inputLongitudeChange">
+              <!-- <small class="helpText">Le séparateur décimal doit être un point</small><br/>
+              <small class="helpText">La saisie des lettres est désactivée</small> -->
+              <p :class="longitudeErrorTextClass" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
+            </div>
+          </div>
+
           <div class="form-group">
             <label>Description</label>
             <textarea cols="50" rows="5" class="form-control" v-model="interestDescription"></textarea>
@@ -56,23 +74,6 @@
           <div class="form-group">
             <label>Lien</label>
             <input class="form-control" v-model="interestLink">
-          </div>
-          <div class="row container-fluid mb-3" style="gap:1%;">
-            <div class="">
-              <label>Latitude <span class="redStar">*</span><span><i v-b-tooltip.hover.right title="Ce champ ne peut pas être modifié" class="fas fa-info-circle informationLogo"></i></span></label>
-              <input disabled min="0" max="100" step="1.0E-7" class="form-control latitude" v-model="interestLatitude" :class="latitudeErrorClass" @click="inputLatitudeChange">
-              <!-- <small class="helpText">Le séparateur décimal doit être un point</small><br/>
-              <small class="helpText">La saisie des lettres est désactivée</small> -->
-              <p :class="latitudeErrorTextClass" v-if="errors.latitude" v-text="errors.latitude[0]"></p>
-            </div>
-
-            <div class="">
-              <label>Longitude <span class="redStar">*</span><span><i v-b-tooltip.hover.right title="Ce champ ne peut pas être modifié" class="fas fa-info-circle informationLogo"></i></span></label>
-              <input disabled min="0" max="100" step="1.0E-8" class="form-control" v-model="interestLongitude" :class="longitudeErrorClass" @click="inputLongitudeChange">
-              <!-- <small class="helpText">Le séparateur décimal doit être un point</small><br/>
-              <small class="helpText">La saisie des lettres est désactivée</small> -->
-              <p :class="longitudeErrorTextClass" v-if="errors.longitude" v-text="errors.longitude[0]"></p>
-            </div>
           </div>
 
           <div class="form-group">

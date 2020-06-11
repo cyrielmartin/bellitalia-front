@@ -18,6 +18,9 @@
       :min-zoom="minZoom"
       :center="center">
 
+      <!-- Barre de recherche pour géolocalisation -->
+      <v-geosearch :options="geosearchOptions" ></v-geosearch>
+
       <!-- Gestion multi cartes (plan et satellite) -->
       <l-tile-layer
       v-for="tileProvider in tileProviders"
@@ -30,9 +33,6 @@
 
       <!-- Pour tracer une ligne droite entre 2 points -->
       <l-polygon :lat-lngs="polygon.latlngs" :color="polygon.color"></l-polygon>
-
-      <!-- Barre de recherche pour géolocalisation -->
-      <v-geosearch :options="geosearchOptions" ></v-geosearch>
 
       <!-- Bouton pour recentrer la carte -->
       <l-control
@@ -143,10 +143,12 @@ export default {
           }
         }),
         searchLabel: 'Recherchez un lieu',
+        autoCompleteDelay: 10,
         autoClose: true,
         keepResult: true,
         showPopup: true,
         style: 'bar',
+        class: 'toto',
         // Dans le popup qui s'affiche, on met un lien avec les infos du lieu dans l'url pour pouvoir les récupérer dans le formulaire d'ajout d'un point d'intérêt
         popupFormat: function(query) {
           console.log(query)
@@ -320,6 +322,7 @@ mounted: function(){
     // Avant, si un popup est déjà ouvert, je le ferme
     this.$refs.myMap.mapObject.closePopup()
     this.$refs.myMarker[index].mapObject.openPopup()
+
   });
 
 },
@@ -412,5 +415,7 @@ h1 {
 .popupImages:hover {
   cursor: zoom-in;
 }
-
+.leaflet-popup {
+  top:-30vh;
+}
 </style>

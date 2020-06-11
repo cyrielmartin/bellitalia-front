@@ -75,18 +75,6 @@
             </div>
           </div>
 
-
-          <!-- Villes gérées grâce à plugin Vue Multiselect -->
-          <div class="form-group">
-            <div>
-              <label>Ville <span class="redStar">*</span></label>
-              <multiselect refs="city" v-model="interestCity" tag-placeholder="Créer cette nouvelle ville" placeholder="Sélectionner ou créer une ville" label="name" :custom-label="nameWithRegion" track-by="name" :options="storedCities" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addCity" @open="inputCityChange" :class="cityErrorClass">
-                <span slot="noOptions">Aucune ville</span>
-              </multiselect>
-              <p :class="cityErrorTextClass" v-if="errors.city_id" v-text="errors.city_id[0]"></p>
-            </div>
-          </div>
-
           <!-- Régions gérées grâce à plugin Vue Multiselect -->
           <div class="form-group" v-if="interestRegionVisible">
             <div>
@@ -235,7 +223,6 @@ export default {
       edit: false,
       interestTag: [],
       storedTags: [],
-      storedCities: [],
       storedRegions: [],
       interestName: '',
       interestAddress: '',
@@ -243,7 +230,6 @@ export default {
       interestLink:'',
       interestLatitude:'',
       interestLongitude:'',
-      interestCity:'',
       interestRegion:'',
       interestRegionVisible: false,
       interestRegionIds:[],
@@ -261,8 +247,6 @@ export default {
       latitudeErrorTextClass: "",
       longitudeErrorClass: "",
       longitudeErrorTextClass: "",
-      cityErrorClass: "",
-      cityErrorTextClass: "",
       regionErrorClass: "",
       regionErrorTextClass:"",
       publicationErrorClass: "",
@@ -283,33 +267,6 @@ export default {
     }
   },
   methods: {
-    // Pour affichage villes + régions déjà associées
-    nameWithRegion ({ name, region_id }) {
-      // Si le select Ville est vide (= affichage par défaut), on n'affiche pas le select Region
-      if(!this.interestCity) {
-        this.interestRegionVisible = false
-      }
-      // Pour le menu déroulant du select Ville
-      var regionName = ''
-      this.storedRegions.forEach(region => {
-        if(region_id == region.id) {
-          regionName = region.name
-        }
-      });
-      // Si les villes ont déjà une région associée (= sont déjà en BDD)
-      if(name && region_id) {
-        // Précaution pour corriger un bug : si une ville a été saisie et qu'elle a déjà une région, on enlève le select région s'il était présent.
-        if(this.interestCity && this.interestCity.region_id) {
-          this.interestRegionVisible = false
-        }
-        // On affiche le nom de la ville + la région
-        return `${name} (${regionName})`
-      } else {
-        // Sinon (= création de ville à la volée), on n'affiche que le nom saisi
-        this.interestRegionVisible = true
-        return name
-      }
-    },
     // Pour affichage numéro + date de publication dans multiselect publication
     numberWithPublication ({ number, publication }) {
       return `n°${number}`+ ` (` + moment(`${publication}`).format('MMMM YYYY')+ `)`
@@ -337,10 +294,6 @@ export default {
     inputLongitudeChange(){
       this.longitudeErrorClass = ""
       this.longitudeErrorTextClass = "text-error-hidden"
-    },
-    inputCityChange(){
-      this.cityErrorClass=""
-      this.cityErrorTextClass = "text-error-hidden"
     },
     inputRegionChange(){
       this.regionErrorClass=""
@@ -570,18 +523,6 @@ export default {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.storedRegions = response.data))
     },
-    // Récupération des villes en BDD
-    getStoredCities() {
-      axios.get('http://127.0.0.1:8000/api/city')
-      .then(response => (this.storedCities = response.data))
-    },
-    // Ajout d'une ville
-    addCity(newCity) {
-      const createdCity = {
-        name: newCity,
-      }
-      this.interestCity = createdCity
-    },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
@@ -591,7 +532,6 @@ export default {
         link: this.interestLink,
         latitude: this.interestLatitude,
         longitude: this.interestLongitude,
-        city_id: this.interestCity,
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
@@ -604,7 +544,6 @@ export default {
         this.interestLink = ""
         this.interestLatitude = ""
         this.interestLongitude = ""
-        this.interestCity = ""
         this.interestRegion = ""
         this.interestNumber = ""
         this.interestDate = ""
@@ -629,11 +568,6 @@ export default {
         }
 
         this.errors = error.response.data
-        if(this.errors.city_id) {
-          this.cityErrorClass= "multiselect__tags-red"
-          this.cityErrorTextClass="text-error"
-          this.interestImageError = false
-        }
         if(this.errors.region_id) {
           this.regionErrorClass= "multiselect__tags-red"
           this.regionErrorTextClass= "text-error"
@@ -680,7 +614,6 @@ export default {
         link: this.interestLink,
         latitude: this.interestLatitude,
         longitude: this.interestLongitude,
-        city_id: this.interestCity,
         region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
@@ -693,7 +626,6 @@ export default {
         this.interestLink = ""
         this.interestLatitude = ""
         this.interestLongitude = ""
-        this.interestCity = ""
         this.interestRegion = ""
         this.interestNumber = ""
         this.interestDate = ""
@@ -729,7 +661,6 @@ export default {
         this.interestLink = r.data.data.link
         this.interestLatitude = r.data.data.latitude
         this.interestLongitude = r.data.data.longitude
-        this.interestCity = {"name": r.data.data.city.name}
         this.interestRegion = {"name": r.data.data.city.region.name, "id": r.data.data.city.region.id}
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
@@ -741,14 +672,13 @@ export default {
     this.getStoredTags();
     this.getStoredPublications();
     this.getInterest();
-    this.getStoredCities();
     // A l'ouverture du formulaire, je récupère les infos passées en URL
     this.interestName = this.$route.query.name;
     this.interestAddress = this.$route.query.address;
     this.interestLongitude = this.$route.query.longitude;
     this.interestLatitude = this.$route.query.latitude;
 
-    // Méthode JS empêchant de saisir autre chose que des chiffres
+    // Méthode JS empêchant de saisir autre chose que des chiffres dans le champ numéro de publication
     function setInputFilter(textbox, inputFilter) {
       ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
         textbox.addEventListener(event, function() {

@@ -17,7 +17,7 @@
               <!-- Nom du point d'intérêt -->
               <span>{{interest.name}}</span>
               <!-- Lieu -->
-              <div class="badge badge-light interestLocation"><span><i class="fas fa-location-arrow"></i> {{interest.city.name}}</span><div v-bind:key="interestRegion" v-for="(region, interestRegion) in interest.city">{{region.name}}</div></div>
+              <div class="badge badge-light interestLocation"><span><i class="fas fa-location-arrow"></i> {{interest.address}}</span></div>
               <!-- Catégorie(s) -->
               <div><span class="badge badge-warning mr-1 popupText" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div>
               <!-- Publication -->

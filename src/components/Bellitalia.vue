@@ -294,8 +294,8 @@ export default {
     regionsFilteredInterests:function() {
       return this.interests.filter((interest) => {
         // Là, je transforme la chaîne de strings reçue depuis la carte (interest.address) en tableau (d'où le split(', ')).
-        // Ensuite, je compare chacun des éléments du tableau (.some()) avec le tableau des régions cochées. Dès qu'il y a intersection (.includes()), je retourne l'interest. 
-        return this.checkedRegions.some(v=> interest.address.split(', ').includes(v))
+        // Ensuite, je compare chacun des éléments du tableau (.some()) avec chacun des éléments du tableau des régions cochées. Dès qu'il y a intersection (.includes()), je retourne l'interest.
+        return this.checkedRegions.some(oneCheckedRegion => interest.address.split(', ').includes(oneCheckedRegion))
       });
     },
     categoriesFilteredInterests:function(){

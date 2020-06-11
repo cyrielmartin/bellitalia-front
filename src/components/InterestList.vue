@@ -1,7 +1,6 @@
 <template>
 
   <div>
-    <a href="add"><b-button type="button" variant="outline-secondary" class="col-12"><i class="fas fa-plus-circle"></i> Ajouter un point d'intérêt</b-button></a>
     <div class="card interest-list">
       <ul class="list-group list-group-flush">
         <li

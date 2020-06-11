@@ -75,17 +75,6 @@
             </div>
           </div>
 
-          <!-- Régions gérées grâce à plugin Vue Multiselect -->
-          <div class="form-group" v-if="interestRegionVisible">
-            <div>
-              <label>Région <span class="redStar">*</span></label>
-              <multiselect v-model="interestRegion" placeholder="Sélectionner une région" label="name" :custom-label="dynamicRegionName" track-by="name" :options="storedRegions" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="false"  :class="regionErrorClass" @open="inputRegionChange">
-                <span slot="noResult">Aucune région correspondante</span>
-              </multiselect>
-              <p :class="regionErrorTextClass" v-if="errors.region_id" v-text="errors.region_id[0]"></p>
-            </div>
-          </div>
-
           <div class="form-group">
             <div>
               <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
@@ -230,9 +219,6 @@ export default {
       interestLink:'',
       interestLatitude:'',
       interestLongitude:'',
-      interestRegion:'',
-      interestRegionVisible: false,
-      interestRegionIds:[],
       interestNumber:[],
       storedPublications:[],
       interestDate: '',
@@ -247,8 +233,6 @@ export default {
       latitudeErrorTextClass: "",
       longitudeErrorClass: "",
       longitudeErrorTextClass: "",
-      regionErrorClass: "",
-      regionErrorTextClass:"",
       publicationErrorClass: "",
       publicationErrorTextClass: "",
       imagePublicationErrorClass:"",
@@ -294,10 +278,6 @@ export default {
     inputLongitudeChange(){
       this.longitudeErrorClass = ""
       this.longitudeErrorTextClass = "text-error-hidden"
-    },
-    inputRegionChange(){
-      this.regionErrorClass=""
-      this.regionErrorTextClass= "text-error-hidden"
     },
     inputPublicationChange(){
       this.publicationErrorClass=""
@@ -532,7 +512,6 @@ export default {
         link: this.interestLink,
         latitude: this.interestLatitude,
         longitude: this.interestLongitude,
-        region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
         image: this.interestImageArray,
@@ -544,7 +523,6 @@ export default {
         this.interestLink = ""
         this.interestLatitude = ""
         this.interestLongitude = ""
-        this.interestRegion = ""
         this.interestNumber = ""
         this.interestDate = ""
         this.interestTag = ""
@@ -568,11 +546,6 @@ export default {
         }
 
         this.errors = error.response.data
-        if(this.errors.region_id) {
-          this.regionErrorClass= "multiselect__tags-red"
-          this.regionErrorTextClass= "text-error"
-          this.interestImageError = false
-        }
         if(this.errors.bellitalia_id) {
           this.publicationErrorClass= "multiselect__tags-red"
           this.publicationErrorTextClass= "text-error"
@@ -614,7 +587,6 @@ export default {
         link: this.interestLink,
         latitude: this.interestLatitude,
         longitude: this.interestLongitude,
-        region_id: this.interestRegion,
         bellitalia_id: this.interestNumber,
         tag_id: this.interestTag,
         image: this.interestImageArray,
@@ -626,7 +598,6 @@ export default {
         this.interestLink = ""
         this.interestLatitude = ""
         this.interestLongitude = ""
-        this.interestRegion = ""
         this.interestNumber = ""
         this.interestDate = ""
         this.interestTag = ""
@@ -661,7 +632,6 @@ export default {
         this.interestLink = r.data.data.link
         this.interestLatitude = r.data.data.latitude
         this.interestLongitude = r.data.data.longitude
-        this.interestRegion = {"name": r.data.data.city.region.name, "id": r.data.data.city.region.id}
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
       })

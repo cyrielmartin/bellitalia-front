@@ -76,18 +76,30 @@
             <input class="form-control" v-model="interestLink">
           </div>
 
-          <div class="form-group">
-            <div>
-              <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-              <label>Numéro du Bell'Italia <span class="redStar">*</span></label>
-              <multiselect v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
-                <span slot="noOptions">Aucune publication</span>
-              </multiselect>
-              <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
-              <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+          <!-- Les input publication/supplément ne peuvent et ne doivent pas être saisis en même temps. C'est l'un ou l'autre. Donc mise en place d'un radio pour passer de l'un à l'autre. -->
+          <b-form-group>
+            <b-form-radio :class="publicationRadio" v-model="selectedPublication" name="selectedPublication" value="publication">Numéro du Bell'Italia <span :class="publicationRedStar">*</span></b-form-radio>
 
+            <div class="form-group">
+              <div>
+                <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
+                <!-- <label>Numéro du Bell'Italia <span class="redStar">*</span></label> -->
+                <multiselect :disabled="publicationInputDisabled" v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
+                  <span slot="noOptions">Aucune publication</span>
+                </multiselect>
+                <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
+                <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+
+              </div>
             </div>
-          </div>
+
+            <!-- WIP : input supplément -->
+            <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
+            <div class="form-group">
+              <!-- <label>Lien</label> -->
+              <input :disabled="supplementInputDisabled" class="form-control" v-model="interestLink">
+            </div>
+          </b-form-group>
 
           <b-modal
           ref="addPublicationModal"
@@ -203,6 +215,10 @@ export default {
   name: 'InterestForm',
   data() {
     return {
+      selectedPublication:'publication',
+      publicationRadio: "mb-2",
+      publicationRedStar: 'redStar',
+      supplementRedStar: 'redStar',
       error:'',
       publicationImage: '',
       publicationImageArray:[],
@@ -638,6 +654,35 @@ export default {
       })
     },
   },
+  computed: {
+    // Les 2 computed suivantes gèrent le comportement des input d'ajout de publication/supplément. Si l'un est sélectionné, l'autre est disabled, l'étoile rouge disparaît et l'input est vidé.
+    supplementInputDisabled:function(){
+      if(this.selectedPublication == "publication") {
+        this.supplementRadio = "mb-2 muted"
+        this.supplementRedStar = 'noRedStar'
+        // WIP : vider l'input supplément si on clique sur publication
+        return true
+      } else {
+        this.supplementRadio = 'mb-2'
+        this.supplementRedStar = 'redStar'
+        this.interestNumber = ''
+        return false
+      }
+    },
+    publicationInputDisabled:function(){
+      if(this.selectedPublication == "supplement") {
+        this.publicationRadio = "mb-2 muted"
+        this.publicationRedStar = 'noRedStar'
+        this.interestNumber = ''
+        return true
+      } else {
+        this.publicationRadio = 'mb-2'
+        this.publicationRedStar = 'redStar'
+        // WIP : vider l'input supplément si on clique sur publication
+        return false
+      }
+    }
+  },
   mounted: function(){
     this.getStoredRegions();
     this.getStoredTags();
@@ -699,6 +744,9 @@ export default {
       }
       .redStar {
         color:red;
+      }
+      .noRedStar {
+        display: none;
       }
       .imageTrash:hover{
         cursor: pointer;

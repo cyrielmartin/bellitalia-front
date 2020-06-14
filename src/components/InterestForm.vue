@@ -83,8 +83,7 @@
             <div class="form-group">
               <div>
                 <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-                <!-- <label>Numéro du Bell'Italia <span class="redStar">*</span></label> -->
-                <multiselect :disabled="publicationInputDisabled" v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
+                <multiselect :disabled="publicationInputDisabled" v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" :allow-empty="false" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
                   <span slot="noOptions">Aucune publication</span>
                 </multiselect>
                 <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
@@ -92,13 +91,12 @@
               </div>
             </div>
 
-            <!-- WIP : input supplément -->
+            <!-- Input supplément -->
             <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
 
             <div class="form-group">
               <div>
-                <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-                <!-- <label>Numéro du Bell'Italia <span class="redStar">*</span></label> -->
+                <!-- L'ajout d'un supplément se fait au moyen de Vue Multiselect surchargé en JS -->
                 <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="storedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
                   <span slot="noOptions">Aucun supplément</span>
                 </multiselect>
@@ -185,7 +183,7 @@
 
       </b-modal>
 
-      <!-- WIP: modal d'ajout d'un supplément -->
+      <!-- Modal d'ajout d'un supplément -->
       <b-modal
       ref="addSupplementModal"
       id="addSupplementModal"
@@ -204,7 +202,7 @@
         <div class="mb-3">Merci d'associer un numéro de Bell'Italia à ce supplément <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
 
         <!-- Select des numéros déjà enregistrés en BDD -->
-        <multiselect v-model="interestNumber" placeholder="Sélectionner un numéro existant" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" :custom-label="numberWithPublication" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer">
+        <multiselect v-model="interestNumber" placeholder="Sélectionner un numéro existant" :options="storedPublications" :allow-empty="false" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" :custom-label="numberWithPublication" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer">
           <span slot="noOptions">Aucune publication</span>
         </multiselect>
 
@@ -213,7 +211,7 @@
 
         <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
 
-        <!-- Upload photo pour couverture publication -->
+        <!-- Upload photo pour couverture supplément -->
         <b-form-file
         placeholder="Choisissez un fichier ou déposez-le ici..."
         drop-placeholder="Déposez le fichier ici..."
@@ -340,6 +338,7 @@ export default {
       tagErrorTextClass:"",
       newPublication:0,
       createdPublication:{},
+      bellitaliaNumber: "",
       NotANumberPublicationModal: false,
       NoDatePublicationModal: false,
       okDisabledPublicationModal: false,
@@ -349,9 +348,11 @@ export default {
     }
   },
   methods: {
-    // WIP: pour affichage nom supplément + numéro publication associé
-    nameWithPublication ({ name, publication}) {
-      return
+    // Pour affichage nom supplément + numéro publication associé
+    nameWithPublication ({ name, bellitalia_id}) {
+      axios.get('http://127.0.0.1:8000/api/bellitalia/'+bellitalia_id)
+      .then(response => (this.bellitaliaNumber = response.data.data.number))
+      return `${name}`+ ` (Bell'Italia n°${this.bellitaliaNumber})`
     },
     // Pour affichage numéro + date de publication dans multiselect publication
     numberWithPublication ({ number, publication }) {
@@ -461,9 +462,8 @@ export default {
         monthPicker.classList.add("vue-monthly-picker-red")
       }
     },
-    // WIP: validation de la modale d'ajout d'un supplément
+    // Validation modale ajout supplément
     handleOkSupplementModal(bvModalEvt){
-      console.log('handleOkSupplementModal')
       this.supplementImageValid = null
       axios.post('http://127.0.0.1:8000/api/supplement', {
         name: this.interestSupplement[0],
@@ -480,7 +480,6 @@ export default {
       })
       // Validation back : si problème avec validator API, erreur renvoyée
       .catch(error => {
-        console.log('supplement error')
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
         if (error) {
           // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
@@ -683,7 +682,7 @@ export default {
       // Ouverture de la modale d'ajout d'un nouveau numéro
       this.$refs['addPublicationModal'].show()
     },
-    // WIP: ajout d'un supplément à la volée
+    // Ajout d'un supplément à la volée
     addSupplement(newSupplement) {
       // Si une image est déjà chargée, je l'enlève
       this.supplementImage = ""
@@ -691,7 +690,7 @@ export default {
       this.createdSupplement = {
         name: newSupplement,
       }
-      // Pour une raison que j'ignore, je dois redire que interestNumber est un tableau, sinon bug à l'update.
+      // Pour une raison que j'ignore, je dois redire que interestSupplement est un tableau, sinon bug à l'update.
       this.interestSupplement = new Array()
       // On affiche ensuite la nouvelle publication dans l'input
       this.interestSupplement.push(newSupplement)
@@ -708,7 +707,13 @@ export default {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.storedRegions = response.data))
     },
+    // Récupération des suppléments en BDD
+    getStoredSupplements() {
+      axios.get('http://127.0.0.1:8000/api/supplement')
+      .then(response => (this.storedSupplements = response.data))
+    },
     // Enregistrement d'un nouveau point d'intérêt
+    // WIP : ajouter Supplement
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
@@ -881,6 +886,7 @@ export default {
     this.getStoredTags();
     this.getStoredPublications();
     this.getInterest();
+    this.getStoredSupplements();
     // A l'ouverture du formulaire, je récupère les infos passées en URL
     this.interestName = this.$route.query.name;
     this.interestAddress = this.$route.query.address;

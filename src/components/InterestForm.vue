@@ -234,7 +234,7 @@
 
         <!-- Messages d'erreur si pb validation numéro et image back -->
         <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-        <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
+        <!-- <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p> -->
 
         <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
         <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
@@ -462,13 +462,49 @@ export default {
       }
     },
     // WIP: validation de la modale d'ajout d'un supplément
-    handleOkSupplementModal(){
+    handleOkSupplementModal(bvModalEvt){
       console.log('handleOkSupplementModal')
+      this.supplementImageValid = null
+      axios.post('http://127.0.0.1:8000/api/supplement', {
+        name: this.interestSupplement[0],
+        publication: this.interestNumber,
+        image: this.supplementImageArray,
+      })
+      .then(() => {
+        // Une fois le supplément créé, je l'ajoute à la liste déroulante du Multiselect
+        this.storedSupplements.push(this.createdSupplement)
+        // Je le sélectionne dans l'input du Multiselect
+        this.interestSupplement = {"name": this.interestSupplement[0]}
+        // Je ferme la modale
+        this.$bvModal.hide('addSupplementModal')
+      })
+      // Validation back : si problème avec validator API, erreur renvoyée
+      .catch(error => {
+        console.log('supplement error')
+        // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
+        if (error) {
+          // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+          this.supplementImageError = true
+          this.supplementImageValid = false
+        }
+        // Pour tous les messages d'erreur du validator
+        // Pour chaque erreur remontée, j'ajoute la bordure rouge
+        this.errors = error.response.data
+
+        if(this.errors.image) {
+          this.supplementImageValid = false
+          this.supplementImageError = false
+        }
+      })
+      // Dans tous les cas, on empêche la fermeture de la modale par défaut
+      // (ce qui permet d'afficher les messages d'erreur du validator sur la modale)
+      bvModalEvt.preventDefault()
     },
     // Si la validation back a échoué, le message d'erreur reste affiché dans la modale.
     // Cette méthode permet de l'effacer quand on clique sur Annuler
     handleCancelPublicationModal(){
       this.errors = {}
+      this.interestNumber = []
       this.publicationImage = ''
       this.publicationImageError = false
       this.publicationImageValid = null
@@ -476,6 +512,7 @@ export default {
     // Idem côté supplément
     handleCancelSupplementModal(){
       this.errors = {}
+      this.interestSupplement = []
       this.supplementImage = ''
       this.supplementImageError = false
       this.supplementImageValid = null

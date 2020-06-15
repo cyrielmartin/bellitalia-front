@@ -143,7 +143,7 @@ export default {
           }
         }),
         searchLabel: 'Recherchez un lieu',
-        autoCompleteDelay: 10,
+        // autoCompleteDelay: 10,
         autoClose: true,
         keepResult: true,
         showPopup: true,

@@ -90,7 +90,6 @@
                 <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
               </div>
             </div>
-
             <!-- Input supplément -->
             <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
 
@@ -202,7 +201,7 @@
         <div class="mb-3">Merci d'associer un numéro de Bell'Italia à ce supplément <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
 
         <!-- Select des numéros déjà enregistrés en BDD -->
-        <multiselect v-model="interestNumber" placeholder="Sélectionner un numéro existant" :options="storedPublications" :allow-empty="false" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" :custom-label="numberWithPublication" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer">
+        <multiselect v-model="interestNumberSupplementModal" placeholder="Sélectionner un numéro existant" :options="storedPublications" :allow-empty="false" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" :custom-label="numberWithPublication" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer">
           <span slot="noOptions">Aucune publication</span>
         </multiselect>
 
@@ -283,7 +282,7 @@ export default {
   name: 'InterestForm',
   data() {
     return {
-      selectedPublication:'publication',
+      selectedPublication: "publication",
       publicationRadio: "mb-2",
       publicationRedStar: 'redStar',
       supplementRedStar: 'redStar',
@@ -307,6 +306,7 @@ export default {
       interestLatitude:'',
       interestLongitude:'',
       interestNumber:[],
+      interestNumberSupplementModal:[],
       interestSupplement:[],
       storedPublications:[],
       storedSupplements: [],
@@ -348,15 +348,22 @@ export default {
     }
   },
   methods: {
-    // Pour affichage nom supplément + numéro publication associé
-    nameWithPublication ({ name, bellitalia_id}) {
-      axios.get('http://127.0.0.1:8000/api/bellitalia/'+bellitalia_id)
-      .then(response => (this.bellitaliaNumber = response.data.data.number))
-      return `${name}`+ ` (Bell'Italia n°${this.bellitaliaNumber})`
-    },
     // Pour affichage numéro + date de publication dans multiselect publication
     numberWithPublication ({ number, publication }) {
-      return `n°${number}`+ ` (` + moment(`${publication}`).format('MMMM YYYY')+ `)`
+      if(number&&publication) {
+        return `n°${number}`+ ` (` + moment(`${publication}`).format('MMMM YYYY')+ `)`
+      } else {
+        return "En cours d'enregistrement"
+      }
+    },
+    // Pour affichage nom supplément + numéro publication associé
+    nameWithPublication ({ name, bellitalia_id}) {
+      // Rappel : à cette étape, le bellitalia_id désigne le numéro de la publication associée et non l'id
+      if(name&&bellitalia_id) {
+        return `${name}`+ ` (Bell'Italia n°${bellitalia_id})`
+      } else {
+        return "En cours d'enregistrement"
+      }
     },
     // Méthodes gérant l'affichage des erreurs sur les input
     // Pour chaque input du formulaire
@@ -382,13 +389,19 @@ export default {
       this.longitudeErrorClass = ""
       this.longitudeErrorTextClass = "text-error-hidden"
     },
+    // Petite particularité pour les input Publication et Supplément :
+    // Comme ils fonctionnent ensemble, au clic sur l'un des 2, j'enlève les erreurs sur les 2
     inputPublicationChange(){
       this.publicationErrorClass=""
       this.publicationErrorTextClass="text-error-hidden"
+      this.supplementErrorClass=""
+      this.supplementErrorTextClass="text-error-hidden"
     },
     inputSupplementChange(){
       this.supplementErrorClass=""
       this.supplementErrorTextClass="text-error-hidden"
+      this.publicationErrorClass=""
+      this.publicationErrorTextClass="text-error-hidden"
     },
     inputTagChange(){
       this.tagErrorClass=""
@@ -419,7 +432,13 @@ export default {
         })
         // Validation front ET back : si tout va bien des 2 côtés
         .then(() => {
-          // Une fois le numéro créé, je l'ajoute à la liste déroulante du Multiselect
+          // Pour que le numéro créé s'affiche dans la liste déroulante du Multiselect :
+          // J'ajoute la date de publication (qui est récupérée dans le custom-label)
+          this.createdPublication = {
+            number: this.interestNumber[0],
+            publication: this.selectedMonthPublicationModal
+          }
+          // Et je l'ajoute au tableau qui sert de "réservoir" à la liste déroulante
           this.storedPublications.push(this.createdPublication)
           // Je le sélectionne dans l'input du Multiselect
           this.interestNumber = {"number": this.interestNumber[0], "publication": this.selectedMonthPublicationModal._d }
@@ -467,14 +486,22 @@ export default {
       this.supplementImageValid = null
       axios.post('http://127.0.0.1:8000/api/supplement', {
         name: this.interestSupplement[0],
-        publication: this.interestNumber,
+        publication: this.interestNumberSupplementModal,
         image: this.supplementImageArray,
       })
       .then(() => {
-        // Une fois le supplément créé, je l'ajoute à la liste déroulante du Multiselect
+        // Pour que le numéro créé s'affiche dans la liste déroulante du Multiselect :
+        // J'associe volontairement à bellitalia_id le numéro de publication (et non l'id)
+        // C'est la seule manière de le faire apparaître dans la liste déroulante
+        // En back, je dois ensuite récupérer l'id pour pouvoir enregistrer l'interest
+        this.createdSupplement = {
+          name: this.interestSupplement[0],
+          bellitalia_id: this.interestNumberSupplementModal['number']
+        }
         this.storedSupplements.push(this.createdSupplement)
         // Je le sélectionne dans l'input du Multiselect
-        this.interestSupplement = {"name": this.interestSupplement[0]}
+        // Rappel : ici, le bellitalia_id n'est pas l'id mais le numéro de la publication
+        this.interestSupplement = {"name": this.interestSupplement[0], "bellitalia_id": this.interestNumberSupplementModal['number']}
         // Je ferme la modale
         this.$bvModal.hide('addSupplementModal')
       })
@@ -692,6 +719,10 @@ export default {
       }
       // Pour une raison que j'ignore, je dois redire que interestSupplement est un tableau, sinon bug à l'update.
       this.interestSupplement = new Array()
+      this.createdSupplement = {
+        name: newSupplement,
+
+      }
       // On affiche ensuite la nouvelle publication dans l'input
       this.interestSupplement.push(newSupplement)
       // Ouverture de la modale d'ajout d'un nouveau supplément
@@ -723,6 +754,7 @@ export default {
         latitude: this.interestLatitude,
         longitude: this.interestLongitude,
         bellitalia_id: this.interestNumber,
+        supplement_id: this.interestSupplement,
         tag_id: this.interestTag,
         image: this.interestImageArray,
       })
@@ -734,6 +766,7 @@ export default {
         this.interestLatitude = ""
         this.interestLongitude = ""
         this.interestNumber = ""
+        this.interestSupplement = ""
         this.interestDate = ""
         this.interestTag = ""
         this.image = ""
@@ -752,6 +785,7 @@ export default {
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
         if (error) {
           // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+          console.log('error', error)
           this.interestImageError = true
         }
 
@@ -836,7 +870,6 @@ export default {
       .then(r => {
         var image = ''
         for(image of r.data.data.images) {
-          console.log(image.url)
           this.interestImageArray.push(image.url)
         }
         this.edit = true
@@ -848,6 +881,7 @@ export default {
         this.interestLatitude = r.data.data.latitude
         this.interestLongitude = r.data.data.longitude
         this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
+        this.interestSupplement = {"name": r.data.data.bellitalia.supplements[0].name, "bellitalia_id": r.data.data.bellitalia.number}
         this.interestTag = this.interestTag.concat(r.data.data.tags)
       })
     },

@@ -3,9 +3,10 @@
 
   <div class="container-fluid">
     <div class="row">
+      <span>storedPublications</span>
+      {{storedPublications}}
       <div class="col-12 selectFilter">
         <div class="dropdowns">
-
           <!-- Filtres publications -->
           <!-- Comme le select était beaucoup trop long et cassait toute la mise en page, je passe par une modale -->
           <b-button @click="publicationModalShow=true" class="mr-1 mb-1" size="sm" :variant=publicationClass>{{publicationSelectText}} <i class="fas fa-caret-down caret"></i></b-button>
@@ -214,6 +215,18 @@ export default {
         })
       ))
     },
+    // Récupération des suppléments
+    // WIP : où je mets ces suppléments ?
+    
+    // getSupplements() {
+    //   axios.get('http://127.0.0.1:8000/api/supplement')
+    //   .then(response => (
+    //     this.storedSupplements = response.data,
+    //     this.storedSupplements.forEach((storedSupplement) => {
+    //       this.checkedPublications.push(storedSupplement.number)
+    //     })
+    //   ))
+    // },
     allRegions: function(){
       if(this.checkedRegions.length==0) {
         this.storedRegions.forEach((storedRegion, index) => {
@@ -307,7 +320,10 @@ export default {
     },
     publicationsFilteredInterests:function() {
       return this.categoriesFilteredInterests.filter((interest) => {
-        return this.checkedPublications.includes(interest.bellitalia.number);
+        // Condition ajoutée pour le cas où interest est associé à un supplément. Dans ce cas, interest.bellitalia est null et ça fait logiquement tout planter.
+        if(interest.bellitalia != null) {
+          return this.checkedPublications.includes(interest.bellitalia.number);
+        }
       });
     },
     firstSearchInterests:function() {
@@ -436,6 +452,7 @@ export default {
     this.getRegions();
     this.getCategories();
     this.getPublications();
+    // this.getSupplements();
   },
   mounted: function() {
     axios

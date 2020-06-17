@@ -88,10 +88,11 @@
         <!-- Popup : lien -->
         <!-- <p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p> -->
         <!-- Popup : numéro de Bell'Italia concerné (image + infos) -->
-        <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
-        <div v-viewer="viewerPublicationOptions" class="">
+        <!-- WIP : conditionner l'affichage selon si publication/supplement -->
+        <!-- <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div> -->
+        <!-- <div v-viewer="viewerPublicationOptions" class="">
           <img :src="interest.bellitalia.image" class="popupImages"/><br>
-        </div>
+        </div> -->
 
         <!-- Popup : liens modifier et supprimer -->
         <div class="mt-2"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a>

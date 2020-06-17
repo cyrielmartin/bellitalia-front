@@ -3,8 +3,6 @@
 
   <div class="container-fluid">
     <div class="row">
-      <span>storedPublications</span>
-      {{storedPublications}}
       <div class="col-12 selectFilter">
         <div class="dropdowns">
           <!-- Filtres publications -->
@@ -23,15 +21,23 @@
           <b-container fluid>
 
             <!-- 3 boutons radios pour accélérer la recherche de numéros -->
+            <!-- WIP : ajouter un bouton : suppléments uniquement  -->
             <b-form-group>
               <b-form-radio v-model="publicationRadioSelected" value="A" size="sm" @change="lastPublication">Dernier numéro</b-form-radio>
               <b-form-radio v-model="publicationRadioSelected" value="B" size="sm" @change="lastTwelvePublications">12 derniers numéros</b-form-radio>
               <b-form-radio v-model="publicationRadioSelected" value="C" size="sm" @change="allPublicationsRadio">Tous les numéros</b-form-radio>
             </b-form-group>
 
+            <!-- Checkbox de tous les numéros en BDD -->
             <b-button pill variant="outline-secondary" :disabled="publicationsDisabled" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
             <b-form-checkbox class="mb-1 mr-1" size="sm" :disabled="publicationsDisabled" :value="storedPublication.number" v-model="checkedPublications" v-for="storedPublication in sortedPublications">n°{{storedPublication.number}} - {{storedPublication.publication | moment("MMMM YYYY")}}</b-form-checkbox>
-            <a href="publications" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a>
+            <a href="publications" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a><br>
+
+            <!-- Checkbox de tous les suppléments en BDD -->
+            <!-- WIP : améliorer mise en page modale avec titre : filtrer par supplément -->
+            <!-- Voir si on peut améliorer l'affichage du nom : name + numéro BI lié -->
+            <b-button pill variant="outline-secondary" :disabled="publicationsDisabled" class="filter-button mt-3" size="sm" @click="allSupplements">Tous les suppléments/Aucun</b-button>
+            <b-form-checkbox class="mb-1 mr-1" size="sm" :disabled="publicationsDisabled" :value="storedSupplement.name" v-model="checkedSupplements" v-for="storedSupplement in storedSupplements">{{storedSupplement.name}}</b-form-checkbox>
           </b-container>
 
         </b-modal>
@@ -145,9 +151,11 @@ export default {
       storedRegions: [],
       storedCategories: [],
       storedPublications: [],
+      storedSupplements: [],
       checkedRegions: [],
       checkedCategories: [],
       checkedPublications: [],
+      checkedSupplements: [],
       search1:"",
       search2:"",
       search3:"",
@@ -216,17 +224,15 @@ export default {
       ))
     },
     // Récupération des suppléments
-    // WIP : où je mets ces suppléments ?
-    
-    // getSupplements() {
-    //   axios.get('http://127.0.0.1:8000/api/supplement')
-    //   .then(response => (
-    //     this.storedSupplements = response.data,
-    //     this.storedSupplements.forEach((storedSupplement) => {
-    //       this.checkedPublications.push(storedSupplement.number)
-    //     })
-    //   ))
-    // },
+    getSupplements() {
+      axios.get('http://127.0.0.1:8000/api/supplement')
+      .then(response => (
+        this.storedSupplements = response.data,
+        this.storedSupplements.forEach((storedSupplement) => {
+          this.checkedSupplements.push(storedSupplement.name)
+        })
+      ))
+    },
     allRegions: function(){
       if(this.checkedRegions.length==0) {
         this.storedRegions.forEach((storedRegion, index) => {
@@ -254,6 +260,16 @@ export default {
         })
       } else {
         this.checkedPublications = []
+      }
+    },
+    // Bouton cocher/décocher tous les suppléments dans le filtre
+    allSupplements: function(){
+      if(this.checkedSupplements.length==0) {
+        this.storedSupplements.forEach((storedSupplement) => {
+          this.checkedSupplements.push(storedSupplement.name)
+        })
+      } else {
+        this.checkedSupplements = []
       }
     },
     // Méthode gérant l'affichage direct du dernier numéro publié si case cochée
@@ -320,15 +336,27 @@ export default {
     },
     publicationsFilteredInterests:function() {
       return this.categoriesFilteredInterests.filter((interest) => {
-        // Condition ajoutée pour le cas où interest est associé à un supplément. Dans ce cas, interest.bellitalia est null et ça fait logiquement tout planter.
+        // Ce filtre ne concerne que les interest liés à une publication (vs supplement). Si ce n'est pas le cas, je renvoie tout
         if(interest.bellitalia != null) {
           return this.checkedPublications.includes(interest.bellitalia.number);
+        } else {
+          return this.checkedPublications
+        }
+      });
+    },
+    supplementsFilteredInterests:function() {
+      return this.publicationsFilteredInterests.filter((interest) => {
+        // Ce filtre ne concerne que les interest liés à un supplément (vs publication). Si ce n'est pas le cas, je renvoie tout
+        if(interest.supplement != null) {
+          return this.checkedSupplements.includes(interest.supplement.name);
+        } else {
+          return this.checkedSupplements
         }
       });
     },
     firstSearchInterests:function() {
       var matcher = new RegExp(this.search1.trim(), 'i')
-      return this.publicationsFilteredInterests.filter((interest) => {
+      return this.supplementsFilteredInterests.filter((interest) => {
         return  interest.tags.some((tag) => {
           return matcher.test([interest.address,interest.name,tag.name].join())
         });
@@ -452,7 +480,7 @@ export default {
     this.getRegions();
     this.getCategories();
     this.getPublications();
-    // this.getSupplements();
+    this.getSupplements();
   },
   mounted: function() {
     axios

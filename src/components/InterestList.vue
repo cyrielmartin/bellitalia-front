@@ -22,7 +22,8 @@
               <!-- Catégorie(s) -->
               <div><span class="badge badge-warning mt-1 mr-1 mb-2" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div>
               <!-- Publication -->
-              <div class="badge badge-secondary mb-2"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+              <!-- WIP : conditionner l'affichage selon si publication/supplement -->
+              <!-- <div class="badge badge-secondary mb-2"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div> -->
             </div>
             <div v-if="interest.images.length" class="col-5 interestItem">
               <!-- Image(s) -->

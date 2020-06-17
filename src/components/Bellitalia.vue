@@ -21,23 +21,21 @@
           <b-container fluid>
 
             <!-- 3 boutons radios pour accélérer la recherche de numéros -->
-            <!-- WIP : ajouter un bouton : suppléments uniquement  -->
             <b-form-group>
-              <b-form-radio v-model="publicationRadioSelected" value="A" size="sm" @change="lastPublication">Dernier numéro</b-form-radio>
-              <b-form-radio v-model="publicationRadioSelected" value="B" size="sm" @change="lastTwelvePublications">12 derniers numéros</b-form-radio>
-              <b-form-radio v-model="publicationRadioSelected" value="C" size="sm" @change="allPublicationsRadio">Tous les numéros</b-form-radio>
+              <b-form-radio v-model="publicationRadioSelected" value="A" size="sm" @change="allPublicationsRadio">Tous les numéros et les suppléments</b-form-radio>
+              <b-form-radio v-model="publicationRadioSelected" value="B" size="sm" @change="lastPublication">Dernier numéro</b-form-radio>
+              <b-form-radio v-model="publicationRadioSelected" value="C" size="sm" @change="lastTwelvePublications">12 derniers numéros</b-form-radio>
+              <b-form-radio v-model="publicationRadioSelected" value="D" size="sm" @change="allSupplementsRadio">Suppléments uniquement</b-form-radio>
             </b-form-group>
 
             <!-- Checkbox de tous les numéros en BDD -->
-            <b-button pill variant="outline-secondary" :disabled="publicationsDisabled" class="filter-button" size="sm" @click="allPublications">Tous/Aucun</b-button>
+            <b-button pill variant="outline-secondary" :disabled="publicationsDisabled" class="filter-button" size="sm" @click="allPublications">Tous les numéros/Aucun</b-button>
             <b-form-checkbox class="mb-1 mr-1" size="sm" :disabled="publicationsDisabled" :value="storedPublication.number" v-model="checkedPublications" v-for="storedPublication in sortedPublications">n°{{storedPublication.number}} - {{storedPublication.publication | moment("MMMM YYYY")}}</b-form-checkbox>
             <a href="publications" class="editTags"><i class="far fa-edit"></i> Modifier les numéros</a><br>
 
             <!-- Checkbox de tous les suppléments en BDD -->
-            <!-- WIP : améliorer mise en page modale avec titre : filtrer par supplément -->
-            <!-- Voir si on peut améliorer l'affichage du nom : name + numéro BI lié -->
-            <b-button pill variant="outline-secondary" :disabled="publicationsDisabled" class="filter-button mt-3" size="sm" @click="allSupplements">Tous les suppléments/Aucun</b-button>
-            <b-form-checkbox class="mb-1 mr-1" size="sm" :disabled="publicationsDisabled" :value="storedSupplement.name" v-model="checkedSupplements" v-for="storedSupplement in storedSupplements">{{storedSupplement.name}}</b-form-checkbox>
+            <b-button pill variant="outline-secondary" :disabled="supplementsDisabled" class="filter-button mt-3" size="sm" @click="allSupplements">Tous les suppléments/Aucun</b-button>
+            <b-form-checkbox class="mb-1 mr-1" size="sm" :disabled="supplementsDisabled" :value="storedSupplement.name" v-model="checkedSupplements" v-for="storedSupplement in storedSupplements">{{storedSupplement.name}}<span v-for="storedPublication in sortedPublications" v-if="storedPublication.id = storedSupplement.bellitalia_id"> (n°{{storedPublication.number}}, {{storedPublication.publication | moment("MMMM YYYY")}})</span></b-form-checkbox>
           </b-container>
 
         </b-modal>
@@ -144,7 +142,8 @@ export default {
   data: function() {
     return {
       publicationsDisabled: false,
-      publicationRadioSelected: "C",
+      supplementsDisabled: false,
+      publicationRadioSelected: "A",
       publicationModalShow: false,
       interests: [],
       normalIcon: [30, 30],
@@ -182,7 +181,7 @@ export default {
       // Je resélectionne tous les numéros
       this.allPublicationsRadio()
       // Je coche le bon bouton radio dans la modale filtre publications
-      this.publicationRadioSelected = "C"
+      this.publicationRadioSelected = "A"
       // Et je vide tous les input du select de recherche
       this.emptySearchInput();
     },
@@ -275,6 +274,8 @@ export default {
     // Méthode gérant l'affichage direct du dernier numéro publié si case cochée
     lastPublication:function(){
       this.publicationsDisabled = true
+      this.supplementsDisabled = true
+      this.checkedSupplements = []
       if(this.checkedPublications==this.storedPublications[0].number) {
         this.checkedPublications = []
         this.storedPublications.forEach((storedPublication) => {
@@ -288,6 +289,8 @@ export default {
     // Méthode gérant l'affichage direct des 12 derniers numéros publiés si case cochée
     lastTwelvePublications:function(){
       this.publicationsDisabled = true
+      this.supplementsDisabled = true
+      this.checkedSupplements = []
       if(this.checkedPublications.length == 12) {
         this.checkedPublications = []
         this.storedPublications.forEach((storedPublication) => {
@@ -303,6 +306,7 @@ export default {
     // Méthode gérant l'affichage par défaut de tous les numéros
     allPublicationsRadio: function(){
       this.publicationsDisabled = false
+      this.supplementsDisabled = false
       this.checkedPublications = []
       if(this.checkedPublications.length==0) {
         this.storedPublications.forEach((storedPublication) => {
@@ -310,6 +314,28 @@ export default {
         })
       } else {
         this.checkedPublications = []
+      }
+      this.checkedSupplements = []
+      if(this.checkedSupplements.length==0) {
+        this.storedSupplements.forEach((storedSupplement) => {
+          this.checkedSupplements.push(storedSupplement.name)
+        })
+      } else {
+        this.checkedSupplements = []
+      }
+    },
+    // Méthode gérant l'affichage par défaut de tous les suppléments
+    allSupplementsRadio: function(){
+      this.publicationsDisabled = true
+      this.supplementsDisabled = false
+      this.checkedPublications = []
+      this.checkedSupplements = []
+      if(this.checkedSupplements.length==0) {
+        this.storedSupplements.forEach((storedSupplement) => {
+          this.checkedSupplements.push(storedSupplement.name)
+        })
+      } else {
+        this.checkedSupplements = []
       }
     },
   },
@@ -427,15 +453,10 @@ export default {
       }
     },
     publicationSelectText:function(){
-      if(this.checkedPublications.length === this.storedPublications.length) {
+      if(this.checkedPublications.length === this.storedPublications.length && this.checkedSupplements.length === this.storedSupplements.length) {
         return "Filtrer par numéro";
-      } else if (this.checkedPublications.length === 0) {
-        return "Aucun numéro sélectionné";
-      }
-      else if(this.checkedPublications.length === 1) {
-        return "1 numéro sélectionné";
       } else {
-        return this.checkedPublications.length+" numéros sélectionnés";
+        return "Numéros filtrés";
       }
     },
     // Changement d'apparence des select si tout n'est pas coché
@@ -461,7 +482,7 @@ export default {
       }
     },
     publicationClass:function(){
-      if(this.checkedPublications.length === this.storedPublications.length) {
+      if(this.checkedPublications.length === this.storedPublications.length && this.checkedSupplements.length === this.storedSupplements.length) {
         return "";
       } else {
         return "danger";

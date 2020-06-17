@@ -88,11 +88,15 @@
         <!-- Popup : lien -->
         <!-- <p><a class="popupText" target="_blank" rel="noopener noreferrer" :href="linkUrl+interest.link"><i class="fas fa-external-link-alt"></i> Lien</a></p> -->
         <!-- Popup : numéro de Bell'Italia concerné (image + infos) -->
-        <!-- WIP : conditionner l'affichage selon si publication/supplement -->
-        <!-- <div class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div> -->
-        <!-- <div v-viewer="viewerPublicationOptions" class="">
-          <img :src="interest.bellitalia.image" class="popupImages"/><br>
-        </div> -->
+        <!-- Si publication -->
+        <div v-if="interest.bellitalia" class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+        <!-- Si supplement -->
+        <div v-if="interest.supplement" class="badge badge-secondary popupPublicationText"><i class="far fa-calendar"></i> Supplément {{interest.supplement.name}} au n°{{interest.supplement.bellitalia.number}}, {{interest.supplement.bellitalia.publication | moment("MMMM YYYY")}}</div>
+
+        <div v-viewer="viewerPublicationOptions" class="">
+          <img v-if="interest.bellitalia" :src="interest.bellitalia.image" class="popupImages"/><br>
+          <img v-if="interest.supplement" :src="interest.supplement.image" class="popupImages"/><br>
+        </div>
 
         <!-- Popup : liens modifier et supprimer -->
         <div class="mt-2"><a :href="/interest/+interest.id"><i class="far fa-edit"></i> Modifier</a>
@@ -148,8 +152,7 @@ export default {
         autoClose: true,
         keepResult: true,
         showPopup: true,
-        style: 'bar',
-        class: 'toto',
+        style: 'button',
         // Dans le popup qui s'affiche, on met un lien avec les infos du lieu dans l'url pour pouvoir les récupérer dans le formulaire d'ajout d'un point d'intérêt
         popupFormat: function(query) {
           console.log(query)

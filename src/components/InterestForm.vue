@@ -744,7 +744,6 @@ export default {
       .then(response => (this.storedSupplements = response.data))
     },
     // Enregistrement d'un nouveau point d'intérêt
-    // WIP : ajouter Supplement
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
@@ -828,6 +827,7 @@ export default {
       })
     },
     // Modification d'un point d'intérêt
+    // WIP : gérer correctement l'édit supplement vs publication 
     editForm() {
       axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
         name: this.interestName,

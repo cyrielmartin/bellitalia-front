@@ -1,13 +1,11 @@
 <template>
 
   <div class="container">
-
     <a href="/"><b-button type="button"><i class="fas fa-arrow-circle-left"></i> Retour</b-button></a>
     <div class="row justify-content-center">
       <div class="col-md-10">
         <span class="formTitle" v-if="!edit">Ajouter un nouveau point d'intérêt</span>
         <span class="formTitle" v-if="edit">Modifier un point d'intérêt</span>
-
         <div class="card-body">
           <form
           novalidate="true">
@@ -78,7 +76,7 @@
 
           <!-- Les input publication/supplément ne peuvent et ne doivent pas être saisis en même temps. C'est l'un ou l'autre. Donc mise en place d'un radio pour passer de l'un à l'autre. -->
           <b-form-group>
-            <b-form-radio :class="publicationRadio" v-model="selectedPublication" name="selectedPublication" value="publication">Numéro du Bell'Italia <span :class="publicationRedStar">*</span></b-form-radio>
+            <b-form-radio :class="publicationRadio" v-model="selectedPublication" name="selectedPublication" value="publication" @change="changePublicationRadio">Numéro du Bell'Italia <span :class="publicationRedStar">*</span></b-form-radio>
 
             <div class="form-group">
               <div>
@@ -90,8 +88,9 @@
                 <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
               </div>
             </div>
+            {{storedSupplements}}
             <!-- Input supplément -->
-            <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
+            <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement" @change="changeSupplementRadio">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
 
             <div class="form-group">
               <div>
@@ -282,10 +281,12 @@ export default {
   name: 'InterestForm',
   data() {
     return {
-      selectedPublication: "publication",
       publicationRadio: "mb-2",
+      supplementRadio: 'mb-2 muted',
       publicationRedStar: 'redStar',
-      supplementRedStar: 'redStar',
+      supplementRedStar: 'noRedStar',
+      publicationInputDisabled: false,
+      supplementInputDisabled: true,
       error:'',
       publicationImage: '',
       publicationImageArray:[],
@@ -348,6 +349,24 @@ export default {
     }
   },
   methods: {
+    changePublicationRadio(){
+      this.publicationRadio = 'mb-2'
+      this.supplementRadio = 'mb-2 muted'
+      this.publicationRedStar = 'redStar'
+      this.supplementRedStar = 'noRedStar'
+      this.interestSupplement = ''
+      this.supplementInputDisabled = true
+      this.publicationInputDisabled = false
+    },
+    changeSupplementRadio(){
+      this.supplementRadio = 'mb-2'
+      this.publicationRadio = 'mb-2 muted'
+      this.supplementRedStar = 'redStar'
+      this.publicationRedStar = 'noRedStar'
+      this.interestNumber = ''
+      this.supplementInputDisabled = false
+      this.publicationInputDisabled = true
+    },
     // Pour affichage numéro + date de publication dans multiselect publication
     numberWithPublication ({ number, publication }) {
       if(number&&publication) {
@@ -741,7 +760,9 @@ export default {
     // Récupération des suppléments en BDD
     getStoredSupplements() {
       axios.get('http://127.0.0.1:8000/api/supplement')
-      .then(response => (this.storedSupplements = response.data))
+      .then(response => (
+        this.storedSupplements = response.data
+      ))
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
@@ -784,7 +805,6 @@ export default {
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
         if (error) {
           // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-          console.log('error', error)
           this.interestImageError = true
         }
 
@@ -827,7 +847,7 @@ export default {
       })
     },
     // Modification d'un point d'intérêt
-    // WIP : gérer correctement l'édit supplement vs publication 
+    // WIP : gérer correctement l'édit supplement vs publication
     editForm() {
       axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
         name: this.interestName,
@@ -837,6 +857,7 @@ export default {
         latitude: this.interestLatitude,
         longitude: this.interestLongitude,
         bellitalia_id: this.interestNumber,
+        supplement_id: this.interestSupplement,
         tag_id: this.interestTag,
         image: this.interestImageArray,
       })
@@ -848,6 +869,7 @@ export default {
         this.interestLatitude = ""
         this.interestLongitude = ""
         this.interestNumber = ""
+        this.interestSupplement = ""
         this.interestDate = ""
         this.interestTag = ""
         this.image = ""
@@ -880,47 +902,58 @@ export default {
         this.interestLink = r.data.data.link
         this.interestLatitude = r.data.data.latitude
         this.interestLongitude = r.data.data.longitude
-        this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
-        this.interestSupplement = {"name": r.data.data.bellitalia.supplements[0].name, "bellitalia_id": r.data.data.bellitalia.number}
+        if(r.data.data.bellitalia != null) {
+          this.interestNumber = {"number": r.data.data.bellitalia.number, "publication": r.data.data.bellitalia.publication}
+        }
+        if(r.data.data.supplement != null) {
+          this.interestSupplement = {"name": r.data.data.supplement.name, "bellitalia_id": r.data.data.supplement.bellitalia.number}
+        }
         this.interestTag = this.interestTag.concat(r.data.data.tags)
       })
     },
   },
   computed: {
-    // Les 2 computed suivantes gèrent le comportement des input d'ajout de publication/supplément. Si l'un est sélectionné, l'autre est disabled, l'étoile rouge disparaît et l'input est vidé.
-    supplementInputDisabled:function(){
-      if(this.selectedPublication == "publication") {
-        this.supplementRadio = "mb-2 muted"
-        this.supplementRedStar = 'noRedStar'
-        this.interestSupplement = ''
-        return true
-      } else {
-        this.supplementRadio = 'mb-2'
-        this.supplementRedStar = 'redStar'
-        this.interestNumber = ''
-        return false
+    // Cette propriété computed gère le comportement des radios publication vs supplément en fonction des situations. Comme je suis amené à la modifier manuellement en edit, j'ai ajouté un setter.
+    selectedPublication:{
+      get:function(){
+        if(this.edit == true) {
+          if(this.interest.bellitalia != null) {
+            return 'publication'
+          } else {
+            return 'supplement'
+          }
+        } else {
+          return 'publication'
+        }
+      },
+      set:function(newValue){
+        if(newValue == 'supplement') {
+          this.supplementRadio = 'mb-2'
+          this.publicationRadio = 'mb-2 muted'
+          this.supplementRedStar = 'redStar'
+          this.publicationRedStar = 'noRedStar'
+          this.interestNumber = ''
+          this.supplementInputDisabled = false
+          this.publicationInputDisabled = true
+        } else {
+          this.publicationRadio = 'mb-2'
+          this.supplementRadio = 'mb-2 muted'
+          this.publicationRedStar = 'redStar'
+          this.supplementRedStar = 'noRedStar'
+          this.interestSupplement = ''
+          this.supplementInputDisabled = true
+          this.publicationInputDisabled = false
+        }
       }
+
     },
-    publicationInputDisabled:function(){
-      if(this.selectedPublication == "supplement") {
-        this.publicationRadio = "mb-2 muted"
-        this.publicationRedStar = 'noRedStar'
-        this.interestNumber = ''
-        return true
-      } else {
-        this.publicationRadio = 'mb-2'
-        this.publicationRedStar = 'redStar'
-        this.interestSupplement = ''
-        return false
-      }
-    }
   },
   mounted: function(){
     this.getStoredRegions();
     this.getStoredTags();
     this.getStoredPublications();
-    this.getInterest();
     this.getStoredSupplements();
+    this.getInterest();
     // A l'ouverture du formulaire, je récupère les infos passées en URL
     this.interestName = this.$route.query.name;
     this.interestAddress = this.$route.query.address;

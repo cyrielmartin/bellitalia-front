@@ -11,6 +11,7 @@
         @dblclick="dblclick(index)"
         class="list-group-item">
         <div class="container-fluid ">
+          {{interest}}
           <div class="row listElement">
             <!-- Lieu du point d'intérêt -->
             <div class="container-fluid">
@@ -21,10 +22,6 @@
               <span>{{interest.name}}</span>
               <!-- Catégorie(s) -->
               <div><span class="badge badge-warning mt-1 mr-1 mb-2" v-bind:key="interestTag" v-for="(tag, interestTag) in interest.tags">{{tag.name}}</span></div>
-              <!-- Si publication -->
-              <div v-if="interest.bellitalia" class="badge badge-secondary mb-2"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
-              <!-- Si supplément -->
-              <div v-if="interest.supplement" class="badge badge-secondary mb-2"><i class="far fa-calendar"></i> Supplément {{interest.supplement.name}} au n°{{interest.supplement.bellitalia.number}}, {{interest.supplement.bellitalia.publication | moment("MMMM YYYY")}}</div>
             </div>
             <div v-if="interest.images.length" class="col-5 interestItem">
               <!-- Image(s) -->
@@ -37,6 +34,13 @@
             <div v-else class="col-5">
 
             </div>
+            <!-- Références publication -->
+            <div class="container-fluid mt-1">
+              <div v-if="interest.bellitalia" class="badge badge-secondary"><i class="far fa-calendar"></i> Bell'Italia n°{{interest.bellitalia.number}}, {{interest.bellitalia.publication | moment("MMMM YYYY")}}</div>
+              <!-- Références supplément -->
+              <div v-if="interest.supplement" class="badge badge-secondary"><i class="far fa-calendar"></i> Supplément {{interest.supplement.name}} au n°{{interest.supplement.bellitalia.number}}, {{interest.supplement.bellitalia.publication | moment("MMMM YYYY")}}</div>
+            </div>
+
           </div>
         </div>
 

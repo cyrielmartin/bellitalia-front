@@ -152,10 +152,9 @@ export default {
         autoClose: true,
         keepResult: true,
         showPopup: true,
-        style: 'button',
+        style: 'bar',
         // Dans le popup qui s'affiche, on met un lien avec les infos du lieu dans l'url pour pouvoir les récupérer dans le formulaire d'ajout d'un point d'intérêt
         popupFormat: function(query) {
-          console.log(query)
           return `<span>${query.result.label} </span><br><a href="add/?name=${query.result.label}&address=${query.result.label}&longitude=${query.result.x}&latitude=${query.result.y}">Créer un point d'intérêt à cet endroit</a>`
         },
       },
@@ -425,6 +424,8 @@ h1 {
   cursor: zoom-in;
 }
 .leaflet-popup {
-  top:-30vh;
+  top:-40vh;
+  // min-height: 90vh;
+  // overflow: auto;
 }
 </style>

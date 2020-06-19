@@ -11,7 +11,6 @@
         @dblclick="dblclick(index)"
         class="list-group-item">
         <div class="container-fluid ">
-          {{interest}}
           <div class="row listElement">
             <!-- Lieu du point d'intérêt -->
             <div class="container-fluid">

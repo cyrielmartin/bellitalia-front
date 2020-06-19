@@ -88,14 +88,21 @@
                 <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
               </div>
             </div>
-            {{storedSupplements}}
             <!-- Input supplément -->
             <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement" @change="changeSupplementRadio">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
+            <div class="">
+              storedSupplements
+              {{storedSupplements}}
+            </div>
+            <div class="">
+              ReducedSupplements
+              {{ReducedSupplements}}
+            </div>
 
             <div class="form-group">
               <div>
                 <!-- L'ajout d'un supplément se fait au moyen de Vue Multiselect surchargé en JS -->
-                <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="storedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
+                <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="ReducedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
                   <span slot="noOptions">Aucun supplément</span>
                 </multiselect>
                 <!-- <small class="helpText">Seuls les chiffres sont acceptés</small><br/> -->
@@ -311,6 +318,7 @@ export default {
       interestSupplement:[],
       storedPublications:[],
       storedSupplements: [],
+      rawSupplements: [],
       interestDate: '',
       errors: {},
       publicationImageError: false,
@@ -377,7 +385,7 @@ export default {
     },
     // Pour affichage nom supplément + numéro publication associé
     nameWithPublication ({ name, bellitalia_id}) {
-      // Rappel : à cette étape, le bellitalia_id désigne le numéro de la publication associée et non l'id
+      // NB: ici, le bellitalia_id désigne le numéro de la publication associée et non l'id
       if(name&&bellitalia_id) {
         return `${name}`+ ` (Bell'Italia n°${bellitalia_id})`
       } else {
@@ -431,7 +439,7 @@ export default {
 
       var monthPicker = document.getElementById("month-picker")
 
-      // Double contrôle d'intégrité des données : front et back.
+      // NB: Double contrôle d'intégrité des données : front et back.
       // Le front est le premier rempart
       // Si on arrive à cette étape, c'est que le numéro est valide côté front
       // (sinon message d'erreur dans la modale qui empêche l'accès à cette méthode)
@@ -757,13 +765,6 @@ export default {
       axios.get('http://127.0.0.1:8000/api/region')
       .then(response => (this.storedRegions = response.data))
     },
-    // Récupération des suppléments en BDD
-    getStoredSupplements() {
-      axios.get('http://127.0.0.1:8000/api/supplement')
-      .then(response => (
-        this.storedSupplements = response.data
-      ))
-    },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
       axios.post('http://127.0.0.1:8000/api/interest', {
@@ -886,6 +887,26 @@ export default {
         this.errors = error.response.data
       })
     },
+    // Récupération de tous les suppléments en BDD pour pouvoir les afficher dans le menu déroulant du multiselect Supplement
+    // Je ne suis pas arrivé à les récupérer via http://127.0.0.1:8000/api/supplement parce que impossible d'accéder au numéro de publication via ce endpoint (pourtant, la relation existe...)
+    // Du coup, je récupère tous les points d'intérêt
+    getSupplements(){
+      axios.get('http://127.0.0.1:8000/api/interest')
+      .then(response => (
+        // Je stocke la réponse dans un tableau provisoire
+        this.rawSupplements = response.data.data,
+        // Je boucle sur ce tableau pour ne récupérer que les points d'intérêt associés à un supplément
+        this.rawSupplements.forEach((rawSupplement, i) => {
+          if(rawSupplement.supplement != null) {
+            // Je stocke le nom de chaque point d'intérêt et le numéro de chaque publication associée dans le tableau qui sert de réservoir au menu déroulant Supplément
+            // NB: je stocke volontairement le numéro de publication sous la clé bellitalia_id car c'est ce qui est attendu pour le custom-label du Multiselect Supplement.
+            this.storedSupplements.push({"name":rawSupplement.supplement.name, "bellitalia_id":rawSupplement.supplement.bellitalia.number})
+            // NB: le tableau renvoyé est récupéré dans la computed ReducedSupplements pour pouvoir éliminer les éléments en double (car chaque supplément lié à chaque point d'intérêt est chargé)
+          }
+        })
+
+      ))
+    },
     // Récupération d'un point d'intérêt existant pour édit
     getInterest() {
       axios.get('http://127.0.0.1:8000/api/interest/'+this.$route.params.id)
@@ -913,6 +934,29 @@ export default {
     },
   },
   computed: {
+    // Cette computed récupère le tableau réservoir des suppléments. Mais il a un souci, beaucoup d'éléments sont en double (à chaque fois qu'un interest est rattaché à un supplément, le supplément apparaît) Donc on le mouline pour enlever les doublons :
+    ReducedSupplements:function(){
+      const result = []
+      const map = new Map()
+      // Pour chacun des éléments du tableau
+      for(const item of this.storedSupplements) {
+        // Si le bellitalia_id n'est pas déjà dedans
+        if(!map.has(item.bellitalia_id)){
+          // alors on stocke l'élément dans le nouveau tableau
+          map.set(item.bellitalia_id, true)
+          result.push({
+            name: item.name,
+            bellitalia_id:item.bellitalia_id,
+          });
+        }
+      }
+      // Au passage, on met de l'ordre dans les éléments du tableau (pour affichage par numéro de BI antéchronologique)
+      result.sort(function(a,b){
+        return b.bellitalia_id-a.bellitalia_id
+      })
+      // Et on renvoie le nouveau tableau
+      return result
+    },
     // Cette propriété computed gère le comportement des radios publication vs supplément en fonction des situations. Comme je suis amené à la modifier manuellement en edit, j'ai ajouté un setter.
     selectedPublication:{
       get:function(){
@@ -952,7 +996,7 @@ export default {
     this.getStoredRegions();
     this.getStoredTags();
     this.getStoredPublications();
-    this.getStoredSupplements();
+    this.getSupplements();
     this.getInterest();
     // A l'ouverture du formulaire, je récupère les infos passées en URL
     this.interestName = this.$route.query.name;

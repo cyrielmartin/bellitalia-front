@@ -302,7 +302,6 @@ export default {
 mounted: function(){
   // Récupération de la requête envoyée dans le geosearch
   // this.$refs.myMap.mapObject.on('geosearch/showlocation', function(result){
-  //   console.log('result', result)
   // });
   // Au passage de la souris, l'icône grossit
   this.$root.$on('mouse-over-interest', (index) => {
@@ -424,8 +423,10 @@ h1 {
   cursor: zoom-in;
 }
 .leaflet-popup {
-  top:-40vh;
-  // min-height: 90vh;
-  // overflow: auto;
+  padding-top: 10vh;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  position: absolute;
+  top: 10vh;
 }
 </style>

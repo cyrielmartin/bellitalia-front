@@ -61,7 +61,7 @@
             <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
             <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
             <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-            <p class="text-error" v-if="this.interestImageError" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p>
+            <!-- <p class="text-error" v-if="this.interestImageError" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p> -->
 
           </div>
 
@@ -90,14 +90,6 @@
             </div>
             <!-- Input supplément -->
             <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement" @change="changeSupplementRadio">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
-            <div class="">
-              storedSupplements
-              {{storedSupplements}}
-            </div>
-            <div class="">
-              ReducedSupplements
-              {{ReducedSupplements}}
-            </div>
 
             <div class="form-group">
               <div>
@@ -535,11 +527,11 @@ export default {
       // Validation back : si problème avec validator API, erreur renvoyée
       .catch(error => {
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
-        if (error) {
-          // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-          this.supplementImageError = true
-          this.supplementImageValid = false
-        }
+        // if (error) {
+        //   // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+        //   this.supplementImageError = true
+        //   this.supplementImageValid = false
+        // }
         // Pour tous les messages d'erreur du validator
         // Pour chaque erreur remontée, j'ajoute la bordure rouge
         this.errors = error.response.data

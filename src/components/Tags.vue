@@ -6,6 +6,7 @@
         <span class="formTitle">Gérer les catégories</span>
         <div class="card-body">
           ICI LE DATATABLE
+          {{tags}}
         </div>
       </div>
     </div>
@@ -14,8 +15,22 @@
 
 <script>
 
+import axios from 'axios'
+
 export default {
-  name: 'Categories',
+  name: 'Tags',
+  data:function(){
+    return {
+      tags:[],
+    }
+  },
+  mounted: function() {
+    axios
+    .get('http://127.0.0.1:8000/api/tag')
+    .then(r => {
+      this.tags = r.data
+    })
+  },
 }
 
 </script>

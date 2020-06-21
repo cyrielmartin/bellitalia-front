@@ -65,7 +65,7 @@ const router = new VueRouter({
     component: require('./components/Publications.vue').default
   }, {
     path: '/categories',
-    component: require('./components/Categories.vue').default
+    component: require('./components/Tags.vue').default
   }]
 })
 

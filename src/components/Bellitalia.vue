@@ -206,7 +206,7 @@ export default {
     getCategories() {
       axios.get('http://127.0.0.1:8000/api/tag')
       .then(response => (
-        this.storedCategories = response.data,
+        this.storedCategories = response.data.data,
         this.storedCategories.forEach((storedCategory) => {
           this.checkedCategories.push(storedCategory.name)
         })
@@ -226,7 +226,7 @@ export default {
     getSupplements() {
       axios.get('http://127.0.0.1:8000/api/supplement')
       .then(response => (
-        this.storedSupplements = response.data,
+        this.storedSupplements = response.data.data,
         this.storedSupplements.forEach((storedSupplement) => {
           this.checkedSupplements.push(storedSupplement.name)
         })

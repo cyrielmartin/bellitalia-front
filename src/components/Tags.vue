@@ -6,7 +6,13 @@
         <span class="formTitle">Gérer les catégories</span>
         <div class="card-body">
           ICI LE DATATABLE
-          {{tags}}
+          <!-- {{tags}} -->
+          <div class="" v-for="tag in tags">
+            Nom du tag {{tag.name}}<br>
+            Créé le {{tag.created_at | moment("DD MMMM YYYY")}}<br>
+            Nombre de points d'intérêt associés {{tag.interests.length}}<br>
+            <br>
+          </div>
         </div>
       </div>
     </div>
@@ -28,7 +34,7 @@ export default {
     axios
     .get('http://127.0.0.1:8000/api/tag')
     .then(r => {
-      this.tags = r.data
+      this.tags = r.data.data
     })
   },
 }

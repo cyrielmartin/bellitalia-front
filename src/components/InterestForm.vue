@@ -94,7 +94,8 @@
             <div class="form-group">
               <div>
                 <!-- L'ajout d'un supplément se fait au moyen de Vue Multiselect surchargé en JS -->
-                <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="ReducedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
+                <!-- NB: le tableau réservoir du menu déroulant est SORTEDSupplements vs storedSupplements -->
+                <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="SortedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
                   <span slot="noOptions">Aucun supplément</span>
                 </multiselect>
                 <!-- <small class="helpText">Seuls les chiffres sont acceptés</small><br/> -->
@@ -534,7 +535,7 @@ export default {
         //   this.supplementImageError = true
         //   this.supplementImageValid = false
         // }
-        
+
         // Pour tous les messages d'erreur du validator
         // Pour chaque erreur remontée, j'ajoute la bordure rouge
         this.errors = error.response.data
@@ -696,7 +697,7 @@ export default {
     // Récupération des tags en BDD
     getStoredTags() {
       axios.get('http://127.0.0.1:8000/api/tag')
-      .then(response => (this.storedTags = response.data))
+      .then(response => (this.storedTags = response.data.data))
     },
     // Ajout d'une nouvelle publication à la volée
     addPublication(newPublication) {
@@ -882,22 +883,19 @@ export default {
         this.errors = error.response.data
       })
     },
-    // Récupération de tous les suppléments en BDD pour pouvoir les afficher dans le menu déroulant du multiselect Supplement
-    // Je ne suis pas arrivé à les récupérer via http://127.0.0.1:8000/api/supplement parce que impossible d'accéder au numéro de publication via ce endpoint (pourtant, la relation existe...)
-    // Du coup, je récupère tous les points d'intérêt
     getSupplements(){
-      axios.get('http://127.0.0.1:8000/api/interest')
+      axios.get('http://127.0.0.1:8000/api/supplement')
       .then(response => (
         // Je stocke la réponse dans un tableau provisoire
         this.rawSupplements = response.data.data,
-        // Je boucle sur ce tableau pour ne récupérer que les points d'intérêt associés à un supplément
+        // Je boucle sur ce tableau pour ne récupérer que les infos dont j'ai besoin pour chaque supplément
         this.rawSupplements.forEach((rawSupplement, i) => {
-          if(rawSupplement.supplement != null) {
-            // Je stocke le nom de chaque point d'intérêt et le numéro de chaque publication associée dans le tableau qui sert de réservoir au menu déroulant Supplément
-            // NB: je stocke volontairement le numéro de publication sous la clé bellitalia_id car c'est ce qui est attendu pour le custom-label du Multiselect Supplement.
-            this.storedSupplements.push({"name":rawSupplement.supplement.name, "bellitalia_id":rawSupplement.supplement.bellitalia.number})
-            // NB: le tableau renvoyé est récupéré dans la computed ReducedSupplements pour pouvoir éliminer les éléments en double (car chaque supplément lié à chaque point d'intérêt est chargé)
-          }
+          // Je stocke le nom de chaque point d'intérêt et le numéro de chaque publication associée dans le tableau qui sert de réservoir au menu déroulant Supplément
+          // NB: je stocke volontairement le numéro de publication sous la clé bellitalia_id car c'est ce qui est attendu pour le custom-label du Multiselect Supplement.
+          this.storedSupplements.push({"name":rawSupplement.name, "bellitalia_id":rawSupplement.bellitalia.number})
+          // NB: le tableau renvoyé est récupéré dans la computed SortedSupplements pour pouvoir ordonner l'affichage correctement dans le menu déroulant
+          // NB: SORTEDSupplements vs STOREDSupplements
+          // }
         })
 
       ))
@@ -929,28 +927,13 @@ export default {
     },
   },
   computed: {
-    // Cette computed récupère le tableau réservoir des suppléments. Mais il a un souci, beaucoup d'éléments sont en double (à chaque fois qu'un interest est rattaché à un supplément, le supplément apparaît) Donc on le mouline pour enlever les doublons :
-    ReducedSupplements:function(){
-      const result = []
-      const map = new Map()
-      // Pour chacun des éléments du tableau
-      for(const item of this.storedSupplements) {
-        // Si le bellitalia_id n'est pas déjà dedans
-        if(!map.has(item.bellitalia_id)){
-          // alors on stocke l'élément dans le nouveau tableau
-          map.set(item.bellitalia_id, true)
-          result.push({
-            name: item.name,
-            bellitalia_id:item.bellitalia_id,
-          });
-        }
-      }
-      // Au passage, on met de l'ordre dans les éléments du tableau (pour affichage par numéro de BI antéchronologique)
-      result.sort(function(a,b){
+    // Cette computed récupère le tableau réservoir des suppléments et organise l'affichage des suppléments dans le menu déroulant.
+    // NB: SORTEDSupplements = suppléments rangés correctement vs STOREDSupplements = suppléments non rangés.
+    SortedSupplements:function(){
+      // Affichage des suppléments par numéro de BI antéchronologique
+      return this.storedSupplements.sort(function(a,b){
         return b.bellitalia_id-a.bellitalia_id
       })
-      // Et on renvoie le nouveau tableau
-      return result
     },
     // Cette propriété computed gère le comportement des radios publication vs supplément en fonction des situations. Comme je suis amené à la modifier manuellement en edit, j'ai ajouté un setter.
     selectedPublication:{

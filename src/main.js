@@ -11,31 +11,8 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueMonthlyPicker from 'vue-monthly-picker'
 import Viewer from 'v-viewer'
-import { TColumnsDefinition, VuejsDatatableFactory } from 'vuejs-datatable'
 
 Vue.use(FlashMessage);
-Vue.use( VuejsDatatableFactory );
-VuejsDatatableFactory.useDefaultType( false )
-    .registerTableType( 'datatable', tableType => tableType.mergeSettings( {
-        table: {
-            class:   'table table-hover table-striped',
-            sorting: {
-                sortAsc:  '<i class="fas fa-sort-amount-up" title="Sort ascending"></i>',
-                sortDesc: '<i class="fas fa-sort-amount-down" title="Sort descending"></i>',
-                sortNone: '<i class="fas fa-sort" title="Sort"></i>',
-            },
-        },
-        pager: {
-            classes: {
-                pager:    'pagination text-center',
-                selected: 'active',
-            },
-            icons: {
-                next:     '<i class="fas fa-chevron-right" title="Next page"></i>',
-                previous: '<i class="fas fa-chevron-left" title="Previous page"></i>',
-            },
-        },
-    } ) );
 
 delete Icon.Default.prototype._getIconUrl;
 

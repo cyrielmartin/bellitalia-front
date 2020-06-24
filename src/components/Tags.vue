@@ -7,16 +7,31 @@
         <div class="card-body">
 
           <div class="col-xs-12">
-            <div class="form-group datatableFilterInput">
-              <label for="filter" class="sr-only">Filter</label>
-              <input type="text" class="form-control" v-model="datatableFilter" placeholder="Recherche" @keydown="$event.stopImmediatePropagation()">
+            <div class="form-group tableFilterInput">
+              <input type="text" class="form-control" v-model="tableFilterInput" placeholder="Rechercher">
             </div>
           </div>
 
-          <div class="col-xs-12 table-responsive">
-            <datatable :columns="columns" :data="tags" :filter="datatableFilter" :per-page="25"></datatable>
-            <datatable-pager v-model="datatablePage"></datatable-pager>
-          </div>
+          <b-table
+          id="table"
+          :fields="tableFields"
+          :items="tags"
+          :per-page="tablePerPage"
+          :current-page="tableCurrentPage"
+          sort-icon-left
+          responsive
+          :filter="tableFilterInput"
+          :filterIncludedFields="tableFilterIncludedFields"
+          ></b-table>
+
+          <b-pagination
+          v-model="tableCurrentPage"
+          align="right"
+          :total-rows="rows"
+          :per-page="tablePerPage"
+          aria-controls="table"
+          ></b-pagination>
+
         </div>
       </div>
     </div>
@@ -32,12 +47,24 @@ export default {
   data:function(){
     return {
       tags:[],
-      datatableFilter:'',
-      datatablePage: 1,
-      columns: [
-        {label: 'Nom de la catégorie', field: 'name', headerClass: 'class-in-header second-class', align: 'center'},
-        {label: 'Nombre de points d\'intérêt associés', field: 'interests.length', align: 'center'},
-        {label: 'Actions', representedAs: row => `<i class="far fa-edit"></i> <i class="far fa-trash-alt"></i>`, align: 'center', interpolate: true, sortable: false},
+      tableCurrentPage: 1,
+      tablePerPage:25,
+      tableFilterInput:'',
+      tableFilterIncludedFields:['name'],
+      tableFields: [
+        {
+          key: 'name',
+          label:'Nom',
+          sortable: true
+        },
+        {
+          key: 'interests.length',
+          label:'Nombre de points d\'intérêt associés',
+        },
+        {
+          key: 'actions',
+          label: 'Actions'
+        },
       ],
     }
   },
@@ -47,6 +74,11 @@ export default {
     .then(r => {
       this.tags = r.data.data
     })
+  },
+  computed:{
+    rows(){
+      return this.tags.length
+    }
   },
 }
 
@@ -59,8 +91,11 @@ export default {
   display: flex;
   justify-content: center;
 }
-.datatableFilterInput{
+.tableFilterInput{
   max-width: 14em;
   margin: auto auto 1em auto;
+}
+.toto{
+  color: red;
 }
 </style>

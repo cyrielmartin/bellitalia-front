@@ -22,20 +22,53 @@
           responsive
           :filter="tableFilterInput"
           :filterIncludedFields="tableFilterIncludedFields"
-          ></b-table>
+          >
 
-          <b-pagination
-          v-model="tableCurrentPage"
-          align="right"
-          :total-rows="rows"
-          :per-page="tablePerPage"
-          aria-controls="table"
-          ></b-pagination>
+          <template v-slot:cell(actions)="row">
+            <b-button size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1" v-b-tooltip.hover.left="'Modifier'">
+              <i class="far fa-edit"></i>
+            </b-button>
+          </template>
 
-        </div>
-      </div>
-    </div>
+        </b-table>
+
+        <b-modal
+        :id="infoModal.id"
+        :title="infoModal.title"
+        @cancel="reserInfoModal"
+        @hide="resetInfoModal"
+        @ok="handleOk"
+        >
+        <form ref="form" @submit.stop.prevent="handleSubmit">
+          <b-form-group
+          :state="nameState"
+          label="Nom de la catégorie"
+          label-for="name-input"
+          invalid-feedback="Name is required"
+          >
+          <b-form-input
+          id="name-input"
+          v-model="tagName"
+          :state="nameState"
+          required
+          ></b-form-input>
+        </b-form-group>
+      </form>
+      <pre>{{ infoModal.content }}</pre>
+    </b-modal>
+
+    <b-pagination
+    v-model="tableCurrentPage"
+    align="right"
+    :total-rows="rows"
+    :per-page="tablePerPage"
+    aria-controls="table"
+    ></b-pagination>
+
   </div>
+</div>
+</div>
+</div>
 </template>
 
 <script>
@@ -66,6 +99,15 @@ export default {
           label: 'Actions'
         },
       ],
+      infoModal: {
+        id: 'info-modal',
+        title: '',
+        content: ''
+      },
+      tagName: '',
+      tagId: '',
+      nameState: null,
+      errors: {},
     }
   },
   mounted: function() {
@@ -74,6 +116,60 @@ export default {
     .then(r => {
       this.tags = r.data.data
     })
+  },
+  methods:{
+    info(item, index, button) {
+      this.infoModal.title = 'Modifier la catégorie'
+      // this.infoModal.content = JSON.stringify(item.name, null, 2)
+      this.tagName = item.name
+      this.tagId = item.id
+      this.$root.$emit('bv::show::modal', this.infoModal.id, button)
+    },
+    checkFormValidity() {
+      const valid = this.$refs.form.checkValidity()
+      this.nameState = valid
+      return valid
+    },
+    resetInfoModal() {
+      this.infoModal.title = ''
+      this.infoModal.content = ''
+    },
+    handleOk(bvModalEvt) {
+      // Prevent modal from closing
+      bvModalEvt.preventDefault()
+      // Trigger submit handler
+      this.handleSubmit()
+    },
+    handleSubmit() {
+      // Exit when the form isn't valid
+      if (!this.checkFormValidity()) {
+        return
+      }
+      // Push the name to submitted names
+      // this.submittedNames.push(this.name)
+      axios.put('http://127.0.0.1:8000/api/tag/'+this.tagId, {
+        tag_id: this.name,
+      })
+      .then(() => {
+        console.log('then'),
+        this.name = ''
+        this.errors = {}
+        this.$router.push('/categories')
+        this.flashMessage.show({
+          status: 'success',
+          title: 'Confirmation',
+          message: 'La catégorie a bien été modifiée'
+        });
+      })
+      // .catch(error => {
+      //   // console.log('error', error),
+      //   // this.errors = error.response.data
+      // })
+      // Hide the modal manually
+      this.$nextTick(() => {
+        this.$bvModal.hide('modal-prevent-closing')
+      })
+    },
   },
   computed:{
     rows(){

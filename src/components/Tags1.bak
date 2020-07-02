@@ -1,4 +1,4 @@
-<template>
+totototoInfo<template>
   <div class="container">
     <a href="/"><b-button type="button"><i class="fas fa-arrow-circle-left"></i> Retour</b-button></a>
     <div class="row justify-content-center">
@@ -27,7 +27,7 @@
           >
 
           <template v-slot:cell(actions)="row">
-            <b-button size="sm" @click="modalEdit(row.item, row.index, $event.target)" class="mr-1" v-b-tooltip.hover.left="'Modifier'">
+            <b-button size="sm" @click="totoInfo(row.item, row.index, $event.target)" class="mr-1" v-b-tooltip.hover.left="'Modifier'">
               <i class="far fa-edit"></i>
             </b-button>
           </template>
@@ -38,12 +38,12 @@
         <b-modal
         :id="editModal.id"
         :title="editModal.title"
-        @cancel="resetEditModal"
-        @hide="resetEditModal"
-        @ok="handleEditOk"
+        @cancel="reseteditModal"
+        @hide="reseteditModal"
+        @ok="handleOk"
         >
         <!-- Input dans la modal -->
-        <form ref="form" @submit.stop.prevent="handleEditSubmit">
+        <form ref="form" @submit.stop.prevent="handleSubmit">
           <b-form-group
           :state="nameState"
           label="Nom de la catégorie"
@@ -58,6 +58,7 @@
           ></b-form-input>
         </b-form-group>
       </form>
+      <!-- <pre>{{ editModal.content }}</pre> -->
     </b-modal>
 
     <b-pagination
@@ -103,7 +104,7 @@ export default {
         },
       ],
       editModal: {
-        id: 'edit-modal',
+        id: 'totototoInfo-modal',
         title: '',
         content: ''
       },
@@ -121,55 +122,44 @@ export default {
     })
   },
   methods:{
-    // Méthode gérant l'ouverture de la modal de modification
-    modalEdit(item, index, button) {
+    totoInfo(item, index, button) {
       this.editModal.title = 'Modifier la catégorie'
-      // Pour remplir l'input avec le bon nom de catégorie
       this.tagName = item.name
-      // Pour stocker le bon id de catégorie
       this.tagId = item.id
-      // Ouverture modal
       this.$root.$emit('bv::show::modal', this.editModal.id, button)
     },
-    // Après fermeture de la modale de modification, on enlève le message d'erreur et la bordure rouge (si présents)
-    resetEditModal() {
-      this.nameState = null
-    },
-    handleEditOk(bvModalEvt) {
-      // A la validation de la modale de modificaton, j'empêche sa fermeture
-      bvModalEvt.preventDefault()
-      // J'appelle la méthode handleEditSubmit
-      this.handleEditSubmit()
-    },
-    // Vérification validation modal modification
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity()
       this.nameState = valid
       return valid
     },
-    handleEditSubmit() {
-      // Je vérifie la validité de l'input grâce à la méthode checkFormValidity.
+    reseteditModal() {
+      this.editModal.title = ''
+      this.editModal.content = ''
+    },
+    handleOk(bvModalEvt) {
+      // Prevent modal from closing
+      bvModalEvt.preventDefault()
+      // Trigger submit handler
+      this.handleSubmit()
+    },
+    handleSubmit() {
+      // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
         return
-        // Si ok, j'envoie la modification
       } else {
         axios.put('http://127.0.0.1:8000/api/tag/'+this.tagId, {
           name: this.tagName,
         })
         .then(() => {
-          // Après envoi modification, je ferme la modale
-          this.$bvModal.hide(this.editModal.id)
-          // Et je remets les compteurs à zéro
-          this.nameState = null
           this.tagName = ''
           this.errors = {}
-          // Et je recharge le tableau pour que modif soit prise en compte
-          // NB: je ne suis pas sûr que ce soit une bonne méthode, mais je ne vois pas comment faire autrement
+          this.nameState = null
+          this.$bvModal.hide(this.editModal.id)
           axios.get('http://127.0.0.1:8000/api/tag')
           .then(r => {
             this.tags = r.data.data
           })
-          // J'affiche un message de réussite
           this.flashMessage.show({
             status: 'success',
             title: 'Confirmation',

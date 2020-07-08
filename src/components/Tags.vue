@@ -27,8 +27,11 @@
           >
 
           <template v-slot:cell(actions)="row">
-            <b-button size="sm" @click="modalEdit(row.item, row.index, $event.target)" class="mr-1" v-b-tooltip.hover.left="'Modifier'">
+            <b-button size="sm" @click="modalEdit(row.item, row.index, $event.target)" class="mr-1" v-b-tooltip.hover.topleft="'Modifier'">
               <i class="far fa-edit"></i>
+            </b-button>
+            <b-button size="sm" @click="modalDelete(row.item, row.index, $event.target)" class="mr-1" v-b-tooltip.hover.topright="'Supprimer'" variant="danger">
+              <i class="far fa-trash-alt"></i>
             </b-button>
           </template>
 
@@ -90,12 +93,12 @@ export default {
       tableFields: [
         {
           key: 'name',
-          label:'Nom',
+          label:'Catégorie',
           sortable: true
         },
         {
           key: 'interests.length',
-          label:'Nombre de points d\'intérêt associés',
+          label:'Points d\'intérêt associés',
         },
         {
           key: 'actions',
@@ -163,7 +166,7 @@ export default {
           this.nameState = null
           this.tagName = ''
           this.errors = {}
-          // Et je recharge le tableau pour que modif soit prise en compte
+          // Et je recharge le tableau pour que modif soit prise en compte sans devoir recharger toute la page
           // NB: je ne suis pas sûr que ce soit une bonne méthode, mais je ne vois pas comment faire autrement
           axios.get('http://127.0.0.1:8000/api/tag')
           .then(r => {
@@ -182,6 +185,41 @@ export default {
         })
       }
     },
+    // Méthode gérant la suppression d'une catégorie
+    modalDelete(item) {
+      this.tagId = item.id
+      // D'abord, une modale de confirmation
+      this.$bvModal.msgBoxConfirm('Voulez-vous vraiment supprimer cette catégorie ?', {
+        title: 'Confirmation',
+        size: 'sm',
+        buttonSize: 'sm',
+        okVariant: 'danger',
+        okTitle: 'Oui',
+        cancelTitle: 'Non',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+      // Si ok, on supprime la catégorie
+      .then(value => {
+        axios.delete('http://127.0.0.1:8000/api/tag/'+this.tagId)
+        // On recharge la liste des catégories sans recharger toute la page
+        .then(() => {
+          axios.get('http://127.0.0.1:8000/api/tag')
+          .then(r => {
+            this.tags = r.data.data
+          })
+            // Et on affiche un message de réussite
+            this.flashMessage.show({
+              status: 'success',
+              title: 'Confirmation',
+              message: 'La catégorie a bien été supprimée'
+            });
+        })
+      })
+      .catch(err => {
+      })
+    }
   },
   computed:{
     rows(){

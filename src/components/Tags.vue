@@ -48,17 +48,17 @@
         <!-- Input dans la modal -->
         <form ref="form" @submit.stop.prevent="handleEditSubmit">
           <b-form-group
-          :state="nameState"
           label="Nom de la catégorie"
           label-for="name-input"
-          invalid-feedback="Veuillez saisir un nom de catégorie"
           >
           <b-form-input
           id="name-input"
           v-model="tagName"
-          :state="nameState"
-          required
+          :class="tagErrorClass"
+          @click="inputTagChange"
           ></b-form-input>
+          <p :class="tagErrorTextClass" v-if="errors.name" v-text="errors.name[0]"></p>
+
         </b-form-group>
       </form>
     </b-modal>
@@ -112,8 +112,9 @@ export default {
       },
       tagName: '',
       tagId: '',
-      nameState: null,
       errors: {},
+      tagErrorTextClass: "",
+      tagErrorClass: ""
     }
   },
   mounted: function() {
@@ -136,7 +137,9 @@ export default {
     },
     // Après fermeture de la modale de modification, on enlève le message d'erreur et la bordure rouge (si présents)
     resetEditModal() {
-      this.nameState = null
+      this.errors = {}
+      this.tagErrorTextClass= ""
+      this.tagErrorClass= ""
     },
     handleEditOk(bvModalEvt) {
       // A la validation de la modale de modificaton, j'empêche sa fermeture
@@ -144,46 +147,46 @@ export default {
       // J'appelle la méthode handleEditSubmit
       this.handleEditSubmit()
     },
-    // Vérification validation modal modification
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity()
-      this.nameState = valid
-      return valid
-    },
+    // Modification d'une catégorie
     handleEditSubmit() {
-      // Je vérifie la validité de l'input grâce à la méthode checkFormValidity.
-      if (!this.checkFormValidity()) {
-        return
-        // Si ok, j'envoie la modification
-      } else {
-        axios.put('http://127.0.0.1:8000/api/tag/'+this.tagId, {
-          name: this.tagName,
+      axios.put('http://127.0.0.1:8000/api/tag/'+this.tagId, {
+        name: this.tagName,
+      })
+      .then(() => {
+        // Après envoi modification, je ferme la modale
+        this.$bvModal.hide(this.editModal.id)
+        // Et je remets les compteurs à zéro
+        this.tagName = ''
+        this.errors = {}
+        this.tagErrorTextClass= ""
+        this.tagErrorClass= ""
+        // Et je recharge le tableau pour que modif soit prise en compte sans devoir recharger toute la page
+        // NB: je ne suis pas sûr que ce soit une bonne méthode, mais je ne vois pas comment faire autrement
+        axios.get('http://127.0.0.1:8000/api/tag')
+        .then(r => {
+          this.tags = r.data.data
         })
-        .then(() => {
-          // Après envoi modification, je ferme la modale
-          this.$bvModal.hide(this.editModal.id)
-          // Et je remets les compteurs à zéro
-          this.nameState = null
-          this.tagName = ''
-          this.errors = {}
-          // Et je recharge le tableau pour que modif soit prise en compte sans devoir recharger toute la page
-          // NB: je ne suis pas sûr que ce soit une bonne méthode, mais je ne vois pas comment faire autrement
-          axios.get('http://127.0.0.1:8000/api/tag')
-          .then(r => {
-            this.tags = r.data.data
-          })
-          // J'affiche un message de réussite
-          this.flashMessage.show({
-            status: 'success',
-            title: 'Confirmation',
-            message: 'La catégorie a bien été modifiée'
-          });
-        })
-        .catch(error => {
-          console.log('error', error),
-          this.errors = error.response.data
-        })
-      }
+        // J'affiche un message de réussite
+        this.flashMessage.show({
+          status: 'success',
+          title: 'Confirmation',
+          message: 'La catégorie a bien été modifiée'
+        });
+      })
+      .catch(error => {
+        // En cas d'erreur de validation back, j'affiche message erreur + bordure rouge
+        this.errors = error.response.data
+        if(this.errors.name) {
+          this.tagErrorTextClass= "text-error"
+          this.tagErrorClass= "border-red"
+        }
+      })
+      // }
+    },
+    // Pour meilleure UX, message d'erreur + bordure rouge disparaissent au click dans l'input 
+    inputTagChange(){
+      this.tagErrorClass = ""
+      this.tagErrorTextClass = "text-error-hidden"
     },
     // Méthode gérant la suppression d'une catégorie
     modalDelete(item) {
@@ -209,12 +212,12 @@ export default {
           .then(r => {
             this.tags = r.data.data
           })
-            // Et on affiche un message de réussite
-            this.flashMessage.show({
-              status: 'success',
-              title: 'Confirmation',
-              message: 'La catégorie a bien été supprimée'
-            });
+          // Et on affiche un message de réussite
+          this.flashMessage.show({
+            status: 'success',
+            title: 'Confirmation',
+            message: 'La catégorie a bien été supprimée'
+          });
         })
       })
       .catch(err => {
@@ -241,7 +244,13 @@ export default {
   max-width: 14em;
   margin: auto auto 1em auto;
 }
-.toto{
+.text-error {
   color: red;
+}
+.border-red {
+  border-color: red;
+}
+.text-error-hidden {
+  display: none;
 }
 </style>

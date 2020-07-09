@@ -250,6 +250,7 @@
           <span slot="noOptions">Aucune catégorie</span>
         </multiselect>
         <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
+        <small class="mt-2 helpText"><a href="/categories" target="_blank" rel="noopener"><i class="far fa-edit"></i> Modifier ou supprimer une catégorie</a></small>
       </div>
     </div>
     <div class="d-flex justify-content-center">
@@ -545,6 +546,7 @@ export default {
           this.supplementImageError = false
         }
       })
+
       // Dans tous les cas, on empêche la fermeture de la modale par défaut
       // (ce qui permet d'afficher les messages d'erreur du validator sur la modale)
       bvModalEvt.preventDefault()
@@ -655,8 +657,8 @@ export default {
       // this.errors.image = []
       // Et je traite la ou les nouvelles photos envoyées
       var files = e.target.files || e.dataTransfer.files;
-
       // Si aucune photo n'est chargée, je ne renvoie rien.
+      console.log('files', files);
       if (!files.length) {
         return;
         // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
@@ -668,6 +670,10 @@ export default {
       }
     },
     createInterestImage(interestFile) {
+      console.log('file size', interestFile.size)
+      if(interestFile.size > 5000000){
+        console.log('trop gros')
+      }
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
@@ -798,13 +804,11 @@ export default {
         });
       })
       .catch(error => {
-
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
         if (error) {
           // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
           this.interestImageError = true
         }
-
         this.errors = error.response.data
         if(this.errors.bellitalia_id) {
           this.publicationErrorClass= "multiselect__tags-red"
@@ -881,6 +885,47 @@ export default {
       })
       .catch(error => {
         this.errors = error.response.data
+        // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
+        if (error) {
+          // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+          this.interestImageError = true
+        }
+        this.errors = error.response.data
+        if(this.errors.bellitalia_id) {
+          this.publicationErrorClass= "multiselect__tags-red"
+          this.publicationErrorTextClass= "text-error"
+          this.interestImageError = false
+        }
+        if(this.errors.supplement_id) {
+          this.supplementErrorClass= "multiselect__tags-red"
+          this.supplementErrorTextClass= "text-error"
+          this.interestImageError = false
+        }
+        if(this.errors.tag_id) {
+          this.tagErrorClass= "multiselect__tags-red"
+          this.tagErrorTextClass="text-error"
+          this.interestImageError = false
+        }
+        if(this.errors.name) {
+          this.nameErrorClass= "border-red"
+          this.nameErrorTextClass="text-error"
+          this.interestImageError = false
+        }
+        if(this.errors.address) {
+          this.addressErrorClass= "border-red"
+          this.addressErrorTextClass="text-error"
+          this.interestImageError = false
+        }
+        if(this.errors.latitude) {
+          this.latitudeErrorClass= "border-red"
+          this.latitudeErrorTextClass="text-error"
+          this.interestImageError = false
+        }
+        if(this.errors.longitude) {
+          this.longitudeErrorClass= "border-red"
+          this.longitudeErrorTextClass="text-error"
+          this.interestImageError = false
+        }
       })
     },
     getSupplements(){

@@ -60,11 +60,8 @@
 
 
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-            <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
-            <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
-            <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-            <!-- <p class="text-error" v-if="this.interestImageError" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p> -->
-            <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+            <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
+            <p class="text-error" v-if="this.interestImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
             </p>
 
           </div>
@@ -152,24 +149,29 @@
             <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
 
             <!-- Upload photo pour couverture publication -->
-            <b-form-file
-            placeholder="Choisissez un fichier ou déposez-le ici..."
-            drop-placeholder="Déposez le fichier ici..."
-            browse-text="Choisir un fichier"
-            accept="image/jpeg, image/jpg, image/png"
-            @change="onPublicationFileChange"
-            :state=publicationImageValid
-            id="publication-file-form"
-            ></b-form-file>
-            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
-            <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
-            <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImageArray">
-              <img v-for="image,imageIndex in publicationImageArray" :src="image" class="previewImage" />
-              <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
-
+            <div class="" v-if="publicationImageArray.length<1">
+              <b-form-file
+              placeholder="Choisissez un fichier ou déposez-le ici..."
+              drop-placeholder="Déposez le fichier ici..."
+              browse-text="Choisir un fichier"
+              accept="image/jpeg, image/jpg, image/png"
+              @change="onPublicationFileChange"
+              :state=publicationImageValid
+              id="publication-file-form"
+              ></b-form-file>
+              <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
             </div>
-            <div id="preview" ref="preview"></div>
-
+            <div class="" v-else>
+              <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
+              <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImageArray">
+                <img v-for="image,imageIndex in publicationImageArray" :src="image" class="previewImage" />
+                <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
+              </div>
+              <div id="preview" ref="preview"></div>
+            </div>
+            <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
+            <p class="text-error" v-if="this.publicationImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+            </p>
             <!-- Messages d'erreur si pb validation numéro et image back -->
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
             <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
@@ -212,26 +214,29 @@
         <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
 
         <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
-
-        <!-- Upload photo pour couverture supplément -->
-        <b-form-file
-        placeholder="Choisissez un fichier ou déposez-le ici..."
-        drop-placeholder="Déposez le fichier ici..."
-        browse-text="Choisir un fichier"
-        accept="image/jpeg, image/jpg, image/png"
-        @change="onSupplementFileChange"
-        :state=supplementImageValid
-        id="supplement-file-form"
-        ></b-form-file>
-        <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
-        <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
-        <div v-viewer="viewerSupplementOptions" class="mt-4" v-if="supplementImageArray">
-          <img v-for="image,imageIndex in supplementImageArray" :src="image" class="previewImage" />
-          <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removeSupplementImage"><i class="far fa-trash-alt imageTrash"></i></button>
-
+        <div class="" v-if="supplementImageArray.length<1">
+          <!-- Upload photo pour couverture supplément -->
+          <b-form-file
+          placeholder="Choisissez un fichier ou déposez-le ici..."
+          drop-placeholder="Déposez le fichier ici..."
+          browse-text="Choisir un fichier"
+          accept="image/jpeg, image/jpg, image/png"
+          @change="onSupplementFileChange"
+          :state=supplementImageValid
+          id="supplement-file-form"
+          ></b-form-file>
+          <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
         </div>
-        <div id="preview" ref="preview"></div>
-
+        <div class="" v-else>
+          <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
+          <div v-viewer="viewerSupplementOptions" class="mt-4" v-if="supplementImageArray">
+            <img v-for="image,imageIndex in supplementImageArray" :src="image" class="previewImage" />
+            <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removeSupplementImage"><i class="far fa-trash-alt imageTrash"></i></button>
+          </div>
+          <div id="preview" ref="preview"></div>
+        </div>
+        <p class="text-error" v-if="this.supplementImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+        </p>
         <!-- Messages d'erreur si pb validation numéro et image back -->
         <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
         <!-- <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p> -->
@@ -292,7 +297,6 @@ export default {
       supplementRedStar: 'noRedStar',
       publicationInputDisabled: false,
       supplementInputDisabled: true,
-      error:'',
       publicationImage: '',
       publicationImageArray:[],
       supplementImage: '',
@@ -320,8 +324,11 @@ export default {
       interestDate: '',
       errors: {},
       publicationImageError: false,
+      publicationImageSizeError:false,
       supplementImageError: false,
+      supplementImageSizeError: false,
       interestImageError:false,
+      interestImageSizeError:false,
       nameErrorClass: "",
       nameErrorTextClass: "",
       addressErrorClass:"",
@@ -625,6 +632,15 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.publicationImage = e.target.result;
+
+        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
+        if(publicationFile.size > 5000000) {
+          this.publicationImageSizeError = true
+          preventDefault()
+        } else {
+          this.publicationImageSizeError = false
+        }
+
         this.publicationImageArray.push(this.publicationImage);
       };
       reader.readAsDataURL(publicationFile);
@@ -633,6 +649,15 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.supplementImage = e.target.result;
+
+        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
+        if(supplementFile.size > 5000000) {
+          this.supplementImageSizeError = true
+          preventDefault()
+        } else {
+          this.supplementImageSizeError = false
+        }
+
         this.supplementImageArray.push(this.supplementImage);
       };
       reader.readAsDataURL(supplementFile);
@@ -676,11 +701,12 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
+        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
         if(interestFile.size > 5000000) {
-          this.error = true
+          this.interestImageSizeError = true
           preventDefault()
         } else {
-          this.error = false
+          this.interestImageSizeError = false
         }
         // Je mets chacune des photos envoyées dans un tableau.
         // C'est ce tableau qui sert à l'affichage des photos.

@@ -11,6 +11,8 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueMonthlyPicker from 'vue-monthly-picker'
 import Viewer from 'v-viewer'
+import ImageUploader from 'vue-image-upload-resize'
+Vue.use(ImageUploader);
 
 Vue.use(FlashMessage);
 

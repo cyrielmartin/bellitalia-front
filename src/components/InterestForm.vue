@@ -56,12 +56,16 @@
               </div>
               <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
-            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 30Mo</small><br/>
+            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
+
+
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
             <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
             <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
             <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
             <!-- <p class="text-error" v-if="this.interestImageError" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p> -->
+            <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+            </p>
 
           </div>
 
@@ -173,7 +177,7 @@
             <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
             <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
             <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-            <p class="text-error" v-if="this.error" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p>
+            <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
 
             <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
@@ -235,7 +239,7 @@
         <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
         <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
         <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-        <p class="text-error" v-if="this.error" >Format non reconnu ou invalide. Veuillez charger un autre fichier.</p>
+        <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
 
         <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
       </b-container>
@@ -277,7 +281,7 @@ import 'viewerjs/dist/viewer.css'
 export default {
   components: {
     Multiselect,
-    VueMonthlyPicker
+    VueMonthlyPicker,
   },
   name: 'InterestForm',
   data() {
@@ -658,7 +662,6 @@ export default {
       // Et je traite la ou les nouvelles photos envoyées
       var files = e.target.files || e.dataTransfer.files;
       // Si aucune photo n'est chargée, je ne renvoie rien.
-      console.log('files', files);
       if (!files.length) {
         return;
         // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
@@ -670,13 +673,15 @@ export default {
       }
     },
     createInterestImage(interestFile) {
-      console.log('file size', interestFile.size)
-      if(interestFile.size > 5000000){
-        console.log('trop gros')
-      }
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
+        if(interestFile.size > 5000000) {
+          this.error = true
+          preventDefault()
+        } else {
+          this.error = false
+        }
         // Je mets chacune des photos envoyées dans un tableau.
         // C'est ce tableau qui sert à l'affichage des photos.
         this.interestImageArray.push(this.interestImage);
@@ -687,6 +692,7 @@ export default {
       this.interestImage = '';
       this.interestImageArray = [];
       this.interestImageError = false;
+      this.error = false;
       e.preventDefault();
     },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
@@ -769,6 +775,7 @@ export default {
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
+      console.log(this.interestImageArray)
       axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
         address: this.interestAddress,
@@ -810,6 +817,7 @@ export default {
           this.interestImageError = true
         }
         this.errors = error.response.data
+
         if(this.errors.bellitalia_id) {
           this.publicationErrorClass= "multiselect__tags-red"
           this.publicationErrorTextClass= "text-error"

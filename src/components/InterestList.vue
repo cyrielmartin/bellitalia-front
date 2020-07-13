@@ -14,7 +14,7 @@
           <div class="row listElement">
             <!-- Lieu du point d'intérêt -->
             <div class="container-fluid">
-              <div class="badge badge-light interestLocation mb-2"><span><i class="fas fa-location-arrow"></i> {{interest.address}}</span></div>
+              <span class="badge badge-light interestLocation mb-2"><div><i class="fas fa-location-arrow"></i> {{interest.address}}</div></span>
             </div>
             <div class="col-7 mt-3">
               <!-- Nom -->

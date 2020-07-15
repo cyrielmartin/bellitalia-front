@@ -701,6 +701,7 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
+
         // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
         if(interestFile.size > 5000000) {
           this.interestImageSizeError = true
@@ -801,8 +802,9 @@ export default {
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
-      console.log(this.interestImageArray)
-      axios.post('http://127.0.0.1:8000/api/interest', {
+      console.log('submitForm', this.interestImageArray)
+      fetch('http://127.0.0.1:8000/api/interest', {
+        method: "POST",
         name: this.interestName,
         address: this.interestAddress,
         description: this.interestDescription,
@@ -815,6 +817,7 @@ export default {
         image: this.interestImageArray,
       })
       .then(() => {
+        console.log('then')
         this.interestName = ""
         this.interestAddress = ""
         this.interestDescription = ""
@@ -837,6 +840,7 @@ export default {
         });
       })
       .catch(error => {
+        console.log('error', error)
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
         if (error) {
           // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input

@@ -61,7 +61,9 @@
 
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
             <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
-            <p class="text-error" v-if="this.interestImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+            <p class="text-error" v-if="this.interestImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">réduire votre image</a>
+            </p>
+            <p class="text-error" v-if="this.interestImageError" >L'ensemble des images chargées dépasse le poids autorisé (5Mo). Veuillez réduire leur taille : <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">réduire vos images</a>
             </p>
 
           </div>
@@ -701,7 +703,7 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
-
+        console.log('ici', this.interestImage.size)
         // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
         if(interestFile.size > 5000000) {
           this.interestImageSizeError = true
@@ -803,8 +805,7 @@ export default {
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
       console.log('submitForm', this.interestImageArray)
-      fetch('http://127.0.0.1:8000/api/interest', {
-        method: "POST",
+      axios.post('http://127.0.0.1:8000/api/interest', {
         name: this.interestName,
         address: this.interestAddress,
         description: this.interestDescription,
@@ -843,10 +844,16 @@ export default {
         console.log('error', error)
         // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
         if (error) {
+          console.log('goooo')
           // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
           this.interestImageError = true
         }
-        this.errors = error.response.data
+
+        if(error.response.data) {
+          this.errors = error.response.data
+        } else {
+          console.log('coucou')
+        }
 
         if(this.errors.bellitalia_id) {
           this.publicationErrorClass= "multiselect__tags-red"

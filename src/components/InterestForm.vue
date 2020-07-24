@@ -47,7 +47,7 @@
           <div class="form-group">
             <label>Image(s)</label>
             <div v-if="interestImageArray.length<1">
-              <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple @change="onInterestFileChange">
+              <input type="file" enctype='multipart/form-data' accept="image/jpeg, image/jpg, image/png" multiple ref="file" @change="onInterestFileChange">
             </div>
             <div v-else>
               <!-- Pour le zoom et la visualisation des images chargées, j'utilise v-viewer  -->
@@ -305,6 +305,8 @@ export default {
       supplementImageArray:[],
       publicationFile:'',
       interestImage:'',
+      photos: [],
+      postFormData: new FormData(),
       interestImageArray:[],
       interestFile:'',
       edit: false,
@@ -682,22 +684,34 @@ export default {
     },
     // // Méthodes gérant l'ajout et la suppression des images du point d'intérêt
     onInterestFileChange(e) {
-      // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
-      // this.publicationImageValid = null
-      // J'enlève le message d'erreur s'il était présent
-      // this.errors.image = []
-      // Et je traite la ou les nouvelles photos envoyées
-      var files = e.target.files || e.dataTransfer.files;
-      // Si aucune photo n'est chargée, je ne renvoie rien.
-      if (!files.length) {
-        return;
-        // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
-      } else {
-        var i;
-        for(i=0;i<files.length;i++) {
-          this.createInterestImage(files[i])
-        }
+      for(var key in e.target.files){
+        this.postFormData.append('images[]', e.target.files[key]);
       }
+      // console.log('photo avant', this.photos)
+      // console.log('target files', e.target.files)
+      // var i;
+      // for(i=0;i<e.target.files.length;i++) {
+      //   this.photos.push(e.target.files[i])
+      // }
+      // console.log('photo après', this.photos)
+      // this.photo = e.target.files[0]
+
+      // // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
+      // // this.publicationImageValid = null
+      // // J'enlève le message d'erreur s'il était présent
+      // // this.errors.image = []
+      // // Et je traite la ou les nouvelles photos envoyées
+      // var files = e.target.files || e.dataTransfer.files;
+      // // Si aucune photo n'est chargée, je ne renvoie rien.
+      // if (!files.length) {
+      //   return;
+      //   // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
+      // } else {
+      //   var i;
+      //   for(i=0;i<files.length;i++) {
+      //     this.createInterestImage(files[i])
+      //   }
+      // }
     },
     createInterestImage(interestFile) {
       var reader = new FileReader();
@@ -804,93 +818,110 @@ export default {
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
-      console.log('submitForm', this.interestImageArray)
-      axios.post('http://127.0.0.1:8000/api/interest', {
-        name: this.interestName,
-        address: this.interestAddress,
-        description: this.interestDescription,
-        link: this.interestLink,
-        latitude: this.interestLatitude,
-        longitude: this.interestLongitude,
-        bellitalia_id: this.interestNumber,
-        supplement_id: this.interestSupplement,
-        tag_id: this.interestTag,
-        image: this.interestImageArray,
-      })
-      .then(() => {
-        console.log('then')
-        this.interestName = ""
-        this.interestAddress = ""
-        this.interestDescription = ""
-        this.interestLink = ""
-        this.interestLatitude = ""
-        this.interestLongitude = ""
-        this.interestNumber = ""
-        this.interestSupplement = ""
-        this.interestDate = ""
-        this.interestTag = ""
-        this.image = ""
-        this.interestImageArray = []
-        this.errors = {}
-        this.interestImageError = false
-        this.$router.push('/')
-        this.flashMessage.show({
-          status: 'success',
-          title: 'Confirmation',
-          message: 'Le point d\'intérêt a bien été enregistré'
-        });
-      })
-      .catch(error => {
-        console.log('error', error)
-        // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
-        if (error) {
-          console.log('goooo')
-          // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-          this.interestImageError = true
-        }
 
-        if(error.response.data) {
-          this.errors = error.response.data
-        } else {
-          console.log('coucou')
-        }
+      this.postFormData.append('name', this.interestName);
+      // this.postFormData.append('maxContentLength', 100000000)
+      // this.postFormData.append('maxBodyLength', 1000000000)
 
-        if(this.errors.bellitalia_id) {
-          this.publicationErrorClass= "multiselect__tags-red"
-          this.publicationErrorTextClass= "text-error"
-          this.interestImageError = false
-        }
-        if(this.errors.supplement_id) {
-          this.supplementErrorClass= "multiselect__tags-red"
-          this.supplementErrorTextClass= "text-error"
-          this.interestImageError = false
-        }
-        if(this.errors.tag_id) {
-          this.tagErrorClass= "multiselect__tags-red"
-          this.tagErrorTextClass="text-error"
-          this.interestImageError = false
-        }
-        if(this.errors.name) {
-          this.nameErrorClass= "border-red"
-          this.nameErrorTextClass="text-error"
-          this.interestImageError = false
-        }
-        if(this.errors.address) {
-          this.addressErrorClass= "border-red"
-          this.addressErrorTextClass="text-error"
-          this.interestImageError = false
-        }
-        if(this.errors.latitude) {
-          this.latitudeErrorClass= "border-red"
-          this.latitudeErrorTextClass="text-error"
-          this.interestImageError = false
-        }
-        if(this.errors.longitude) {
-          this.longitudeErrorClass= "border-red"
-          this.longitudeErrorTextClass="text-error"
-          this.interestImageError = false
-        }
+      axios.post("http://127.0.0.1:8000/api/interest", this.postFormData)
+      .then(function(response){
+        console.log('response', response);
       })
+      .catch(function(error){
+        console.log('error', error);
+      });
+
+
+
+
+
+      // console.log('submitForm', this.interestImageArray)
+      // axios.post('http://127.0.0.1:8000/api/interest', {
+      //   name: this.interestName,
+      //   address: this.interestAddress,
+      //   description: this.interestDescription,
+      //   link: this.interestLink,
+      //   latitude: this.interestLatitude,
+      //   longitude: this.interestLongitude,
+      //   bellitalia_id: this.interestNumber,
+      //   supplement_id: this.interestSupplement,
+      //   tag_id: this.interestTag,
+      //   image: this.interestImageArray,
+      // })
+      // .then(() => {
+      //   console.log('then')
+      //   this.interestName = ""
+      //   this.interestAddress = ""
+      //   this.interestDescription = ""
+      //   this.interestLink = ""
+      //   this.interestLatitude = ""
+      //   this.interestLongitude = ""
+      //   this.interestNumber = ""
+      //   this.interestSupplement = ""
+      //   this.interestDate = ""
+      //   this.interestTag = ""
+      //   this.image = ""
+      //   this.interestImageArray = []
+      //   this.errors = {}
+      //   this.interestImageError = false
+      //   this.$router.push('/')
+      //   this.flashMessage.show({
+      //     status: 'success',
+      //     title: 'Confirmation',
+      //     message: 'Le point d\'intérêt a bien été enregistré'
+      //   });
+      // })
+      // .catch(error => {
+      //   console.log('error', error)
+      //   // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
+      //   if (error) {
+      //     console.log('goooo')
+      //     // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
+      //     this.interestImageError = true
+      //   }
+      //
+      //   if(error.response.data) {
+      //     this.errors = error.response.data
+      //   } else {
+      //     console.log('coucou')
+      //   }
+      //
+      //   if(this.errors.bellitalia_id) {
+      //     this.publicationErrorClass= "multiselect__tags-red"
+      //     this.publicationErrorTextClass= "text-error"
+      //     this.interestImageError = false
+      //   }
+      //   if(this.errors.supplement_id) {
+      //     this.supplementErrorClass= "multiselect__tags-red"
+      //     this.supplementErrorTextClass= "text-error"
+      //     this.interestImageError = false
+      //   }
+      //   if(this.errors.tag_id) {
+      //     this.tagErrorClass= "multiselect__tags-red"
+      //     this.tagErrorTextClass="text-error"
+      //     this.interestImageError = false
+      //   }
+      //   if(this.errors.name) {
+      //     this.nameErrorClass= "border-red"
+      //     this.nameErrorTextClass="text-error"
+      //     this.interestImageError = false
+      //   }
+      //   if(this.errors.address) {
+      //     this.addressErrorClass= "border-red"
+      //     this.addressErrorTextClass="text-error"
+      //     this.interestImageError = false
+      //   }
+      //   if(this.errors.latitude) {
+      //     this.latitudeErrorClass= "border-red"
+      //     this.latitudeErrorTextClass="text-error"
+      //     this.interestImageError = false
+      //   }
+      //   if(this.errors.longitude) {
+      //     this.longitudeErrorClass= "border-red"
+      //     this.longitudeErrorTextClass="text-error"
+      //     this.interestImageError = false
+      //   }
+      // })
     },
     // Modification d'un point d'intérêt
     // WIP : gérer correctement l'édit supplement vs publication

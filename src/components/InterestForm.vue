@@ -43,7 +43,6 @@
             <label>Description</label>
             <textarea cols="50" rows="5" class="form-control" v-model="interestDescription"></textarea>
           </div>
-
           <div class="form-group">
             <label>Image(s)</label>
             <div v-if="interestImageArray.length<1">
@@ -60,12 +59,11 @@
 
 
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-            <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
             <p class="text-error" v-if="this.interestImageSizeError" >Au moins une des images chargées dépasse le poids autorisé (8Mo). Veuillez réduire sa taille : <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">réduire votre image</a>
             </p>
-            <!-- <p class="text-error" v-if="this.interestImageError" >L'ensemble des images chargées dépasse le poids autorisé (5Mo). Veuillez réduire leur taille : <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">réduire vos images</a>
-          </p> -->
-
+            <div class="" v-if="this.interestImageSizeError">
+              <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
+            </div>
         </div>
 
         <div>
@@ -686,24 +684,30 @@ export default {
       // A chaque changement de l'input, j'enlève le message d'erreur s'il était présent
       this.interestImageSizeError = false
       // Pour chacune des images envoyées :
-      for(var key in e.target.files){
-        // Si l'une d'entre elle fait plus de 8Mo
-        if(e.target.files[key].size>8000000){
-          // J'ajoute le message d'erreur
-          this.interestImageSizeError = true
-          // Je bloque la validation du formulaire (NB: ça c'est en théorie, en fait ça bloque pas, mais ça permet au message d'erreur de rester affiché)
-          preventDefault()
-        } else {
-          // Si pas de pb de taille, j'ajoute l'image au formData
-          this.interestImageSizeError = false
+      console.log('e.target.files', e.target.files)
 
-          this.interestImage = e.target.files[key]
-          //     // Je mets chacune des photos envoyées dans un tableau.
-          //     // C'est ce tableau qui sert à l'affichage des photos.
-          this.interestImageArray.push(this.interestImage);
-          this.postFormData.append('images[]', e.target.files[key]);
-        }
-      }
+      // for(var key in e.target.files){
+      //   // console.log('key', key)
+      //   // Si l'une d'entre elle fait plus de 8Mo
+      //   if(e.target.files[key].size>8000000){
+      //     // console.log('if')
+      //     // J'ajoute le message d'erreur
+      //     this.interestImageSizeError = true
+      //     // Je bloque la validation du formulaire (NB: ça c'est en théorie, en fait ça bloque pas, mais ça permet au message d'erreur de rester affiché)
+      //     preventDefault()
+      //   } else {
+      //     // console.log('else')
+      //     // Si pas de pb de taille, j'ajoute l'image au formData
+      //     this.interestImageSizeError = false
+      //
+      //     //     // Je mets chacune des photos envoyées dans un tableau.
+      //     //     // C'est ce tableau qui sert à l'affichage des photos.
+      //
+      //     this.postFormData.append('images[]', e.target.files[key]);
+      //   }
+      //
+      // }
+
       // console.log('photo avant', this.photos)
       // console.log('target files', e.target.files)
       // var i;
@@ -718,40 +722,48 @@ export default {
       // // J'enlève le message d'erreur s'il était présent
       // // this.errors.image = []
       // // Et je traite la ou les nouvelles photos envoyées
-      // var files = e.target.files || e.dataTransfer.files;
+      var files = e.target.files || e.dataTransfer.files;
       // // Si aucune photo n'est chargée, je ne renvoie rien.
-      // if (!files.length) {
-      //   return;
-      //   // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
-      // } else {
-      //   var i;
-      //   for(i=0;i<files.length;i++) {
-      //     this.createInterestImage(files[i])
-      //   }
-      // }
+      if (!files.length) {
+        return;
+        //   // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
+      } else {
+        var i;
+        for(i=0;i<files.length;i++) {
+          if(files[i].size>8000000) {
+            this.interestImageSizeError = true
+          } else {
+            this.interestImageSizeError = false
+            this.createInterestImage(files[i])
+            this.postFormData.append('images[]', files[i])
+          }
+
+        }
+      }
     },
-    // createInterestImage(interestFile) {
-    //   var reader = new FileReader();
-    //   reader.onload = (e) => {
-    //     this.interestImage = e.target.result;
-    //     console.log('ici', this.interestImage.size)
-    //     // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
-    //     if(interestFile.size > 5000000) {
-    //       this.interestImageSizeError = true
-    //       preventDefault()
-    //     } else {
-    //       this.interestImageSizeError = false
-    //     }
-    //     // Je mets chacune des photos envoyées dans un tableau.
-    //     // C'est ce tableau qui sert à l'affichage des photos.
-    //     this.interestImageArray.push(this.interestImage);
-    //   };
-    //   reader.readAsDataURL(interestFile);
-    // },
+    createInterestImage(interestFile) {
+      var reader = new FileReader();
+      reader.onload = (e) => {
+        this.interestImage = e.target.result;
+        // console.log('ici', this.interestImage.size)
+        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
+        // if(interestFile.size > 5000000) {
+        //   this.interestImageSizeError = true
+        //   preventDefault()
+        // } else {
+        //   this.interestImageSizeError = false
+        // }
+        // Je mets chacune des photos envoyées dans un tableau.
+        // C'est ce tableau qui sert à l'affichage des photos.
+        this.interestImageArray.push(this.interestImage);
+      };
+      reader.readAsDataURL(interestFile);
+    },
     removeInterestImage: function (e) {
       this.interestImage = '';
       this.interestImageArray = [];
       this.interestImageError = false;
+      this.interestImageSizeError = false;
       this.error = false;
       e.preventDefault();
     },
@@ -835,11 +847,6 @@ export default {
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
-      // Par sécurité, si une image trop lourde est arrivée jusque-là, je ne l'envoie pas au back
-      if(this.interestImageSizeError = true){
-        this.interestImage = []
-      }
-
       this.postFormData.append('name', this.interestName);
 
       axios.post("http://127.0.0.1:8000/api/interest", this.postFormData)

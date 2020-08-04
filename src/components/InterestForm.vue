@@ -64,210 +64,210 @@
             <div class="" v-if="this.interestImageSizeError">
               <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
-        </div>
+          </div>
 
-        <div>
+          <div>
 
-        </div>
-
-        <div class="form-group">
-          <label>Lien</label>
-          <input class="form-control" v-model="interestLink">
-        </div>
-
-        <!-- Les input publication/supplément ne peuvent et ne doivent pas être saisis en même temps. C'est l'un ou l'autre. Donc mise en place d'un radio pour passer de l'un à l'autre. -->
-        <b-form-group>
-          <b-form-radio :class="publicationRadio" v-model="selectedPublication" name="selectedPublication" value="publication" @change="changePublicationRadio">Numéro du Bell'Italia <span :class="publicationRedStar">*</span></b-form-radio>
+          </div>
 
           <div class="form-group">
-            <div>
-              <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
-              <multiselect :disabled="publicationInputDisabled" v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" :allow-empty="false" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
-                <span slot="noOptions">Aucune publication</span>
-              </multiselect>
-              <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
-              <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+            <label>Lien</label>
+            <input class="form-control" v-model="interestLink">
+          </div>
+
+          <!-- Les input publication/supplément ne peuvent et ne doivent pas être saisis en même temps. C'est l'un ou l'autre. Donc mise en place d'un radio pour passer de l'un à l'autre. -->
+          <b-form-group>
+            <b-form-radio :class="publicationRadio" v-model="selectedPublication" name="selectedPublication" value="publication" @change="changePublicationRadio">Numéro du Bell'Italia <span :class="publicationRedStar">*</span></b-form-radio>
+
+            <div class="form-group">
+              <div>
+                <!-- L'ajout d'une publication se fait au moyen de Vue Multiselect surchargé en JS -->
+                <multiselect :disabled="publicationInputDisabled" v-model="interestNumber" tag-placeholder="Créer cette nouvelle publication" placeholder="Sélectionner ou créer une publication" label="number" :custom-label="numberWithPublication" track-by="number" :options="storedPublications" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" :allow-empty="false" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addPublication" id="number" :class="publicationErrorClass" @open="inputPublicationChange">
+                  <span slot="noOptions">Aucune publication</span>
+                </multiselect>
+                <small class="helpText">Seuls les chiffres sont acceptés</small><br/>
+                <p :class="publicationErrorTextClass" v-if="errors.bellitalia_id" v-text="errors.bellitalia_id[0]"></p>
+              </div>
             </div>
-          </div>
-          <!-- Input supplément -->
-          <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement" @change="changeSupplementRadio">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
+            <!-- Input supplément -->
+            <b-form-radio :class="supplementRadio" v-model="selectedPublication" name="selectedPublication" value="supplement" @change="changeSupplementRadio">Supplément/Hors-Série <span :class="supplementRedStar">*</span></b-form-radio>
 
-          <div class="form-group">
-            <div>
-              <!-- L'ajout d'un supplément se fait au moyen de Vue Multiselect surchargé en JS -->
-              <!-- NB: le tableau réservoir du menu déroulant est SORTEDSupplements vs storedSupplements -->
-              <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="SortedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
-                <span slot="noOptions">Aucun supplément</span>
-              </multiselect>
-              <!-- <small class="helpText">Seuls les chiffres sont acceptés</small><br/> -->
-              <p :class="supplementErrorTextClass" v-if="errors.supplement_id" v-text="errors.supplement_id[0]"></p>
+            <div class="form-group">
+              <div>
+                <!-- L'ajout d'un supplément se fait au moyen de Vue Multiselect surchargé en JS -->
+                <!-- NB: le tableau réservoir du menu déroulant est SORTEDSupplements vs storedSupplements -->
+                <multiselect :disabled="supplementInputDisabled" v-model="interestSupplement" tag-placeholder="Créer ce nouveau supplément" placeholder="Sélectionner ou créer un supplément" label="name" :custom-label="nameWithPublication" track-by="name" :options="SortedSupplements" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addSupplement" id="name" :class="supplementErrorClass" @open="inputSupplementChange">
+                  <span slot="noOptions">Aucun supplément</span>
+                </multiselect>
+                <!-- <small class="helpText">Seuls les chiffres sont acceptés</small><br/> -->
+                <p :class="supplementErrorTextClass" v-if="errors.supplement_id" v-text="errors.supplement_id[0]"></p>
+              </div>
             </div>
-          </div>
 
-        </b-form-group>
+          </b-form-group>
 
-        <!-- Modal d'ajout d'une publication -->
-        <b-modal
-        ref="addPublicationModal"
-        id="addPublicationModal"
-        title="Ajout d'un nouveau numéro"
-        ok-title="Valider"
-        :ok-disabled="okDisabledPublicationModal"
-        cancel-title="Annuler"
-        size="lg"
-        button-size="sm"
-        no-close-on-esc
-        @ok="handleOkPublicationModal"
-        @cancel="handleCancelPublicationModal"
-        >
+          <!-- Modal d'ajout d'une publication -->
+          <b-modal
+          ref="addPublicationModal"
+          id="addPublicationModal"
+          title="Ajout d'un nouveau numéro"
+          ok-title="Valider"
+          :ok-disabled="okDisabledPublicationModal"
+          cancel-title="Annuler"
+          size="lg"
+          button-size="sm"
+          no-close-on-esc
+          @ok="handleOkPublicationModal"
+          @cancel="handleCancelPublicationModal"
+          >
 
-        <b-container fluid>
+          <b-container fluid>
 
-          <!-- Message d'erreur affiché si le numéro contient une lettre -->
-          <div class="text-error" v-if="NotANumberPublicationModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
+            <!-- Message d'erreur affiché si le numéro contient une lettre -->
+            <div class="text-error" v-if="NotANumberPublicationModal">Le numéro saisi n'est pas valide (présence d'une lettre). Veuillez saisir un autre numéro.</div>
 
-          <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
-          <div v-if="!NotANumberPublicationModal">
-            <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
-            <!-- Month Picker pour date publication -->
-            <vue-monthly-picker
-            v-model="selectedMonthPublicationModal"
-            dateFormat="MMMM YYYY"
-            :monthLabels="monthLabelsPublicationModal"
-            @selected="monthSelectedPublicationModal"
-            placeHolder="Cliquez ici pour sélectionner une date de publication"
-            id="month-picker"
-            >
-          </vue-monthly-picker>
+            <!-- Tout le reste de la modale ne s'affiche que si le numéro envoyé ne contient pas de lettre -->
+            <div v-if="!NotANumberPublicationModal">
+              <div class="mb-3">Merci de définir la date de parution du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+              <!-- Month Picker pour date publication -->
+              <vue-monthly-picker
+              v-model="selectedMonthPublicationModal"
+              dateFormat="MMMM YYYY"
+              :monthLabels="monthLabelsPublicationModal"
+              @selected="monthSelectedPublicationModal"
+              placeHolder="Cliquez ici pour sélectionner une date de publication"
+              id="month-picker"
+              >
+            </vue-monthly-picker>
 
-          <!-- Message d'erreur si pb validation date front -->
-          <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
+            <!-- Message d'erreur si pb validation date front -->
+            <div class="text-error" v-if="NoDatePublicationModal">Vous devez saisir une date de publication.</div>
 
-          <!-- Messages d'erreur si pb validation date back -->
-          <p class="text-error" v-if="errors.date" v-text="errors.date[0]"></p>
+            <!-- Messages d'erreur si pb validation date back -->
+            <p class="text-error" v-if="errors.date" v-text="errors.date[0]"></p>
 
-          <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
+            <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
 
-          <!-- Upload photo pour couverture publication -->
-          <div class="" v-if="publicationImageArray.length<1">
-            <b-form-file
-            placeholder="Choisissez un fichier ou déposez-le ici..."
-            drop-placeholder="Déposez le fichier ici..."
-            browse-text="Choisir un fichier"
-            accept="image/jpeg, image/jpg, image/png"
-            @change="onPublicationFileChange"
-            :state=publicationImageValid
-            id="publication-file-form"
-            ></b-form-file>
-            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
-          </div>
-          <div class="" v-else>
-            <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
-            <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImageArray">
-              <img v-for="image,imageIndex in publicationImageArray" :src="image" class="previewImage" />
-              <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
+            <!-- Upload photo pour couverture publication -->
+            <div class="" v-if="publicationImageArray.length<1">
+              <b-form-file
+              placeholder="Choisissez un fichier ou déposez-le ici..."
+              drop-placeholder="Déposez le fichier ici..."
+              browse-text="Choisir un fichier"
+              accept="image/jpeg, image/jpg, image/png"
+              @change="onPublicationFileChange"
+              :state=publicationImageValid
+              id="publication-file-form"
+              ></b-form-file>
+              <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
             </div>
-            <div id="preview" ref="preview"></div>
+            <div class="" v-else>
+              <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
+              <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImageArray">
+                <img v-for="image,imageIndex in publicationImageArray" :src="image" class="previewImage" />
+                <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
+              </div>
+              <div id="preview" ref="preview"></div>
+            </div>
+            <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
+            <p class="text-error" v-if="this.publicationImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+            </p>
+            <!-- Messages d'erreur si pb validation numéro et image back -->
+            <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
+            <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
+
+            <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
+            <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
+            <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
+            <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
+
+            <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
-          <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
-          <p class="text-error" v-if="this.publicationImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
-          </p>
-          <!-- Messages d'erreur si pb validation numéro et image back -->
-          <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-          <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
+        </b-container>
 
-          <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
-          <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
-          <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-          <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
+      </b-modal>
 
-          <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
+      <!-- Modal d'ajout d'un supplément -->
+      <b-modal
+      ref="addSupplementModal"
+      id="addSupplementModal"
+      title="Ajout d'un nouveau supplément"
+      ok-title="Valider"
+      :ok-disabled="okDisabledSupplementModal"
+      cancel-title="Annuler"
+      size="lg"
+      button-size="sm"
+      no-close-on-esc
+      @ok="handleOkSupplementModal"
+      @cancel="handleCancelSupplementModal"
+      >
+
+      <b-container fluid>
+        <div class="mb-3">Merci d'associer un numéro de Bell'Italia à ce supplément <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
+
+        <!-- Select des numéros déjà enregistrés en BDD -->
+        <multiselect v-model="interestNumberSupplementModal" placeholder="Sélectionner un numéro existant" :options="storedPublications" :allow-empty="false" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" :custom-label="numberWithPublication" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer">
+          <span slot="noOptions">Aucune publication</span>
+        </multiselect>
+
+        <!-- Messages d'erreur si pas de publication associée -->
+        <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
+
+        <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
+        <div class="" v-if="supplementImageArray.length<1">
+          <!-- Upload photo pour couverture supplément -->
+          <b-form-file
+          placeholder="Choisissez un fichier ou déposez-le ici..."
+          drop-placeholder="Déposez le fichier ici..."
+          browse-text="Choisir un fichier"
+          accept="image/jpeg, image/jpg, image/png"
+          @change="onSupplementFileChange"
+          :state=supplementImageValid
+          id="supplement-file-form"
+          ></b-form-file>
+          <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
         </div>
+        <div class="" v-else>
+          <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
+          <div v-viewer="viewerSupplementOptions" class="mt-4" v-if="supplementImageArray">
+            <img v-for="image,imageIndex in supplementImageArray" :src="image" class="previewImage" />
+            <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removeSupplementImage"><i class="far fa-trash-alt imageTrash"></i></button>
+          </div>
+          <div id="preview" ref="preview"></div>
+        </div>
+        <p class="text-error" v-if="this.supplementImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+        </p>
+        <!-- Messages d'erreur si pb validation numéro et image back -->
+        <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
+        <!-- <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p> -->
+
+        <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
+        <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
+        <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
+        <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
+
+        <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
       </b-container>
 
     </b-modal>
 
-    <!-- Modal d'ajout d'un supplément -->
-    <b-modal
-    ref="addSupplementModal"
-    id="addSupplementModal"
-    title="Ajout d'un nouveau supplément"
-    ok-title="Valider"
-    :ok-disabled="okDisabledSupplementModal"
-    cancel-title="Annuler"
-    size="lg"
-    button-size="sm"
-    no-close-on-esc
-    @ok="handleOkSupplementModal"
-    @cancel="handleCancelSupplementModal"
-    >
-
-    <b-container fluid>
-      <div class="mb-3">Merci d'associer un numéro de Bell'Italia à ce supplément <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
-
-      <!-- Select des numéros déjà enregistrés en BDD -->
-      <multiselect v-model="interestNumberSupplementModal" placeholder="Sélectionner un numéro existant" :options="storedPublications" :allow-empty="false" :multiple="false" selectLabel="Cliquer ou 'entrée' pour sélectionner" :custom-label="numberWithPublication" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer">
-        <span slot="noOptions">Aucune publication</span>
-      </multiselect>
-
-      <!-- Messages d'erreur si pas de publication associée -->
-      <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p>
-
-      <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestSupplement[0]}}</strong> :<span class="redStar"> *</span></div>
-      <div class="" v-if="supplementImageArray.length<1">
-        <!-- Upload photo pour couverture supplément -->
-        <b-form-file
-        placeholder="Choisissez un fichier ou déposez-le ici..."
-        drop-placeholder="Déposez le fichier ici..."
-        browse-text="Choisir un fichier"
-        accept="image/jpeg, image/jpg, image/png"
-        @change="onSupplementFileChange"
-        :state=supplementImageValid
-        id="supplement-file-form"
-        ></b-form-file>
-        <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
+    <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
+    <div class="form-group">
+      <div>
+        <label>Catégorie(s) <span class="redStar">*</span></label>
+        <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange">
+          <span slot="noOptions">Aucune catégorie</span>
+        </multiselect>
+        <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
+        <small class="mt-2 helpText"><a href="/categories" target="_blank" rel="noopener"><i class="far fa-edit"></i> Modifier ou supprimer une catégorie</a></small>
       </div>
-      <div class="" v-else>
-        <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
-        <div v-viewer="viewerSupplementOptions" class="mt-4" v-if="supplementImageArray">
-          <img v-for="image,imageIndex in supplementImageArray" :src="image" class="previewImage" />
-          <button v-b-tooltip.hover.right.v-danger title="Supprimer l'image" class="btn btn-outline-danger deleteImageIcon" @click="removeSupplementImage"><i class="far fa-trash-alt imageTrash"></i></button>
-        </div>
-        <div id="preview" ref="preview"></div>
-      </div>
-      <p class="text-error" v-if="this.supplementImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
-      </p>
-      <!-- Messages d'erreur si pb validation numéro et image back -->
-      <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-      <!-- <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p> -->
-
-      <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
-      <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
-      <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-      <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
-
-      <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
-    </b-container>
-
-  </b-modal>
-
-  <!-- Catégories/Tags gérés grâce à plugin Vue Multiselect -->
-  <div class="form-group">
-    <div>
-      <label>Catégorie(s) <span class="redStar">*</span></label>
-      <multiselect v-model="interestTag" tag-placeholder="Créer cette nouvelle catégorie" placeholder="Sélectionner ou créer une catégorie" label="name" track-by="name" :options="storedTags" :multiple="true" selectLabel="Cliquer ou 'entrée' pour sélectionner" selectedLabel="sélectionné" deselectLabel="Cliquer ou 'entrée' pour retirer" :taggable="true" @tag="addTag" :class="tagErrorClass" @open="inputTagChange">
-        <span slot="noOptions">Aucune catégorie</span>
-      </multiselect>
-      <p :class="tagErrorTextClass" v-if="errors.tag_id" v-text="errors.tag_id[0]"></p>
-      <small class="mt-2 helpText"><a href="/categories" target="_blank" rel="noopener"><i class="far fa-edit"></i> Modifier ou supprimer une catégorie</a></small>
     </div>
-  </div>
-  <div class="d-flex justify-content-center">
-    <b-button type="submit" v-if="!edit" @click.prevent="submitForm">Enregistrer</b-button>
-    <b-button type="submit" v-if="edit" @click.prevent="editForm">Enregistrer les modifications</b-button>
-  </div>
-  <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
-</form>
+    <div class="d-flex justify-content-center">
+      <b-button :disabled='interestSubmitIsDisabled' type="submit" v-if="!edit" @click.prevent="submitForm">Enregistrer</b-button>
+      <b-button :disabled='interestSubmitIsDisabled' type="submit" v-if="edit" @click.prevent="editForm">Enregistrer les modifications</b-button>
+    </div>
+    <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
+  </form>
 </div>
 </div>
 </div>
@@ -307,6 +307,7 @@ export default {
       interestImageArray:[],
       interestFile:'',
       edit: false,
+      interestSubmitIsDisabled: false,
       interestTag: [],
       storedTags: [],
       storedRegions: [],
@@ -684,7 +685,6 @@ export default {
       // A chaque changement de l'input, j'enlève le message d'erreur s'il était présent
       this.interestImageSizeError = false
       // Pour chacune des images envoyées :
-      console.log('e.target.files', e.target.files)
 
       // for(var key in e.target.files){
       //   // console.log('key', key)
@@ -723,21 +723,26 @@ export default {
       // // this.errors.image = []
       // // Et je traite la ou les nouvelles photos envoyées
       var files = e.target.files || e.dataTransfer.files;
-      // // Si aucune photo n'est chargée, je ne renvoie rien.
+      // Si aucune photo n'est chargée, je ne renvoie rien.
       if (!files.length) {
         return;
-        //   // Sinon, pour chaque photo envoyée, j'appelle la méthode createInterestImage
+        //   //
       } else {
         var i;
         for(i=0;i<files.length;i++) {
+          // Je contrôle la taille de chaque photo envoyée
           if(files[i].size>8000000) {
             this.interestImageSizeError = true
+            this.interestSubmitIsDisabled = true
+            // Pour chaque photo valide envoyée :
+            // - Je l'ajoute au FormData pour envoi back
+            // - j'appelle la méthode createInterestImage (pour prévisualisation v-viewer)
           } else {
             this.interestImageSizeError = false
+            this.interestSubmitIsDisabled = false
             this.createInterestImage(files[i])
             this.postFormData.append('images[]', files[i])
           }
-
         }
       }
     },
@@ -765,6 +770,7 @@ export default {
       this.interestImageError = false;
       this.interestImageSizeError = false;
       this.error = false;
+      this.interestSubmitIsDisabled = false;
       e.preventDefault();
     },
     // Ajout dynamique d'un tag en cours de saisie du formulaire
@@ -847,15 +853,34 @@ export default {
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
-      this.postFormData.append('name', this.interestName);
+      console.log(this.interestTag)
+      this.postFormData.append('name', this.interestName)
+      this.postFormData.append('address', this.interestAddress)
+      this.postFormData.append('description', this.interestDescription)
+      this.postFormData.append('link', this.interestLink)
+      this.postFormData.append('latitude', this.interestLatitude)
+      this.postFormData.append('longitude', this.interestLongitude)
+      this.postFormData.append('bellitalia_id', this.interestNumber.number)
+      this.postFormData.append('supplement_id', this.interestSupplement.number)
+
+      this.interestTag.forEach((tag, i) => {
+        this.postFormData.append('tag_id[]', tag.name)
+      });
+
 
       axios.post("http://127.0.0.1:8000/api/interest", this.postFormData)
-      .then(function(response){
-        console.log('response', response);
+       .then(() => {
+        // console.log('response', response);
         this.interestImageSizeError = false
+        this.$router.push('/')
+        this.flashMessage.show({
+          status: 'success',
+          title: 'Confirmation',
+          message: 'Le point d\'intérêt a bien été enregistré'
+        });
       })
-      .catch(function(error){
-        console.log('error', error);
+      .catch(error => {
+        console.log('erroor', error);
       });
 
 

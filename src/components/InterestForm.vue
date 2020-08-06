@@ -55,11 +55,10 @@
               </div>
               <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
             </div>
-            <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 8Mo</small><br/>
-
+            <small class="helpText">Les images (jpg, jpeg ou png) ne doivent pas peser plus de 4Mo. <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">Cliquez ici pour compresser vos images</a>.</small><br/>
 
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
-            <p class="text-error" v-if="this.interestImageSizeError" >Au moins une des images chargées dépasse le poids autorisé (8Mo). Veuillez réduire sa taille : <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">réduire votre image</a>
+            <p class="text-error" v-if="this.interestImageSizeError" >Au moins une des images chargées dépasse le poids autorisé (4Mo). <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">Cliquez ici pour compresser vos images</a>.
             </p>
             <div class="" v-if="this.interestImageSizeError">
               <button class="btn btn-outline-danger" @click="removeInterestImage"><i class="far fa-trash-alt imageTrash"></i></button>
@@ -179,7 +178,7 @@
             <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
             <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
             <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-            <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
+            <!-- <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p> -->
 
             <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
@@ -244,7 +243,7 @@
         <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
         <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
         <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-        <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p>
+        <!-- <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p> -->
 
         <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
       </b-container>
@@ -329,7 +328,6 @@ export default {
       publicationImageSizeError:false,
       supplementImageError: false,
       supplementImageSizeError: false,
-      interestImageError:false,
       interestImageSizeError:false,
       nameErrorClass: "",
       nameErrorTextClass: "",
@@ -481,12 +479,6 @@ export default {
         })
         // Validation back : si problème avec validator API, erreur renvoyée
         .catch(error => {
-          // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
-          if (error) {
-            // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-            this.publicationImageError = true
-            this.publicationImageValid = false
-          }
           // Pour tous les messages d'erreur du validator
           // Pour chaque erreur remontée, j'ajoute la bordure rouge
           this.errors = error.response.data
@@ -541,15 +533,6 @@ export default {
       })
       // Validation back : si problème avec validator API, erreur renvoyée
       .catch(error => {
-        // NB: ce if posait trop de problèmes (erreur systématique si pas d'image envoyée). Je le garde sous la main au cas où, mais en attendant, il est commenté.
-
-        // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
-        // if (error) {
-        //   // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-        //   this.supplementImageError = true
-        //   this.supplementImageValid = false
-        // }
-
         // Pour tous les messages d'erreur du validator
         // Pour chaque erreur remontée, j'ajoute la bordure rouge
         this.errors = error.response.data
@@ -595,7 +578,6 @@ export default {
       this.publicationImageValid = null
       // J'enlève les messages d'erreur s'ils étaient présents
       this.errors.image = []
-      this.error = false
       // Et je traite la nouvelle photo envoyée
       var files = e.target.files || e.dataTransfer.files;
 
@@ -615,7 +597,6 @@ export default {
       this.supplementImageValid = null
       // J'enlève les messages d'erreur s'ils étaient présents
       this.errors.image = []
-      this.error = false
       // Et je traite la nouvelle photo envoyée
       var files = e.target.files || e.dataTransfer.files;
 
@@ -684,57 +665,19 @@ export default {
     onInterestFileChange(e) {
       // A chaque changement de l'input, j'enlève le message d'erreur s'il était présent
       this.interestImageSizeError = false
-      // Pour chacune des images envoyées :
-
-      // for(var key in e.target.files){
-      //   // console.log('key', key)
-      //   // Si l'une d'entre elle fait plus de 8Mo
-      //   if(e.target.files[key].size>8000000){
-      //     // console.log('if')
-      //     // J'ajoute le message d'erreur
-      //     this.interestImageSizeError = true
-      //     // Je bloque la validation du formulaire (NB: ça c'est en théorie, en fait ça bloque pas, mais ça permet au message d'erreur de rester affiché)
-      //     preventDefault()
-      //   } else {
-      //     // console.log('else')
-      //     // Si pas de pb de taille, j'ajoute l'image au formData
-      //     this.interestImageSizeError = false
-      //
-      //     //     // Je mets chacune des photos envoyées dans un tableau.
-      //     //     // C'est ce tableau qui sert à l'affichage des photos.
-      //
-      //     this.postFormData.append('images[]', e.target.files[key]);
-      //   }
-      //
-      // }
-
-      // console.log('photo avant', this.photos)
-      // console.log('target files', e.target.files)
-      // var i;
-      // for(i=0;i<e.target.files.length;i++) {
-      //   this.photos.push(e.target.files[i])
-      // }
-      // console.log('photo après', this.photos)
-      // this.photo = e.target.files[0]
-
-      // // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
-      // // this.publicationImageValid = null
-      // // J'enlève le message d'erreur s'il était présent
-      // // this.errors.image = []
-      // // Et je traite la ou les nouvelles photos envoyées
       var files = e.target.files || e.dataTransfer.files;
       // Si aucune photo n'est chargée, je ne renvoie rien.
       if (!files.length) {
         return;
-        //   //
+        // Sinon, pour chacune des images envoyées :
       } else {
         var i;
         for(i=0;i<files.length;i++) {
-          // Je contrôle la taille de chaque photo envoyée
-          if(files[i].size>8000000) {
+          // Je contrôle la taille de chaque photo envoyée. Je bloque à 4Mo max.
+          if(files[i].size>4000000) {
             this.interestImageSizeError = true
             this.interestSubmitIsDisabled = true
-            // Pour chaque photo valide envoyée :
+            // Sinon, pour chaque photo valide envoyée :
             // - Je l'ajoute au FormData pour envoi back
             // - j'appelle la méthode createInterestImage (pour prévisualisation v-viewer)
           } else {
@@ -746,20 +689,11 @@ export default {
         }
       }
     },
+    // Cette méthode ne sert qu'à pouvoir visualiser les images uploadées.
     createInterestImage(interestFile) {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.interestImage = e.target.result;
-        // console.log('ici', this.interestImage.size)
-        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
-        // if(interestFile.size > 5000000) {
-        //   this.interestImageSizeError = true
-        //   preventDefault()
-        // } else {
-        //   this.interestImageSizeError = false
-        // }
-        // Je mets chacune des photos envoyées dans un tableau.
-        // C'est ce tableau qui sert à l'affichage des photos.
         this.interestImageArray.push(this.interestImage);
       };
       reader.readAsDataURL(interestFile);
@@ -767,9 +701,7 @@ export default {
     removeInterestImage: function (e) {
       this.interestImage = '';
       this.interestImageArray = [];
-      this.interestImageError = false;
       this.interestImageSizeError = false;
-      this.error = false;
       this.interestSubmitIsDisabled = false;
       e.preventDefault();
     },
@@ -853,144 +785,30 @@ export default {
     },
     // Enregistrement d'un nouveau point d'intérêt
     submitForm() {
-      console.log(this.interestTag)
       this.postFormData.append('name', this.interestName)
       this.postFormData.append('address', this.interestAddress)
       this.postFormData.append('description', this.interestDescription)
       this.postFormData.append('link', this.interestLink)
       this.postFormData.append('latitude', this.interestLatitude)
       this.postFormData.append('longitude', this.interestLongitude)
-      this.postFormData.append('bellitalia_id', this.interestNumber.number)
-      this.postFormData.append('supplement_id', this.interestSupplement.number)
-
+      // En back, le validator required laisse passer le undefined. Du coup, je fais en sorte d'envoyer du null si ces 2 champs sont undefined
+      if(this.interestNumber.number == undefined){
+        this.postFormData.append('bellitalia_id', this.interestNumber)
+      } else {
+        this.postFormData.append('bellitalia_id', this.interestNumber.number)
+      }
+      if(this.interestSupplement.number == undefined){
+        this.postFormData.append('supplement_id', this.interestSupplement)
+      } else {
+        this.postFormData.append('supplement_id', this.interestSupplement.number)
+      }
       this.interestTag.forEach((tag, i) => {
         this.postFormData.append('tag_id[]', tag.name)
       });
 
-
       axios.post("http://127.0.0.1:8000/api/interest", this.postFormData)
-       .then(() => {
-        // console.log('response', response);
-        this.interestImageSizeError = false
-        this.$router.push('/')
-        this.flashMessage.show({
-          status: 'success',
-          title: 'Confirmation',
-          message: 'Le point d\'intérêt a bien été enregistré'
-        });
-      })
-      .catch(error => {
-        console.log('erroor', error);
-      });
-
-
-
-
-
-      // console.log('submitForm', this.interestImageArray)
-      // axios.post('http://127.0.0.1:8000/api/interest', {
-      //   name: this.interestName,
-      //   address: this.interestAddress,
-      //   description: this.interestDescription,
-      //   link: this.interestLink,
-      //   latitude: this.interestLatitude,
-      //   longitude: this.interestLongitude,
-      //   bellitalia_id: this.interestNumber,
-      //   supplement_id: this.interestSupplement,
-      //   tag_id: this.interestTag,
-      //   image: this.interestImageArray,
-      // })
-      // .then(() => {
-      //   console.log('then')
-      //   this.interestName = ""
-      //   this.interestAddress = ""
-      //   this.interestDescription = ""
-      //   this.interestLink = ""
-      //   this.interestLatitude = ""
-      //   this.interestLongitude = ""
-      //   this.interestNumber = ""
-      //   this.interestSupplement = ""
-      //   this.interestDate = ""
-      //   this.interestTag = ""
-      //   this.image = ""
-      //   this.interestImageArray = []
-      //   this.errors = {}
-      //   this.interestImageError = false
-      //   this.$router.push('/')
-      //   this.flashMessage.show({
-      //     status: 'success',
-      //     title: 'Confirmation',
-      //     message: 'Le point d\'intérêt a bien été enregistré'
-      //   });
-      // })
-      // .catch(error => {
-      //   console.log('error', error)
-      //   // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
-      //   if (error) {
-      //     console.log('goooo')
-      //     // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-      //     this.interestImageError = true
-      //   }
-      //
-      //   if(error.response.data) {
-      //     this.errors = error.response.data
-      //   } else {
-      //     console.log('coucou')
-      //   }
-      //
-      //   if(this.errors.bellitalia_id) {
-      //     this.publicationErrorClass= "multiselect__tags-red"
-      //     this.publicationErrorTextClass= "text-error"
-      //     this.interestImageError = false
-      //   }
-      //   if(this.errors.supplement_id) {
-      //     this.supplementErrorClass= "multiselect__tags-red"
-      //     this.supplementErrorTextClass= "text-error"
-      //     this.interestImageError = false
-      //   }
-      //   if(this.errors.tag_id) {
-      //     this.tagErrorClass= "multiselect__tags-red"
-      //     this.tagErrorTextClass="text-error"
-      //     this.interestImageError = false
-      //   }
-      //   if(this.errors.name) {
-      //     this.nameErrorClass= "border-red"
-      //     this.nameErrorTextClass="text-error"
-      //     this.interestImageError = false
-      //   }
-      //   if(this.errors.address) {
-      //     this.addressErrorClass= "border-red"
-      //     this.addressErrorTextClass="text-error"
-      //     this.interestImageError = false
-      //   }
-      //   if(this.errors.latitude) {
-      //     this.latitudeErrorClass= "border-red"
-      //     this.latitudeErrorTextClass="text-error"
-      //     this.interestImageError = false
-      //   }
-      //   if(this.errors.longitude) {
-      //     this.longitudeErrorClass= "border-red"
-      //     this.longitudeErrorTextClass="text-error"
-      //     this.interestImageError = false
-      //   }
-      // })
-    },
-    // Modification d'un point d'intérêt
-    // WIP : gérer correctement l'édit supplement vs publication
-    editForm() {
-      axios.put('http://127.0.0.1:8000/api/interest/'+this.$route.params.id, {
-        name: this.interestName,
-        address: this.interestAddress,
-        description: this.interestDescription,
-        link: this.interestLink,
-        latitude: this.interestLatitude,
-        longitude: this.interestLongitude,
-        bellitalia_id: this.interestNumber,
-        supplement_id: this.interestSupplement,
-        tag_id: this.interestTag,
-        image: this.interestImageArray,
-      })
       .then(() => {
+        this.interestImageSizeError = false
         this.interestName = ""
         this.interestAddress = ""
         this.interestDescription = ""
@@ -1008,51 +826,124 @@ export default {
         this.flashMessage.show({
           status: 'success',
           title: 'Confirmation',
-          message: 'Le point d\'intérêt a bien été modifié'
+          message: 'Le point d\'intérêt a bien été enregistré'
         });
       })
       .catch(error => {
         this.errors = error.response.data
-        // Ce IF n'intercepte que les erreurs qui auraient réussi à duper le validator
-        if (error) {
-          // Dans ce cas, j'affiche le message par défaut et je mets la bordure rouge à l'input
-          this.interestImageError = true
-        }
-        this.errors = error.response.data
+
         if(this.errors.bellitalia_id) {
           this.publicationErrorClass= "multiselect__tags-red"
           this.publicationErrorTextClass= "text-error"
-          this.interestImageError = false
         }
         if(this.errors.supplement_id) {
           this.supplementErrorClass= "multiselect__tags-red"
           this.supplementErrorTextClass= "text-error"
-          this.interestImageError = false
         }
         if(this.errors.tag_id) {
           this.tagErrorClass= "multiselect__tags-red"
           this.tagErrorTextClass="text-error"
-          this.interestImageError = false
         }
         if(this.errors.name) {
           this.nameErrorClass= "border-red"
           this.nameErrorTextClass="text-error"
-          this.interestImageError = false
         }
         if(this.errors.address) {
           this.addressErrorClass= "border-red"
           this.addressErrorTextClass="text-error"
-          this.interestImageError = false
         }
         if(this.errors.latitude) {
           this.latitudeErrorClass= "border-red"
           this.latitudeErrorTextClass="text-error"
-          this.interestImageError = false
         }
         if(this.errors.longitude) {
           this.longitudeErrorClass= "border-red"
           this.longitudeErrorTextClass="text-error"
-          this.interestImageError = false
+        }
+      })
+    },
+    // Modification d'un point d'intérêt
+    editForm() {
+      this.postFormData.set('name', this.interestName)
+      this.postFormData.set('address', this.interestAddress)
+      this.postFormData.set('description', this.interestDescription)
+      this.postFormData.set('link', this.interestLink)
+      this.postFormData.set('latitude', this.interestLatitude)
+      this.postFormData.set('longitude', this.interestLongitude)
+      // En back, le validator required laisse passer le undefined. Du coup, je fais en sorte d'envoyer du null si ces 2 champs sont undefined
+      if(this.interestNumber.number == undefined){
+        this.postFormData.set('bellitalia_id', this.interestNumber)
+      } else {
+        this.postFormData.set('bellitalia_id', this.interestNumber.number)
+      }
+      if(this.interestSupplement.number == undefined){
+        this.postFormData.set('supplement_id', this.interestSupplement)
+      } else {
+        this.postFormData.set('supplement_id', this.interestSupplement.number)
+      }
+      this.interestTag.forEach((tag, i) => {
+        this.postFormData.set('tag_id[]', tag.name)
+      });
+
+      // NB: Pour une raison que j'ignore, à l'update, le FormData ne fonctionne pas avec axios.put. Il faut :
+
+      // 1. Lui préciser que l'on veut faire un update :
+      this.postFormData.append('_method', 'PUT')
+
+      // 2. Faire un axios.post et non axios.put
+      axios.post("http://127.0.0.1:8000/api/interest/"+this.$route.params.id, this.postFormData)
+      .then(() => {
+        this.interestImageSizeError = false
+        this.interestName = ""
+        this.interestAddress = ""
+        this.interestDescription = ""
+        this.interestLink = ""
+        this.interestLatitude = ""
+        this.interestLongitude = ""
+        this.interestNumber = ""
+        this.interestSupplement = ""
+        this.interestDate = ""
+        this.interestTag = ""
+        this.image = ""
+        this.interestImageArray = []
+        this.errors = {}
+        this.$router.push('/')
+        this.flashMessage.show({
+          status: 'success',
+          title: 'Confirmation',
+          message: 'Le point d\'intérêt a bien été enregistré'
+        });
+      })
+      .catch(error => {
+        this.errors = error.response.data
+
+        if(this.errors.bellitalia_id) {
+          this.publicationErrorClass= "multiselect__tags-red"
+          this.publicationErrorTextClass= "text-error"
+        }
+        if(this.errors.supplement_id) {
+          this.supplementErrorClass= "multiselect__tags-red"
+          this.supplementErrorTextClass= "text-error"
+        }
+        if(this.errors.tag_id) {
+          this.tagErrorClass= "multiselect__tags-red"
+          this.tagErrorTextClass="text-error"
+        }
+        if(this.errors.name) {
+          this.nameErrorClass= "border-red"
+          this.nameErrorTextClass="text-error"
+        }
+        if(this.errors.address) {
+          this.addressErrorClass= "border-red"
+          this.addressErrorTextClass="text-error"
+        }
+        if(this.errors.latitude) {
+          this.latitudeErrorClass= "border-red"
+          this.latitudeErrorTextClass="text-error"
+        }
+        if(this.errors.longitude) {
+          this.longitudeErrorClass= "border-red"
+          this.longitudeErrorTextClass="text-error"
         }
       })
     },

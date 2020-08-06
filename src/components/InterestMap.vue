@@ -163,7 +163,7 @@ export default {
       maxZoom: 18,
       minZoom:2,
       center: [],
-      viewerInterestOptions: {title: false, scalable: false},
+      viewerInterestOptions: {scalable: false},
       // Gestion multi cartes plan/satellite
       tileProviders: [
         {

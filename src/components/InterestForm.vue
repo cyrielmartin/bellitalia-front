@@ -148,7 +148,7 @@
             <div class="mb-3 mt-3">Merci de définir la couverture du n° <strong>{{this.interestNumber[0]}}</strong> :<span class="redStar"> *</span></div>
 
             <!-- Upload photo pour couverture publication -->
-            <div class="" v-if="publicationImageArray.length<1">
+            <div v-if="publicationImageArray.length<1">
               <b-form-file
               placeholder="Choisissez un fichier ou déposez-le ici..."
               drop-placeholder="Déposez le fichier ici..."
@@ -158,9 +158,9 @@
               :state=publicationImageValid
               id="publication-file-form"
               ></b-form-file>
-              <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
+              <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 4Mo. <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">Cliquez ici pour compresser votre image</a>.</small><br/>
             </div>
-            <div class="" v-else>
+            <div v-else>
               <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
               <div v-viewer="viewerPublicationOptions" class="mt-4" v-if="publicationImageArray">
                 <img v-for="image,imageIndex in publicationImageArray" :src="image" class="previewImage" />
@@ -168,17 +168,14 @@
               </div>
               <div id="preview" ref="preview"></div>
             </div>
-            <!-- Pour une raison que j'ignore, le front ne laisse pas passer les fichiers de plus de 5 Mo. En attendant de trouver une meilleure solution, c'est la limite que je mets (avec un lien vers un site pour réduire la taille des images)-->
-            <p class="text-error" v-if="this.publicationImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+            <p class="text-error" v-if="this.publicationImageSizeError" >L'image chargé dépasse le poids autorisé (4Mo). <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">Cliquez ici pour compresser votre image</a>.
             </p>
             <!-- Messages d'erreur si pb validation numéro et image back -->
             <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
             <p class="text-error" v-if="errors.number" v-text="errors.number[0]"></p>
-
-            <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
-            <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
-            <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
-            <!-- <p class="text-error" v-if="this.error" >L'image chargée dépasse le poids autorisée. Veuillez réduire sa taille.</p> -->
+            <div class="" v-if="this.publicationImageSizeError">
+              <button class="btn btn-outline-danger" @click="removePublicationImage"><i class="far fa-trash-alt imageTrash"></i></button>
+            </div>
 
             <span class="helpText">Les champs marqués d'une <span class="redStar">*</span> sont obligatoires.</span>
           </div>
@@ -224,7 +221,7 @@
           :state=supplementImageValid
           id="supplement-file-form"
           ></b-form-file>
-          <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 5Mo</small><br/>
+          <small class="helpText">L'image (jpg, jpeg ou png) ne doit pas peser plus de 4Mo. <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">Cliquez ici pour compresser votre image</a>.</small><br/>
         </div>
         <div class="" v-else>
           <!-- Pour le zoom et la visualisation de l'image chargée, j'utilise v-viewer  -->
@@ -234,12 +231,14 @@
           </div>
           <div id="preview" ref="preview"></div>
         </div>
-        <p class="text-error" v-if="this.supplementImageSizeError" >L'image chargée dépasse le poids autorisé (5Mo). Veuillez réduire sa taille : <a href="https://www.reduceimages.com/" target="_blank" rel="noopener">Réduire votre image</a>
+        <p class="text-error" v-if="this.supplementImageSizeError" >L'image chargé dépasse le poids autorisé (4Mo). <a href="https://compressjpeg.com/fr/" target="_blank" rel="noopener">Cliquez ici pour compresser votre image</a>.
         </p>
         <!-- Messages d'erreur si pb validation numéro et image back -->
         <p class="text-error" v-if="errors.image" v-text="errors.image[0]"></p>
         <!-- <p class="text-error" v-if="errors.publication" v-text="errors.publication[0]"></p> -->
-
+        <div class="" v-if="this.supplementImageSizeError">
+          <button class="btn btn-outline-danger" @click="removeSupplementImage"><i class="far fa-trash-alt imageTrash"></i></button>
+        </div>
         <!-- Si une erreur autre que validator est détectée, j'affiche un message par défaut -->
         <!-- J'ai dû mettre ça en place pour éviter que les fichiers manipulés puissent duper le validator -->
         <!-- Fichiers manipulés = pdf artificiellement changé en jpg, par exemple -->
@@ -303,6 +302,8 @@ export default {
       publicationFile:'',
       interestImage:'',
       postFormData: new FormData(),
+      publicationFormData: new FormData(),
+      supplementFormData: new FormData(),
       interestImageArray:[],
       interestFile:'',
       edit: false,
@@ -457,11 +458,11 @@ export default {
         monthPicker.classList.remove("vue-monthly-picker-red")
         this.publicationImageValid = null
         // J'enregistre mon nouveau numéro en base
-        axios.post('http://127.0.0.1:8000/api/bellitalia', {
-          number: this.interestNumber[0],
-          date: this.selectedMonthPublicationModal,
-          image: this.publicationImageArray,
-        })
+
+        this.publicationFormData.append('number', this.interestNumber[0])
+        this.publicationFormData.append('date', this.selectedMonthPublicationModal)
+
+        axios.post('http://127.0.0.1:8000/api/bellitalia', this.publicationFormData)
         // Validation front ET back : si tout va bien des 2 côtés
         .then(() => {
           // Pour que le numéro créé s'affiche dans la liste déroulante du Multiselect :
@@ -510,11 +511,10 @@ export default {
     // Validation modale ajout supplément
     handleOkSupplementModal(bvModalEvt){
       this.supplementImageValid = null
-      axios.post('http://127.0.0.1:8000/api/supplement', {
-        name: this.interestSupplement[0],
-        publication: this.interestNumberSupplementModal,
-        image: this.supplementImageArray,
-      })
+      this.supplementFormData.append('name', this.interestSupplement[0])
+      this.supplementFormData.append('publication', this.interestNumberSupplementModal.number)
+
+      axios.post('http://127.0.0.1:8000/api/supplement', this.supplementFormData)
       .then(() => {
         // Pour que le numéro créé s'affiche dans la liste déroulante du Multiselect :
         // J'associe volontairement à bellitalia_id le numéro de publication (et non l'id)
@@ -554,6 +554,7 @@ export default {
       this.interestNumber = []
       this.publicationImage = ''
       this.publicationImageError = false
+      this.publicationImageSizeError = false
       this.publicationImageValid = null
     },
     // Idem côté supplément
@@ -562,6 +563,7 @@ export default {
       this.interestSupplement = []
       this.supplementImage = ''
       this.supplementImageError = false
+      this.supplementImageSizeError = false
       this.supplementImageValid = null
     },
     // Pour tout changement dans le MonthPicker :
@@ -574,8 +576,9 @@ export default {
     },
     // Méthodes gérant l'ajout et la suppression d'une image de couverture
     onPublicationFileChange(e) {
-      // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
+      // A chaque changement de l'input, j'enlève la bordure rouge et le message d'erreur s'ils étaient présents
       this.publicationImageValid = null
+      this.publicationImageSizeError = false
       // J'enlève les messages d'erreur s'ils étaient présents
       this.errors.image = []
       // Et je traite la nouvelle photo envoyée
@@ -584,17 +587,30 @@ export default {
       // Si aucune photo n'est chargée, je ne renvoie rien.
       if (!files.length) {
         return;
-        // Sinon, pour chaque photo envoyée, j'appelle la méthode createPublicationImage
+        // Sinon, pour la photo envoyée :
       } else {
         var i;
         for(i=0;i<files.length;i++) {
-          this.createPublicationImage(files[i])
+          // Je contrôle la taille de chaque photo envoyée. Je bloque à 4Mo max.
+          if(files[i].size>4000000) {
+            this.publicationImageSizeError = true
+            // this.publicationSubmitIsDisabled = true
+            // Sinon, pour chaque photo valide envoyée :
+            // - Je l'ajoute au FormData pour envoi back
+            // - j'appelle la méthode createPublicationImage (pour prévisualisation v-viewer)
+          } else {
+            this.publicationImageSizeError = false
+            // this.publicationSubmitIsDisabled = false
+            this.createPublicationImage(files[i])
+            this.publicationFormData.append('images[]', files[i])
+          }
         }
       }
     },
     onSupplementFileChange(e) {
-      // A chaque changement de l'input, j'enlève la bordure rouge si elle était présente
+      // A chaque changement de l'input, j'enlève la bordure rouge et le message d'erreur s'ils étaient présents
       this.supplementImageValid = null
+      this.supplementImageSizeError = false
       // J'enlève les messages d'erreur s'ils étaient présents
       this.errors.image = []
       // Et je traite la nouvelle photo envoyée
@@ -603,11 +619,23 @@ export default {
       // Si aucune photo n'est chargée, je ne renvoie rien.
       if (!files.length) {
         return;
-        // Sinon, pour chaque photo envoyée, j'appelle la méthode createPublicationImage
+        // Sinon, pour la photo envoyée :
       } else {
         var i;
         for(i=0;i<files.length;i++) {
-          this.createSupplementImage(files[i])
+          // Je contrôle la taille de chaque photo envoyée. Je bloque à 4Mo max.
+          if(files[i].size>4000000) {
+            this.supplementImageSizeError = true
+            // this.publicationSubmitIsDisabled = true
+            // Sinon, pour chaque photo valide envoyée :
+            // - Je l'ajoute au FormData pour envoi back
+            // - j'appelle la méthode createSupplementImage (pour prévisualisation v-viewer)
+          } else {
+            this.supplementImageSizeError = false
+            // this.publicationSubmitIsDisabled = false
+            this.createSupplementImage(files[i])
+            this.supplementFormData.append('images[]', files[i])
+          }
         }
       }
     },
@@ -615,15 +643,6 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.publicationImage = e.target.result;
-
-        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
-        if(publicationFile.size > 5000000) {
-          this.publicationImageSizeError = true
-          preventDefault()
-        } else {
-          this.publicationImageSizeError = false
-        }
-
         this.publicationImageArray.push(this.publicationImage);
       };
       reader.readAsDataURL(publicationFile);
@@ -632,15 +651,6 @@ export default {
       var reader = new FileReader();
       reader.onload = (e) => {
         this.supplementImage = e.target.result;
-
-        // Au chargement de l'image, je contrôle la taille : si supérieur à 5Mo, je bloque la validation et j'envoie un message d'erreur.
-        if(supplementFile.size > 5000000) {
-          this.supplementImageSizeError = true
-          preventDefault()
-        } else {
-          this.supplementImageSizeError = false
-        }
-
         this.supplementImageArray.push(this.supplementImage);
       };
       reader.readAsDataURL(supplementFile);
@@ -651,6 +661,7 @@ export default {
       this.publicationImageError = false
       this.errors = {};
       this.publicationImageValid = null;
+      this.publicationImageSizeError = false;
       e.preventDefault();
     },
     removeSupplementImage: function (e) {
@@ -659,6 +670,7 @@ export default {
       this.supplementImageError = false
       this.errors = {};
       this.supplementImageValid = null;
+      this.supplementImageSizeError = false;
       e.preventDefault();
     },
     // // Méthodes gérant l'ajout et la suppression des images du point d'intérêt
@@ -797,10 +809,13 @@ export default {
       } else {
         this.postFormData.append('bellitalia_id', this.interestNumber.number)
       }
-      if(this.interestSupplement.number == undefined){
+console.log('this.interestSupplement', this.interestSupplement)
+
+      if(this.interestSupplement.name == undefined){
         this.postFormData.append('supplement_id', this.interestSupplement)
       } else {
-        this.postFormData.append('supplement_id', this.interestSupplement.number)
+        this.postFormData.append('supplement_id', this.interestSupplement.name)
+        this.postFormData.append('bellitalia_id', this.interestSupplement.bellitalia_id)
       }
       this.interestTag.forEach((tag, i) => {
         this.postFormData.append('tag_id[]', tag.name)
